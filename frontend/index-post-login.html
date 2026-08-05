@@ -318,20 +318,20 @@
 				<!-- County Dropdown -->
 				<div class="relative">
 					<label for="mapCountySelect" class="block text-sm font-medium text-gray-700 mb-2">County</label>
-					<select id="mapCountySelect"
-						class="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-						<option value="">All Counties</option>
-					</select>
+					<input type="text" id="mapCountySelect" list="mapCountyList" autocomplete="off"
+						placeholder="Type a county..."
+						class="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+					<datalist id="mapCountyList"></datalist>
 				</div>
 
 				<!-- Sub-County Dropdown -->
 				<div class="relative">
 					<label for="mapSubCountySelect"
 						class="block text-sm font-medium text-gray-700 mb-2">Sub-County</label>
-					<select id="mapSubCountySelect"
-						class="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-						<option value="">All Sub-Counties</option>
-					</select>
+					<input type="text" id="mapSubCountySelect" list="mapSubCountyList" autocomplete="off"
+						placeholder="Type a sub-county..."
+						class="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+					<datalist id="mapSubCountyList"></datalist>
 				</div>
 
 				<!-- Search Button -->
@@ -753,13 +753,50 @@
 
 		// Initialize map search functionality
 		function initializeMapSearch() {
-			// Initialize county and sub-county dropdowns with fixed Kenya locations
-			initializeCountyDropdown("mapCountySelect", "mapSubCountySelect");
+			// Type-ahead county / sub-county inputs backed by native datalists
+			const countyInput = document.getElementById("mapCountySelect");
+			const subCountyInput = document.getElementById("mapSubCountySelect");
+			const countyList = document.getElementById("mapCountyList");
+			const subCountyList = document.getElementById("mapSubCountyList");
+
+			const fillList = (listEl, values) => {
+				listEl.innerHTML = "";
+				values.forEach((v) => {
+					const opt = document.createElement("option");
+					opt.value = v;
+					listEl.appendChild(opt);
+				});
+			};
+
+			fillList(countyList, getAllCounties());
+
+			const refreshSubCounties = () => {
+				const match = getAllCounties().find(
+					(c) => normalizeCounty(c) === normalizeCounty(countyInput.value)
+				);
+				// No/unknown county → offer every sub-county
+				const subs = match
+					? getSubCountiesForCounty(match)
+					: getAllCounties().flatMap(getSubCountiesForCounty).sort();
+				fillList(subCountyList, subs);
+			};
+			refreshSubCounties();
+			countyInput.addEventListener("input", () => {
+				subCountyInput.value = "";
+				refreshSubCounties();
+			});
 
 			// Add search button event listener
 			document
 				.getElementById("mapSearchBtn")
 				.addEventListener("click", performMapSearch);
+
+			// Enter in any search field runs the search
+			[document.getElementById("mapSearchInput"), countyInput, subCountyInput].forEach((el) =>
+				el.addEventListener("keydown", (e) => {
+					if (e.key === "Enter") performMapSearch();
+				})
+			);
 		}
 
 		// Mapbox-geocoded county names don't always match the fixed dropdown list

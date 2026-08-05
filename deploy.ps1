@@ -3,7 +3,7 @@ param (
     [switch]$Restart
 )
 
-$ServerIP = "35.88.59.170"
+$ServerIP = "44.245.151.32"
 $KeyPath = "C:\Users\Briane\.ssh\id_rsa"
 $User = "ubuntu"
 

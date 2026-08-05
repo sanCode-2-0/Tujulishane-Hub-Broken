@@ -1,0 +1,14 @@
+{
+  "name": "tujulishane-hub-ui-tests",
+  "version": "1.0.0",
+  "description": "UI testing suite for Tujulishane Hub eCitizen redesign",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "serve": "http-server frontend -p 8000"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "http-server": "^14.1.1"
+  }
+}

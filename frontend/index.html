@@ -1,41 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="scroll-smooth h-full">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RMNCAH</title>
+    <title>RMNCAH Co-ordination Hub</title>
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <!-- Tailwind CSS (with custom config using inline script) -->
-
-    <link rel="stylesheet" href="styles/main.css" />
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tw-elements/css/tw-elements.min.css" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700;800;900&display=swap"
-        rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
-    <!-- Alpine.js -->
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- Mapbox CSS -->
-    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css" rel="stylesheet" />
-    <!-- Mapbox JS -->
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <!-- Backend URL Configuration - Centralized in app-config.js -->
-    <script src="./app-config.js?v=3"></script>
-    <script src="./set-base-url.js?v=3"></script>
-    <script src="./network-debugger.js"></script>
-    <!-- Modal Utilities -->
-    <script src="./modal-utils.js"></script>
-    <script src="auth.js"></script>
-    <script src="kenya-locations.js"></script>
-
-    <!-- Optional: Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tw-elements/css/tw-elements.min.css" />
     <script>
         tailwind.config = {
             theme: {
@@ -43,50 +18,42 @@
                     colors: {
                         primary: "#272E28",
                         secondary: "#f59e0b",
-                        accent: "#00474C",
-                        button: "#14B04C",
-                        button_two: "#3482FF",
+                        accent: "#0047BA",
+                        accentcolor: {
+                            700: "#0047BA",
+                            800: "#003da1"
+                        },
+                        sso: {
+                            green: {
+                                500: "#10b981"
+                            }
+                        }
                     },
                     fontFamily: {
-                        sans: ["Inter", "sans-serif"],
+                        sans: ["Lexend", "Inter", "sans-serif"],
                     },
                 },
             },
         };
     </script>
-    <style>
-        .fade-slide-enter {
-            opacity: 0;
-            transform: translateY(20px);
-        }
+    <link rel="stylesheet" href="styles/main.css" />
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-        .fade-slide-enter-active {
-            opacity: 1;
-            transform: translateY(0);
-            transition: all 0.4s ease;
-        }
+    <!-- Backend URL Configuration -->
+    <script src="./app-config.js?v=3"></script>
+    <script src="./set-base-url.js?v=3"></script>
+    <script src="./network-debugger.js"></script>
+    <script src="./modal-utils.js"></script>
+    <script src="auth.js"></script>
+    <script src="kenya-locations.js"></script>
 
-        .fade-slide-leave {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .fade-slide-leave-active {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.3s ease;
-        }
-    </style>
-</head>
-
-<body class="text-gray-800 overflow-x-hidden">
-    <!-- Authentication Redirect Check -->
+    <!-- Redirect for logged-in users -->
     <script>
-        // Check if user is already logged in and redirect to index-post-login
         (function () {
             const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
             if (token) {
-                // Verify token format (JWT should have 3 parts)
                 const parts = token.split('.');
                 if (parts.length === 3) {
                     console.log('[Auth] User is logged in, redirecting to index-post-login.html');
@@ -96,476 +63,326 @@
             }
         })();
     </script>
-    <!-- Nav Start -->
-    <div class="" id="nav-placeholder"></div>
-    <!-- Nav End -->
+</head>
 
-    <section class="relative z-0 overflow-hidden" id="top">
-        <div class="w-full overflow-hidden">
-            <div x-data="{
-						activeSlide: 0,
-						media: [
-						{ type: 'image', src: 'resources/images/main-1.jpg' },
-						{ type: 'image', src: 'resources/images/main-2.jpg' },
-						{ type: 'image', src: 'resources/images/main-3.jpg' }
-						]
-					}" x-init="setInterval(() => { activeSlide = (activeSlide + 1) % media.length }, 7000)"
-                class="relative w-full min-h-[75vh] md:h-[50vh] flex flex-col justify-end">
-                <!-- Background Image Carousel with Zoom + Fade -->
-                <template x-for="(item, index) in media" :key="index">
-                    <div class="absolute inset-0 transition-all duration-1000 ease-in-out overflow-hidden" :class="{
-										'opacity-100 z-0': activeSlide === index,
-										'opacity-0 z-0 pointer-events-none': activeSlide !== index
-									}">
-                        <img :src="item.src" alt="Slide Image"
-                            class="w-full h-full object-cover object-center transition-transform duration-[7000ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
-                            :class="activeSlide === index ? 'scale-105' : 'scale-100'" />
+<body class="text-[#272E28] bg-white antialiased min-h-full flex flex-col">
+    <!-- Navigation Placeholder -->
+    <div id="nav-placeholder"></div>
+
+    <main class="flex-grow flex flex-col" id="main-content">
+        <!-- Hero section matching eCitizen -->
+        <div class="relative">
+            <!-- Hero image with overlay -->
+            <div class="absolute inset-0 isolate h-full w-full">
+                <!-- Using a fallback gradient/image representing Kenya healthcare/landscape -->
+                <div class="relative w-full h-full bg-no-repeat bg-center bg-cover -z-10" style="background-image: url('resources/images/main-1.jpg'), linear-gradient(135deg, #1e3a8a, #00595E)">
+                    <!-- Overlay matching eCitizen accounts page -->
+                    <div class="w-full h-full absolute top-0 left-0 bg-black/60 md:bg-transparent md:bg-gradient-to-t md:from-black/80 md:via-black/50 lg:to-transparent">
                     </div>
-                </template>
+                </div>
+            </div>
 
-                <!-- Overlay -->
-                <div class="absolute inset-0 bg-black bg-opacity-50 z-10"></div>
+            <div class="w-full mx-auto max-w-screen-2xl px-6 sm:px-8">
+                <!-- Hero text -->
+                <div class="max-w-none pt-14 text-left md:max-w-2xl lg:max-w-4xl sm:pt-28 relative z-20">
+                    <p class="text-xs font-semibold uppercase tracking-widest text-[#3482FF] mb-3">Ministry of Health</p>
+                    <h1 class="text-2xl sm:text-4xl lg:text-5xl font-medium tracking-wide text-white leading-10">
+                        RMNCAH health coordination <br>
+                        <strong>simplified</strong> <br>
+                        All maternal & child health records <br>
+                        <strong>unified</strong>
+                    </h1>
+                </div>
 
-                <!-- Bottom Content Section -->
-                <div class="relative z-20 w-full pt-16 sm:pt-0">
-                    <div class="mx-4 md:mx-8 text-white px-4">
-                        <a href="#" class="text-xs font-semibold uppercase tracking-wide mb-2 block">
-                            Ministry of Health
+                <!-- Hero search container -->
+                <div class="mt-8 rounded-t-3xl bg-gray-900/40 px-5 py-6 backdrop-blur-sm backdrop-filter sm:px-10 sm:py-8 lg:bg-gray-900/30">
+                    <!-- Search input -->
+                    <div class="relative rounded-3xl shadow-sm">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-6 w-6 text-gray-400">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
+                            </svg>
+                        </div>
+                        <input type="text" id="homepage_search_input" class="pl-12 pr-6 block h-14 w-full border-gray-100 focus:border-[#0047BA] focus:ring-0 focus:outline-none rounded-[30px] text-base placeholder:text-gray-400 bg-white" placeholder="Type name of project, county, stakeholder, or agency...">
+                    </div>
+
+                    <!-- Services/Features Grid (eCitizen style) -->
+                    <div class="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-white text-center">
+                        <a href="access.html?tab=register" class="flex flex-col items-center p-3 rounded-2xl bg-white/10 hover:bg-white/20 transition backdrop-blur-md">
+                            <div class="h-10 w-10 flex items-center justify-center rounded-full bg-emerald-500 mb-2">
+                                <i class="fas fa-plus"></i>
+                            </div>
+                            <span class="text-xs font-semibold">New Project</span>
                         </a>
-                        <h1 class="text-xl sm:text-4xl font-semibold mb-4">
-                            <span class="tracking-wide">RMNCAH</span> Co-ordination Hub
-                        </h1>
-                        <p class="text-sm sm:text-base mb-6 max-w-4xl">
-                            Discover and engage with impactful projects driving change
-                            across Kenya. Use the filters to find projects that align with
-                            your interests and make a difference.
-                        </p>
-                    </div>
-
-                    <!-- Search and Stats Section -->
-                    <div class="backdrop-blur-md bg-black/30 mx-8 rounded-t-2xl border-t border-black/20">
-                        <div class="px-4 py-4 flex flex-col items-center justify-between gap-4">
-                            <!-- Icon Buttons / Stats -->
-                            <div
-                                class="flex justify-between text-white text-xl lg:text-3xl w-full flex-wrap text-center gap-y-6">
-                                <div class="flex flex-col items-center w-1/2 sm:w-auto">
-                                    <i class="fas fa-tasks text-lg lg:text-2xl"></i>
-                                    <div class="mt-2">
-                                        <span id="totalProjectsCount" class="font-bold tracking-wider">
-                                            0
-                                        </span>
-                                        <span class="font-thin">Projects</span>
-                                    </div>
-                                </div>
-                                <div class="flex flex-col items-center w-1/2 sm:w-auto">
-                                    <i class="fas fa-map-marker-alt text-lg lg:text-2xl"></i>
-                                    <div class="mt-2">
-                                        <span id="totalCountiesCount" class="font-bold tracking-wider">0</span>
-                                        <span class="font-thin">Counties</span>
-                                    </div>
-                                </div>
-                                <div class="flex flex-col items-center w-1/2 sm:w-auto">
-                                    <i class="fas fa-handshake text-lg lg:text-2xl"></i>
-                                    <div class="mt-2">
-                                        <span id="totalStakeholdersCount" class="font-bold tracking-wider">0</span>
-                                        <span class="font-thin">Stakeholders</span>
-                                    </div>
-                                </div>
+                        <a href="#about" class="flex flex-col items-center p-3 rounded-2xl bg-white/10 hover:bg-white/20 transition backdrop-blur-md">
+                            <div class="h-10 w-10 flex items-center justify-center rounded-full bg-sky-500 mb-2">
+                                <i class="fas fa-circle-info"></i>
                             </div>
+                            <span class="text-xs font-semibold">About Portal</span>
+                        </a>
+                        <a href="#features" class="flex flex-col items-center p-3 rounded-2xl bg-white/10 hover:bg-white/20 transition backdrop-blur-md">
+                            <div class="h-10 w-10 flex items-center justify-center rounded-full bg-indigo-500 mb-2">
+                                <i class="fas fa-cubes"></i>
+                            </div>
+                            <span class="text-xs font-semibold">Key Features</span>
+                        </a>
+                        <a href="faq.html" class="flex flex-col items-center p-3 rounded-2xl bg-white/10 hover:bg-white/20 transition backdrop-blur-md">
+                            <div class="h-10 w-10 flex items-center justify-center rounded-full bg-amber-500 mb-2">
+                                <i class="fas fa-circle-question"></i>
+                            </div>
+                            <span class="text-xs font-semibold">Help & Support</span>
+                        </a>
+                        <a href="access.html?tab=login" class="flex flex-col items-center p-3 rounded-2xl bg-white/10 hover:bg-white/20 transition backdrop-blur-md">
+                            <div class="h-10 w-10 flex items-center justify-center rounded-full bg-rose-500 mb-2">
+                                <i class="fas fa-right-to-bracket"></i>
+                            </div>
+                            <span class="text-xs font-semibold">Sign In</span>
+                        </a>
+                        <a href="#contact" class="flex flex-col items-center p-3 rounded-2xl bg-white/10 hover:bg-white/20 transition backdrop-blur-md">
+                            <div class="h-10 w-10 flex items-center justify-center rounded-full bg-teal-500 mb-2">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <span class="text-xs font-semibold">Contact Us</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Banner matching eCitizen "Over 22,000 services..." -->
+            <div class="w-full mx-auto max-w-screen-2xl px-6 sm:px-8">
+                <div class="rounded-b-3xl relative overflow-hidden bg-[#00595E] text-white">
+                    <div class="relative py-8 px-6 sm:px-10 max-w-3xl">
+                        <h2 class="text-lg sm:text-2xl font-medium tracking-wide">
+                            Over <span id="bannerProjectsCount" class="font-bold">100+</span> health projects now active across all <span id="bannerCountiesCount" class="font-bold">47</span> Counties from <span id="bannerStakeholdersCount" class="font-bold">50+</span> partners and donors.
+                        </h2>
+                    </div>
+                    <div class="px-6 sm:px-10 py-5 sm:flex items-center justify-between bg-black/30 border-t border-white/10">
+                        <h3 class="text-white text-base sm:text-lg font-normal mb-3 sm:mb-0">
+                            Get started on the coordination portal today
+                        </h3>
+                        <div class="flex space-x-3 items-center">
+                            <a href="access.html?tab=login" class="block w-full sm:w-auto text-center rounded-3xl whitespace-nowrap bg-white py-2 px-5 font-semibold text-gray-800 hover:bg-gray-100 transition shadow-sm">
+                                Sign in
+                            </a>
+                            <a href="access.html?tab=register" class="block w-full sm:w-auto text-center rounded-3xl whitespace-nowrap bg-[#0047BA] py-2 px-5 font-semibold text-white hover:bg-[#003da1] transition shadow-sm">
+                                Register
+                            </a>
                         </div>
                     </div>
                 </div>
-                <!-- end bottom section -->
             </div>
         </div>
-    </section>
 
-    <section id="about" class="py-20">
-        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12">
-            <img src="resources/images/why.jpg" class="rounded-lg shadow-lg">
-
-            <div class="flex flex-col justify-center">
-                <h3 class="text-3xl font-bold mb-4">What is the RMNCAH Coordination Hub?</h3>
-                <p class="leading-relaxed">
-                    The RMNCAH Coordination Hub is a national digital platform providing real-time visibility into
-                    program activities across Kenya. It maps who is working where and on what, helping reduce
-                    fragmentation, avoid duplication, and improve alignment of partner efforts.
-                </p>
+        <!-- Dynamic Statistics Counters Section -->
+        <section class="py-8 bg-gray-50 border-y border-gray-100 mt-6">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div class="flex flex-col items-center">
+                        <div class="h-12 w-12 flex items-center justify-center rounded-full bg-[#0047BA]/10 text-[#0047BA] mb-2 text-xl">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <span id="totalProjectsCount" class="text-2xl sm:text-4xl font-extrabold text-gray-900">0</span>
+                        <span class="text-xs sm:text-sm text-gray-500 uppercase tracking-widest font-semibold mt-1">Active Projects</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="h-12 w-12 flex items-center justify-center rounded-full bg-[#0047BA]/10 text-[#0047BA] mb-2 text-xl">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <span id="totalCountiesCount" class="text-2xl sm:text-4xl font-extrabold text-gray-900">0</span>
+                        <span class="text-xs sm:text-sm text-gray-500 uppercase tracking-widest font-semibold mt-1">Counties Covered</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="h-12 w-12 flex items-center justify-center rounded-full bg-[#0047BA]/10 text-[#0047BA] mb-2 text-xl">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <span id="totalStakeholdersCount" class="text-2xl sm:text-4xl font-extrabold text-gray-900">0</span>
+                        <span class="text-xs sm:text-sm text-gray-500 uppercase tracking-widest font-semibold mt-1">Stakeholders</span>
+                    </div>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Features Section (alternating layout) -->
-    <section id="features" class="py-20 bg-gray-100">
-        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12">
-            <div class="flex flex-col justify-center">
-                <h3 class="text-3xl font-bold mb-4">Key Features</h3>
-                <ul class="space-y-4 text-lg">
-                    <li>✔ Interactive dashboard with national RMNCAH visibility</li>
-                    <li>✔ Geospatial mapping of partners and interventions</li>
-                    <li>✔ Real-time updates and collaboration tools</li>
-                    <li>✔ Supports coordinated planning & resource allocation</li>
-                    <li>✔ Enhances transparency and strengthens decision-making</li>
-                </ul>
+        <!-- About Section -->
+        <section id="about" class="py-16">
+            <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+                <img src="resources/images/why.jpg" class="rounded-2xl shadow-lg border border-gray-100 object-cover" onerror="this.src='resources/images/logo.png'">
+                <div class="flex flex-col justify-center">
+                    <h3 class="text-2xl sm:text-3xl font-bold mb-4 text-[#272E28]">What is the RMNCAH Coordination Hub?</h3>
+                    <p class="leading-relaxed text-gray-600 text-base">
+                        The RMNCAH Coordination Hub is a national digital platform providing real-time visibility into
+                        program activities across Kenya. It maps who is working where and on what, helping reduce
+                        fragmentation, avoid duplication, and improve alignment of partner efforts.
+                    </p>
+                </div>
             </div>
+        </section>
 
-            <img src="resources/images/tw.jpg" class="rounded-lg shadow-lg">
-        </div>
-    </section>
-
-    <!-- Another Alternating Section -->
-    <section class="py-20">
-        <div class="max-w-7xl mx-auto px-6 items-center grid md:grid-cols-2 gap-12">
-            <div class="flex justify-center flex-wrap">
-                <img src="resources/images/logo.png" class="rounded-lg h-[4rem] lg:h-[5rem]">
-                <img src="resources/images/moh.png" class="rounded-lg h-[4rem] lg:h-[5rem]">
+        <!-- Features Section -->
+        <section id="features" class="py-16 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+                <div class="flex flex-col justify-center order-2 md:order-1">
+                    <h3 class="text-2xl sm:text-3xl font-bold mb-4 text-[#272E28]">Key Features</h3>
+                    <ul class="space-y-3 text-base text-gray-600">
+                        <li class="flex items-start"><span class="text-[#0047BA] mr-2">✔</span> Interactive dashboard with national RMNCAH visibility</li>
+                        <li class="flex items-start"><span class="text-[#0047BA] mr-2">✔</span> Geospatial mapping of partners and interventions</li>
+                        <li class="flex items-start"><span class="text-[#0047BA] mr-2">✔</span> Real-time updates and collaboration tools</li>
+                        <li class="flex items-start"><span class="text-[#0047BA] mr-2">✔</span> Supports coordinated planning & resource allocation</li>
+                        <li class="flex items-start"><span class="text-[#0047BA] mr-2">✔</span> Enhances transparency and strengthens decision-making</li>
+                    </ul>
+                </div>
+                <img src="resources/images/tw.jpg" class="rounded-2xl shadow-lg border border-gray-100 object-cover order-1 md:order-2" onerror="this.src='resources/images/logo.png'">
             </div>
+        </section>
 
-            <div class="flex flex-col justify-center">
-                <h3 class="text-3xl font-bold mb-4">Why It Matters</h3>
-                <p class="leading-relaxed">
-                    By improving coordination between partners, counties, and the Ministry of Health, the Hub ensures
-                    RMNCAH programs truly reach the communities that need them most. It accelerates decision-making,
-                    enhances transparency, and supports a more effective health system.
-                </p>
-            </div>
-        </div>
-    </section>
+        <!-- FAQ Section -->
+        <section id="faq" class="py-16 bg-white border-t border-gray-100">
+            <div class="max-w-4xl mx-auto px-6">
+                <h3 class="text-2xl sm:text-3xl font-bold text-center mb-10 text-[#272E28]">Frequently Asked Questions</h3>
 
-    <!-- FAQ Section -->
-    <section id="faq" class="py-20 bg-gray-100">
-        <div class="max-w-4xl mx-auto px-6">
-            <h3 class="text-3xl font-bold text-primary text-center mb-10">Frequently Asked Questions</h3>
-
-            <div id="accordionFaqExample">
-                <!-- ITEM 1 -->
-                <div class="rounded-none border border-e-0 border-s-0 border-t-0 border-neutral-200">
-                    <h2 class="mb-0" id="faq-headingOne">
-                        <button
-                            class="group relative flex w-full items-center justify-between border-0 px-5 py-4 text-left text-base text-neutral-800 transition hover:z-[2] focus:z-[3] focus:outline-none dark:bg-body-dark dark:text-white [&:not([data-twe-collapse-collapsed])]:bg-green-800/5 [&:not([data-twe-collapse-collapsed])]:text-primary"
-                            type="button" data-twe-collapse-init data-twe-target="#faq-collapseOne" aria-expanded="true"
-                            aria-controls="faq-collapseOne">
-                            <div class="flex items-center w-full">
-                                <div
-                                    class="hidden sm:flex items-center justify-center h-10 w-10 p-3 mr-3 rounded-xl bg-blue-700 text-white border-4 border-white text-lg font-semibold">
-                                    Q
-                                </div>
-                                <div class="w-full flex items-center p-3 px-6 rounded-md">
-                                    <h4 class="text-md leading-6 font-medium text-gray-900">
-                                        What is RMNCAH Coordination Hub?
-                                    </h4>
-                                </div>
-                            </div>
-                            <span
-                                class="ms-auto h-5 w-5 shrink-0 transition-transform duration-200 ease-in-out group-data-[twe-collapse-collapsed]:rotate-0 group-[&:not([data-twe-collapse-collapsed])]:rotate-180">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="h-6 w-6 text-gray-500">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                                </svg>
-                            </span>
+                <div id="accordion-collapse" data-accordion="collapse">
+                    <!-- FAQ 1 -->
+                    <h2 id="accordion-collapse-heading-1">
+                        <button type="button" class="flex items-center justify-between w-full p-5 font-semibold text-left text-gray-900 border border-b-0 border-gray-200 rounded-t-xl hover:bg-gray-50 focus:ring-4 focus:ring-gray-100" data-accordion-target="#accordion-collapse-body-1" aria-expanded="true" aria-controls="accordion-collapse-body-1">
+                            <span>What is RMNCAH Coordination Hub?</span>
+                            <svg data-accordion-icon class="w-3 h-3 rotate-180 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
+                            </svg>
                         </button>
                     </h2>
-                    <div id="faq-collapseOne" class="!visible border-0" data-twe-collapse-item data-twe-collapse-show
-                        aria-labelledby="faq-headingOne" data-twe-parent="#accordionFaqExample">
-                        <div class="px-5 py-4 bg-blue-70 rounded-md mt-2">
-                            <div class="flex flex-col items-start">
-                                <div class="flex w-full justify-end">
-                                    <div
-                                        class="flex items-center justify-center justify-end py-1 px-3 ml-3 rounded-sm bg-blue-700 text-white text-xs font-medium">
-                                        ANSWER
-                                    </div>
-                                </div>
-                                <div class="flex-grow p-2 px-6">
-                                    <p class="text-gray-700 text-base">
-                                        The RMNCAH Coordination Hub is an official Ministry
-                                        of Health digital platform designed to enhance
-                                        visibility, coordination, and accountability among
-                                        stakeholders implementing projects in Reproductive,
-                                        Maternal, Newborn, Child, and Adolescent Health
-                                        (RMNCAH). It enables partners and donors to
-                                        register, submit projects, collaborate, and align
-                                        efforts with national health priorities.
-                                    </p>
-                                </div>
-                            </div>
+                    <div id="accordion-collapse-body-1" class="hidden" aria-labelledby="accordion-collapse-heading-1">
+                        <div class="p-5 border border-b-0 border-gray-200 bg-gray-50">
+                            <p class="text-gray-600 text-sm leading-relaxed">
+                                The RMNCAH Coordination Hub is an official Ministry of Health digital platform designed to enhance visibility, coordination, and accountability among stakeholders implementing projects in Reproductive, Maternal, Newborn, Child, and Adolescent Health (RMNCAH). It enables partners and donors to register, submit projects, collaborate, and align efforts with national health priorities.
+                            </p>
                         </div>
                     </div>
-                </div>
 
-                <!-- ITEM 2 -->
-                <div class="rounded-none border border-e-0 border-s-0 border-t-0 border-neutral-200">
-                    <h2 class="mb-0" id="faq-headingTwo">
-                        <button
-                            class="group relative flex w-full items-center justify-between border-0 px-5 py-4 text-left text-base text-neutral-800 transition hover:z-[2] focus:z-[3] focus:outline-none dark:bg-body-dark dark:text-white [&:not([data-twe-collapse-collapsed])]:bg-green-800/5 [&:not([data-twe-collapse-collapsed])]:text-primary"
-                            type="button" data-twe-collapse-init data-twe-collapse-collapsed
-                            data-twe-target="#faq-collapseTwo" aria-expanded="false" aria-controls="faq-collapseTwo">
-                            <div class="flex items-center w-full">
-                                <div
-                                    class="hidden sm:flex items-center justify-center h-10 w-10 p-3 mr-3 rounded-xl bg-blue-700 text-white border-4 border-white text-lg font-semibold">
-                                    Q
-                                </div>
-                                <div class="w-full flex items-center p-3 px-6 rounded-md">
-                                    <h4 class="text-md leading-6 font-medium text-gray-900">
-                                        Why should I use the RMNCAH Coordination Hub?
-                                    </h4>
-                                </div>
-                            </div>
-                            <span
-                                class="ms-auto h-5 w-5 shrink-0 transition-transform duration-200 ease-in-out group-data-[twe-collapse-collapsed]:rotate-0 group-[&:not([data-twe-collapse-collapsed])]:rotate-180">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="h-6 w-6 text-gray-500">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                                </svg>
-                            </span>
+                    <!-- FAQ 2 -->
+                    <h2 id="accordion-collapse-heading-2">
+                        <button type="button" class="flex items-center justify-between w-full p-5 font-semibold text-left text-gray-900 border border-b-0 border-gray-200 hover:bg-gray-50 focus:ring-4 focus:ring-gray-100" data-accordion-target="#accordion-collapse-body-2" aria-expanded="false" aria-controls="accordion-collapse-body-2">
+                            <span>Why should I use the RMNCAH Coordination Hub?</span>
+                            <svg data-accordion-icon class="w-3 h-3 rotate-180 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
+                            </svg>
                         </button>
                     </h2>
-                    <div id="faq-collapseTwo" class="!visible hidden border-0" data-twe-collapse-item
-                        aria-labelledby="faq-headingTwo" data-twe-parent="#accordionFaqExample">
-                        <div class="px-5 py-4 bg-blue-70 rounded-md mt-2">
-                            <div class="flex flex-col items-start">
-                                <div class="flex w-full justify-end">
-                                    <div
-                                        class="flex items-center justify-center justify-end py-1 px-3 ml-3 rounded-sm bg-blue-700 text-white text-xs font-medium">
-                                        ANSWER
-                                    </div>
-                                </div>
-                                <div class="flex-grow p-2 px-6">
-                                    <p class="text-gray-700 text-base">
-                                        The platform streamlines coordination between the
-                                        Ministry of Health, implementing partners, and
-                                        donors. It ensures transparency in project
-                                        implementation, minimizes duplication of efforts,
-                                        and provides an up-to-date view of ongoing
-                                        initiatives through interactive maps and project
-                                        dashboards.
-                                    </p>
-                                </div>
-                            </div>
+                    <div id="accordion-collapse-body-2" class="hidden" aria-labelledby="accordion-collapse-heading-2">
+                        <div class="p-5 border border-b-0 border-gray-200 bg-gray-50">
+                            <p class="text-gray-600 text-sm leading-relaxed">
+                                The platform streamlines coordination between the Ministry of Health, implementing partners, and donors. It ensures transparency in project implementation, minimizes duplication of efforts, and provides an up-to-date view of ongoing initiatives through interactive maps and project dashboards.
+                            </p>
                         </div>
                     </div>
-                </div>
-                <!-- ITEM 3 -->
-                <div class="rounded-none border border-e-0 border-s-0 border-t-0 border-neutral-200">
-                    <h2 class="mb-0" id="faq-headingTwo">
-                        <button
-                            class="group relative flex w-full items-center justify-between border-0 px-5 py-4 text-left text-base text-neutral-800 transition hover:z-[2] focus:z-[3] focus:outline-none dark:bg-body-dark dark:text-white [&:not([data-twe-collapse-collapsed])]:bg-green-800/5 [&:not([data-twe-collapse-collapsed])]:text-primary"
-                            type="button" data-twe-collapse-init data-twe-collapse-collapsed
-                            data-twe-target="#faq-collapseThree" aria-expanded="false" aria-controls="faq-collapseTwo">
-                            <div class="flex items-center w-full">
-                                <div
-                                    class="hidden sm:flex items-center justify-center h-10 w-10 p-3 mr-3 rounded-xl bg-blue-700 text-white border-4 border-white text-lg font-semibold">
-                                    Q
-                                </div>
-                                <div class="w-full flex items-center p-3 px-6 rounded-md">
-                                    <h4 class="text-md leading-6 font-medium text-gray-900">
-                                        How can I create an account on the RMNCAH
-                                        Coordination Hub?
-                                    </h4>
-                                </div>
-                            </div>
-                            <span
-                                class="ms-auto h-5 w-5 shrink-0 transition-transform duration-200 ease-in-out group-data-[twe-collapse-collapsed]:rotate-0 group-[&:not([data-twe-collapse-collapsed])]:rotate-180">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="h-6 w-6 text-gray-500">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                                </svg>
-                            </span>
+
+                    <!-- FAQ 3 -->
+                    <h2 id="accordion-collapse-heading-3">
+                        <button type="button" class="flex items-center justify-between w-full p-5 font-semibold text-left text-gray-900 border border-gray-200 hover:bg-gray-50 focus:ring-4 focus:ring-gray-100" data-accordion-target="#accordion-collapse-body-3" aria-expanded="false" aria-controls="accordion-collapse-body-3">
+                            <span>How can I create an account?</span>
+                            <svg data-accordion-icon class="w-3 h-3 rotate-180 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
+                            </svg>
                         </button>
                     </h2>
-                    <div id="faq-collapseThree" class="!visible hidden border-0" data-twe-collapse-item
-                        aria-labelledby="faq-headingTwo" data-twe-parent="#accordionFaqExample">
-                        <div class="px-5 py-4 bg-blue-70 rounded-md mt-2">
-                            <div class="flex flex-col items-start">
-                                <div class="flex w-full justify-end">
-                                    <div
-                                        class="flex items-center justify-center justify-end py-1 px-3 ml-3 rounded-sm bg-blue-700 text-white text-xs font-medium">
-                                        ANSWER
-                                    </div>
-                                </div>
-                                <div class="flex-grow p-2 px-6">
-                                    <ol class="list-decimal text-base gap-4">
-                                        <li class="px-2 lg:py-2 lg:px-4">
-                                            Visit the
-                                            <a href="/frontend/index.html" class="underline font-medium">RMNCAH
-                                                Coordination Hub
-                                                registration page.</a>
-                                        </li>
-                                        <li class="px-2 lg:py-2 lg:px-4">
-                                            Select your account type (Partner, Donor, or MOH
-                                            Official).
-                                        </li>
-                                        <li class="px-2 lg:py-2 lg:px-4">
-                                            Fill in the registration form with accurate
-                                            organizational details.
-                                        </li>
-                                        <li class="px-2 lg:py-2 lg:px-4">
-                                            Upload the required documents (if applicable).
-                                        </li>
-                                        <li class="px-2 lg:py-2 lg:px-4">
-                                            Submit for review. Once submitted, your account
-                                            will undergo a two-step approval process by the
-                                            MOH reviewer and admin. You will receive an email
-                                            notification once your account is approved.
-                                        </li>
-                                    </ol>
-                                </div>
-                            </div>
+                    <div id="accordion-collapse-body-3" class="hidden" aria-labelledby="accordion-collapse-heading-3">
+                        <div class="p-5 border border-t-0 border-gray-200 bg-gray-50 rounded-b-xl">
+                            <p class="text-gray-600 text-sm leading-relaxed">
+                                Visit the registration tab on the access page, choose your organization role (Donor, Partner, MOH), fill in details, upload verification documents, and submit for two-tier admin review. You'll receive email notification once approved.
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="flex mt-10 justify-center">
-                <a href="faq.html"
-                    class="flex items-center justify-center justify-end py-1 px-3 rounded-sm bg-blue-700 text-white text-xs font-medium">
-                    MORE FAQ
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="py-16 bg-gray-50 border-t border-gray-100">
+            <div class="max-w-3xl mx-auto px-6 text-center">
+                <h3 class="text-2xl sm:text-3xl font-bold mb-4 text-[#272E28]">Contact Us</h3>
+                <p class="mb-6 text-gray-600">For inquiries or access requests, reach out to the RMNCAH Coordination Hub team.</p>
+                <a href="mailto:advocacy@familyhealth.go.ke" class="bg-[#0047BA] text-white font-semibold px-8 py-3 rounded-full hover:bg-[#003da1] transition shadow-sm">
+                    Send Message
                 </a>
             </div>
-        </div>
-    </section>
+        </section>
+    </main>
 
-    <!-- Contact Section -->
-    <section id="contact" class="py-20">
-        <div class="max-w-3xl mx-auto px-6 text-center">
-            <h3 class="text-3xl font-bold mb-4">Contact Us</h3>
-            <p class="mb-6">For inquiries or access requests, reach out to the RMNCAH Coordination Hub team.</p>
-            <a href="mailto:advocacy@familyhealth.go.ke"
-                class="bg-indigo-700 text-white font-semibold px-8 py-3 rounded shadow hover:bg-indigo-800">
-                Send Message
-            </a>
-        </div>
-    </section>
-
-    <!--Footer container-->
-    <footer class="flex flex-col items-center text-center text-surface">
-        <div class="">
-            <!-- Social media icons container -->
-            <div class="flex items-center justify-center mb-6 space-x-2">
-                <a href="#!" type="button"
-                    class="p-3 font-medium leading-normal uppercase transition duration-150 ease-in-out bg-transparent rounded-full text-surface hover:bg-neutral-100 focus:outline-none focus:ring-0"
-                    data-twe-ripple-init>
-                    <span class="mx-auto [&>svg]:h-4 [&>svg]:w-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 512 512">
-                            <!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc. -->
-                            <path
-                                d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a href="#!" type="button"
-                    class="p-3 font-medium leading-normal uppercase transition duration-150 ease-in-out bg-transparent rounded-full text-surface hover:bg-neutral-100 focus:outline-none focus:ring-0"
-                    data-twe-ripple-init>
-                    <i class="fab fa-facebook-f"></i>
-                </a>
-
-                <a href="#!" type="button"
-                    class="p-3 font-medium leading-normal uppercase transition duration-150 ease-in-out bg-transparent rounded-full text-surface hover:bg-neutral-100 focus:outline-none focus:ring-0"
-                    data-twe-ripple-init>
-                    <span class="mx-auto [&>svg]:h-4 [&>svg]:w-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 448 512">
-                            <!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc. -->
-                            <path
-                                d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a href="#!" type="button"
-                    class="p-3 font-medium leading-normal uppercase transition duration-150 ease-in-out bg-transparent rounded-full text-surface hover:bg-neutral-100 focus:outline-none focus:ring-0"
-                    data-twe-ripple-init>
-                    <span class="mx-auto [&>svg]:h-4 [&>svg]:w-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 448 512">
-                            <!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc. -->
-                            <path
-                                d="M100.3 448H7.4V148.9h92.9zM53.8 108.1C24.1 108.1 0 83.5 0 53.8a53.8 53.8 0 0 1 107.6 0c0 29.7-24.1 54.3-53.8 54.3zM447.9 448h-92.7V302.4c0-34.7-.7-79.2-48.3-79.2-48.3 0-55.7 37.7-55.7 76.7V448h-92.8V148.9h89.1v40.8h1.3c12.4-23.5 42.7-48.3 87.9-48.3 94 0 111.3 61.9 111.3 142.3V448z" />
-                        </svg>
-                    </span>
-                </a>
+    <!-- Footer matching eCitizen -->
+    <footer class="bg-[#272E28] text-white py-12 border-t border-white/10">
+        <div class="max-w-screen-2xl mx-auto px-6 sm:px-8">
+            <div class="flex flex-col lg:flex-row justify-between items-center space-y-6 lg:space-y-0">
+                <div class="text-center lg:text-left">
+                    <div class="flex items-center justify-center lg:justify-start space-x-3 mb-2">
+                        <img class="w-auto h-8" src="resources/images/logo.png" alt="RMNCAH Logo" onerror="this.src='resources/images/moh.png'">
+                        <span class="text-lg font-bold text-white">RMNCAH<span class="text-[#3482FF]">Hub</span></span>
+                    </div>
+                    <p class="text-xs text-gray-400">
+                        Giving partners easy access to RMNCAH project coordination.
+                    </p>
+                </div>
+                <div>
+                    <ul class="flex flex-wrap justify-center space-x-6 text-xs text-gray-300">
+                        <li><a href="index.html" class="hover:text-white transition font-medium">Home</a></li>
+                        <li><a href="index.html#features" class="hover:text-white transition font-medium">National</a></li>
+                        <li><a href="index.html#about" class="hover:text-white transition font-medium">Counties</a></li>
+                        <li><a href="faq.html" class="hover:text-white transition font-medium">Help &amp; Support</a></li>
+                        <li><a href="credits.html" class="hover:text-white transition font-medium">Credits</a></li>
+                    </ul>
+                </div>
             </div>
-        </div>
-
-        <!--Copyright section-->
-        <div class="w-full p-4 text-xs text-center bg-black/5 text-gray-600">
-            © 2025 Copyright:
-            <a href="index.html" class="hover:underline"> RMNCAH Hub </a> |
-            <a href="credits" class="hover:underline font-medium text-gray-500">Credits</a>
+            <div class="mt-8 pt-6 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-xs text-gray-400">
+                <p>&copy; 2026 RMNCAH Coordination Hub. All rights reserved.</p>
+                <p class="mt-2 md:mt-0">Ministry of Health, Government of Kenya</p>
+            </div>
         </div>
     </footer>
-    <!-- Removed script that sets localStorage with undefined 'data' to fix ReferenceError. This should only be set after login. -->
 
-    <script src="https://cdn.jsdelivr.net/npm/tw-elements/js/tw-elements.umd.min.js"></script>
+    <!-- Bootstrap/Flowbite and Navigation Loader JS -->
     <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
-    <script src="styles/effects.js"></script>
     <script src="styles/loadNavg.js"></script>
-    <script src="styles/authnav.js"></script>
+    <script src="styles/accessibility-helper.js" defer></script>
 
-    <!-- Load Real Statistics -->
+    <!-- Load Real Statistics Script -->
     <script>
         document.addEventListener('DOMContentLoaded', async function() {
             try {
-                // Fetch project statistics from public endpoint (no authentication required)
                 const statsResponse = await fetch(`${window.BASE_URL}/api/projects/public/statistics`, {
                     method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
+                    headers: { 'Content-Type': 'application/json' }
                 });
                 
                 if (statsResponse.ok) {
                     const statsData = await statsResponse.json();
                     const stats = statsData.data || {};
                     
-                    // Update total projects count
-                    const projectsCountElement = document.getElementById('totalProjectsCount');
-                    if (projectsCountElement) {
-                        animateCounter(projectsCountElement, stats.totalProjects || 0);
-                    }
-                    
-                    // Update counties count
-                    const countiesCountElement = document.getElementById('totalCountiesCount');
-                    if (countiesCountElement) {
-                        animateCounter(countiesCountElement, stats.totalCounties || 0);
-                    }
-                    
-                    // Update stakeholders count
-                    const stakeholdersCountElement = document.getElementById('totalStakeholdersCount');
-                    if (stakeholdersCountElement) {
-                        animateCounter(stakeholdersCountElement, stats.totalStakeholders || 0);
-                    }
-                    
-                    console.log('📊 Statistics loaded:', stats);
-                } else {
-                    console.warn('⚠️ Failed to fetch project statistics:', statsResponse.status);
-                    // Set dash on error
-                    document.getElementById('totalProjectsCount').textContent = '—';
-                    document.getElementById('totalCountiesCount').textContent = '—';
-                    document.getElementById('totalStakeholdersCount').textContent = '—';
+                    const pCount = stats.totalProjects || 0;
+                    const cCount = stats.totalCounties || 0;
+                    const sCount = stats.totalStakeholders || 0;
+
+                    // Update stats counters
+                    animateCounter(document.getElementById('totalProjectsCount'), pCount);
+                    animateCounter(document.getElementById('totalCountiesCount'), cCount);
+                    animateCounter(document.getElementById('totalStakeholdersCount'), sCount);
+
+                    // Update banner counts
+                    document.getElementById('bannerProjectsCount').textContent = pCount + '+';
+                    document.getElementById('bannerCountiesCount').textContent = cCount;
+                    document.getElementById('bannerStakeholdersCount').textContent = sCount + '+';
                 }
             } catch (error) {
                 console.error('❌ Error loading statistics:', error);
-                // Set dash on error
-                document.getElementById('totalProjectsCount').textContent = '—';
-                document.getElementById('totalCountiesCount').textContent = '—';
-                document.getElementById('totalStakeholdersCount').textContent = '—';
             }
         });
         
-        // Animate counter from 0 to target value
         function animateCounter(element, targetValue) {
-            const duration = 1500; // 1.5 seconds
+            if (!element) return;
+            const duration = 1200;
             const startValue = 0;
             const startTime = performance.now();
             
             function updateCounter(currentTime) {
                 const elapsed = currentTime - startTime;
                 const progress = Math.min(elapsed / duration, 1);
-                
-                // Easing function (easeOutCubic)
                 const easeProgress = 1 - Math.pow(1 - progress, 3);
-                
                 const currentValue = Math.floor(startValue + (targetValue - startValue) * easeProgress);
                 element.textContent = currentValue;
                 
@@ -575,11 +392,9 @@
                     element.textContent = targetValue;
                 }
             }
-            
             requestAnimationFrame(updateCounter);
         }
     </script>
-
 </body>
 
 </html>

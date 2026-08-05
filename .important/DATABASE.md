@@ -25,7 +25,7 @@ sudo chmod 600 /home/briane/tujulishane_backup.dump
 ### Step 2: Download to your Local Computer
 Run this on your **local computer's terminal (PowerShell / CMD)**:
 ```powershell
-scp -i C:\Users\Briane\.ssh\id_rsa briane@35.88.59.170:/home/briane/tujulishane_backup.dump C:\Users\Briane\Documents\
+scp -i C:\Users\Briane\.ssh\id_rsa briane@44.245.151.32:/home/briane/tujulishane_backup.dump C:\Users\Briane\Documents\
 ```
 
 ---
@@ -37,7 +37,7 @@ Do **not** open PostgreSQL port `5432` to the public internet. Instead, use an S
 ### Step 1: Open the Tunnel
 Run this in a **local PowerShell window** and keep it open:
 ```powershell
-ssh -i C:\Users\Briane\.ssh\id_rsa -L 5433:127.0.0.1:5432 briane@35.88.59.170
+ssh -i C:\Users\Briane\.ssh\id_rsa -L 5433:127.0.0.1:5432 briane@44.245.151.32
 ```
 
 ### Step 2: Connect via GUI Client (DBeaver / pgAdmin)

@@ -183,7 +183,7 @@
         console.log("=== Starting verifyOtp() ===");
 
         const email = localStorage.getItem("pendingEmail");
-        const isLogin = localStorage.getItem("isLogin") === "true";
+        const isLogin = localStorage.getItem("isLogin") !== "false";
         const code = otpHelpers.getCode(); // from your OTP script
 
         console.log("Email from localStorage:", email);
@@ -204,7 +204,7 @@
             endpoint = `${baseUrl}/api/auth/verify/login`;
             payload = { email, otp: code };
           } else {
-            endpoint = `${baseUrl}/api/auth/verify-otp`;
+            endpoint = `${baseUrl}/api/auth/verify`;
             payload = { email, otp: code };
           }
 

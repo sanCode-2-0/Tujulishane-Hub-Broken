@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,6 +46,7 @@ public class GeocodingService {
      * 3. Use geocoding API if configured
      * 4. Return default Kenya center coordinates as fallback
      */
+    @Cacheable(value = "geocoding", key = "#mapsAddress", unless = "#result == null || !#result.valid")
     public CoordinateResult extractCoordinates(String mapsAddress) {
         if (mapsAddress == null || mapsAddress.trim().isEmpty()) {
             return new CoordinateResult(null, null, "No address provided");
@@ -161,7 +163,8 @@ public class GeocodingService {
     /**
      * Result class for coordinate extraction
      */
-    public static class CoordinateResult {
+    public static class CoordinateResult implements java.io.Serializable {
+        private static final long serialVersionUID = 1L;
         private final Double latitude;
         private final Double longitude;
         private final String message;

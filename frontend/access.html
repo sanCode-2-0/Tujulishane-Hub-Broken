@@ -1,31 +1,31 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="scroll-smooth h-full">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RMNCAH</title>
-    <!-- Tailwind CSS CDN - must load BEFORE tailwind.config -->
+    <title>RMNCAH Hub · Accounts</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#1e40af',   // Custom Blue
-                        secondary: '#f59e0b', // Custom Amber
-                        accent: '#10b981',    // Custom Green
-                        dark: '#1f2937',      // Gray-800
+                        primary: '#0047BA',
+                        primary_hover: '#003da1',
+                        accent: '#3482FF',
+                        dark: '#272E28',
                     },
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                        sans: ['Lexend', 'Inter', 'sans-serif'],
                     }
                 }
             }
         }
     </script>
     <link rel="stylesheet" href="styles/main.css">
-    <!-- Backend URL Configuration - MUST BE LOADED FIRST -->
+    <!-- Backend URL Configuration -->
     <script src="./app-config.js?v=3"></script>
     <script src="./set-base-url.js?v=3"></script>
     <script src="./network-debugger.js"></script>
@@ -34,395 +34,333 @@
     <!-- Modal Utilities -->
     <script src="./modal-utils.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tw-elements/css/tw-elements.min.css" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700;800;900&display=swap"
-        rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
     <!-- Alpine.js -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- Leaflet CSS & JS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 
     <!-- Auto-redirect for logged-in users -->
     <script src="auto-redirect.js"></script>
-
-    <!-- Optional: Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        .fade-slide-enter {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        .fade-slide-enter-active {
-            opacity: 1;
-            transform: translateY(0);
-            transition: all 0.4s ease;
-        }
-
-        .fade-slide-leave {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .fade-slide-leave-active {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.3s ease;
-        }
-    </style>
-
 </head>
 
-<body class="text-gray-800 ">
-    <div class="relative h-screen bg-fixed bg-cover p-4 bg-center" id="heroSection">
-        <div class="absolute inset-0 bg-black bg-opacity-50 z-0"></div>
+<body class="text-[#272E28] bg-white antialiased min-h-full flex flex-col font-sans">
+    <!-- We wrap the login page in the standard eCitizen header/footer structure -->
+    <!-- Navigation Placeholder -->
+    <div id="nav-placeholder"></div>
 
-        <div class="relative z-10 flex justify-center items-center h-full">
+    <div class="relative flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-fixed bg-cover bg-center" id="heroSection" style="background-image: url('resources/images/main-1.jpg')">
+        <div class="absolute inset-0 bg-black/60 z-0"></div>
 
-            <div
-                class="flex flex-col w-full rounded-xl bg-white/90 backdrop-blur-xl shadow-lg max-w-3xl p-4 mx-auto items-center justify-center rounded-xl">
-                <div class="flex items-center space-x-2 text-2xl font-bold text-black uppercase">
-                    <img src="resources/images/moh.png" class="object-contain h-12" alt="Site Logo">
-                    <img src="resources/images/logo.png" class="object-contain h-12" alt="Site Logo">
+        <div class="relative z-10 w-full max-w-2xl bg-white/95 backdrop-blur-md shadow-2xl rounded-[24px] p-6 sm:p-10 border border-white/20">
+            <!-- Branding -->
+            <div class="flex flex-col items-center justify-center text-center mb-8">
+                <div class="flex items-center space-x-3 mb-2">
+                    <img src="resources/images/logo.png" class="object-contain h-12" alt="Site Logo" onerror="this.src='resources/images/moh.png'">
+                    <div class="text-left border-l border-gray-300 pl-3">
+                        <h1 class="text-xl font-bold tracking-tight text-gray-900 leading-none">RMNCAH<span class="text-[#0047BA]">Hub</span></h1>
+                        <span class="text-[9px] uppercase tracking-widest text-gray-500 font-semibold leading-none mt-1">Coordination Portal</span>
+                    </div>
                 </div>
-                <p class="mt-1 text-sm uppercase opacity-70">
-                    RMNCAH Coordination Hub
-                </p>
-                <!--Tabs navigation-->
-                <ul class="flex list-none w-full flex-row flex-wrap border-b border-gray-200 mb-4 ps-0" role="tablist" data-twe-nav-ref>
-                    <li role="presentation" class="flex-grow basis-0 text-center">
-                        <a href="#tabs-home02"
-                            class="my-2 mx-1 flex items-center justify-center rounded-lg py-3 px-4 text-xs font-semibold uppercase tracking-wider leading-tight text-gray-500 transition-all duration-200 hover:bg-gray-100 hover:text-blue-700 data-[twe-nav-active]:bg-blue-50 data-[twe-nav-active]:text-blue-700 data-[twe-nav-active]:shadow-sm border border-transparent data-[twe-nav-active]:border-blue-200"
-                            data-twe-toggle="pill" data-twe-target="#tabs-home02" data-twe-nav-active role="tab"
-                            aria-controls="tabs-home02" aria-selected="true">
-                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                            Login
-                        </a>
-                    </li>
-                    <li role="presentation" class="flex-grow basis-0 text-center">
-                        <a href="#tabs-profile02"
-                            class="my-2 mx-1 flex items-center justify-center rounded-lg py-3 px-4 text-xs font-semibold uppercase tracking-wider leading-tight text-gray-500 transition-all duration-200 hover:bg-emerald-50 hover:text-emerald-700 data-[twe-nav-active]:bg-emerald-500 data-[twe-nav-active]:text-white data-[twe-nav-active]:shadow-md border border-transparent data-[twe-nav-active]:border-emerald-600 relative overflow-hidden"
-                            data-twe-toggle="pill" data-twe-target="#tabs-profile02" role="tab"
-                            aria-controls="tabs-profile02" aria-selected="false">
-                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
-                            Become a Member
-                            <span class="absolute top-0 right-0 flex h-2 w-2">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                            </span>
-                        </a>
-                    </li>
-                    <li role="presentation" class="flex-grow basis-0 text-center">
-                        <a href="#tabs-faq"
-                            class="my-2 mx-1 flex items-center justify-center rounded-lg py-3 px-4 text-xs font-semibold uppercase tracking-wider leading-tight text-gray-500 transition-all duration-200 hover:bg-gray-100 hover:text-amber-700 data-[twe-nav-active]:bg-amber-50 data-[twe-nav-active]:text-amber-700 data-[twe-nav-active]:shadow-sm border border-transparent data-[twe-nav-active]:border-amber-200"
-                            data-twe-toggle="pill" data-twe-target="#tabs-faq" role="tab"
-                            aria-controls="tabs-faq" aria-selected="false">
-                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            FAQs
-                        </a>
-                    </li>
-                </ul>
+            </div>
 
-                <!--Tabs content-->
-                <div class="mb-6 w-full">
-                    <div class="hidden opacity-100 transition-opacity duration-150 ease-linear data-[twe-tab-active]:block"
-                        id="tabs-home02" role="tabpanel" aria-labelledby="tabs-home-tab02" data-twe-tab-active>
-                        <div id="loginCard"
-                            class="py-8 w-full mb-4 space-y-4 transition-all duration-500 ease-in-out rounded-xl">
-                            <h2 class="text-sm uppercase text-left font-normal opacity-70 text-gray-700">
-                                Log in to your account
-                            </h2>
-                            
-                            <!-- Session Expiration Message -->
-                            <div id="sessionMessage" class="hidden p-3 rounded-md text-sm">
-                                <div class="flex items-start">
-                                    <i class="fas fa-info-circle mr-2 mt-0.5"></i>
-                                    <span id="sessionMessageText"></span>
-                                </div>
+            <!-- Tabs navigation matching eCitizen -->
+            <ul class="flex border-b border-gray-200 mb-6 w-full justify-center space-x-2" role="tablist" data-twe-nav-ref>
+                <li role="presentation" class="flex-grow">
+                    <a href="#tabs-home02"
+                        class="block text-center border-b-2 border-transparent py-3 text-sm font-semibold uppercase tracking-wider text-gray-500 hover:text-[#0047BA] data-[twe-nav-active]:border-[#0047BA] data-[twe-nav-active]:text-[#0047BA] transition"
+                        data-twe-toggle="pill" data-twe-target="#tabs-home02" data-twe-nav-active role="tab"
+                        aria-controls="tabs-home02" aria-selected="true">
+                        Login
+                    </a>
+                </li>
+                <li role="presentation" class="flex-grow">
+                    <a href="#tabs-profile02"
+                        class="block text-center border-b-2 border-transparent py-3 text-sm font-semibold uppercase tracking-wider text-gray-500 hover:text-[#0047BA] data-[twe-nav-active]:border-[#0047BA] data-[twe-nav-active]:text-[#0047BA] transition"
+                        data-twe-toggle="pill" data-twe-target="#tabs-profile02" role="tab"
+                        aria-controls="tabs-profile02" aria-selected="false">
+                        Become a Member
+                    </a>
+                </li>
+                <li role="presentation" class="flex-grow">
+                    <a href="#tabs-faq"
+                        class="block text-center border-b-2 border-transparent py-3 text-sm font-semibold uppercase tracking-wider text-gray-500 hover:text-[#0047BA] data-[twe-nav-active]:border-[#0047BA] data-[twe-nav-active]:text-[#0047BA] transition"
+                        data-twe-toggle="pill" data-twe-target="#tabs-faq" role="tab"
+                        aria-controls="tabs-faq" aria-selected="false">
+                        FAQs
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Tabs content -->
+            <div class="w-full">
+                <!-- Login Tab -->
+                <div class="hidden opacity-100 transition-opacity duration-150 ease-linear data-[twe-tab-active]:block"
+                    id="tabs-home02" role="tabpanel" aria-labelledby="tabs-home-tab02" data-twe-tab-active>
+                    <div id="loginCard" class="space-y-5 py-2">
+                        <div class="text-center sm:text-left">
+                            <h2 class="text-base font-semibold text-gray-900">Sign in to RMNCAH Hub</h2>
+                            <p class="text-xs text-gray-500 mt-1">Enter your registered email address to receive a verification OTP.</p>
+                        </div>
+                        
+                        <!-- Session Expiration Message -->
+                        <div id="sessionMessage" class="hidden p-3 rounded-xl border text-xs">
+                            <div class="flex items-start">
+                                <i class="fas fa-info-circle mr-2 mt-0.5"></i>
+                                <span id="sessionMessageText"></span>
                             </div>
-                            
-                            <input id="loginEmail" type="email" required placeholder="Email"
-                                class="w-full px-4 py-2 border text-sm rounded-md focus:ring-2 focus:ring-blue-500">
-                            
-                            <!-- Remember Me Checkbox -->
-                            <div class="flex items-center">
-                                <input id="rememberMe" type="checkbox" 
-                                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                                <label for="rememberMe" class="ml-2 text-sm text-gray-700 cursor-pointer">
-                                    Remember me for 30 days
-                                    <span class="text-xs text-gray-500 block">Keep me logged in on this device</span>
-                                </label>
-                            </div>
-                            
-                            <div class="flex w-full">
-                                <button type="button" onclick="requestOtp()" id="loginBtn"
-                                    class="w-full py-2 text-center text-white transition-all bg-blue-600 rounded-md hover:bg-blue-700 font-semibold shadow-sm">
-                                    <span id="loginBtnText">Get OTP</span>
-                                    <span id="loginBtnSpinner" class="hidden">
-                                        <svg class="inline w-5 h-5 mr-2 text-white animate-spin"
-                                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                                stroke-width="4">
-                                            </circle>
-                                            <path class="opacity-75" fill="currentColor"
-                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                            </path>
-                                        </svg>
-                                        Sending...
-                                    </span>
+                        </div>
+                        
+                        <div>
+                            <label for="loginEmail" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Email address</label>
+                            <input id="loginEmail" type="email" required placeholder="name@organization.or.ke"
+                                class="w-full px-4 py-3 border border-gray-300 text-sm rounded-xl focus:ring-1 focus:ring-[#0047BA] focus:border-[#0047BA] outline-none transition bg-gray-50/50">
+                        </div>
+                        
+                        <!-- Remember Me -->
+                        <div class="flex items-start bg-gray-50 p-3 rounded-xl border border-gray-100">
+                            <input id="rememberMe" type="checkbox" 
+                                class="w-4 h-4 text-[#0047BA] border-gray-300 rounded focus:ring-[#0047BA] mt-0.5">
+                            <label for="rememberMe" class="ml-3 text-xs text-gray-600 cursor-pointer select-none">
+                                <span class="font-semibold text-gray-800 block">Remember me for 30 days</span>
+                                Keep me logged in on this device to skip future OTP verification.
+                            </label>
+                        </div>
+                        
+                        <div class="pt-2">
+                            <button type="button" onclick="requestOtp()" id="loginBtn"
+                                class="w-full py-3 text-center text-white bg-[#0047BA] hover:bg-[#003da1] rounded-3xl font-semibold shadow-md transition flex items-center justify-center">
+                                <span id="loginBtnText">Request Login OTP</span>
+                                <span id="loginBtnSpinner" class="hidden flex items-center justify-center">
+                                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Sending Code...
+                                </span>
+                            </button>
+                        </div>
+
+                        <!-- CTA to switch tabs -->
+                        <div class="mt-6 text-center border-t border-gray-200 pt-5 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-xs text-gray-500">
+                            <p>
+                                New to the coordination hub? 
+                                <button type="button" onclick="switchTab('#tabs-profile02')" class="font-bold text-[#0047BA] hover:underline">
+                                    Become a Member
                                 </button>
-                            </div>
-
-                            <!-- CTA for Higher Visibility (Membership and FAQs) -->
-                            <div class="mt-6 text-center border-t border-gray-200 pt-5 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6">
-                                <p class="text-sm text-gray-600 flex items-center justify-center flex-wrap gap-1">
-                                    <span>New to the coordination hub?</span>
-                                    <button type="button" onclick="switchTab('#tabs-profile02')" class="inline-flex items-center font-bold text-emerald-600 hover:text-emerald-800 transition duration-150 hover:underline">
-                                        Become a Member
-                                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
-                                    </button>
-                                </p>
-                                <span class="hidden sm:inline text-gray-300">|</span>
-                                <p class="text-sm text-gray-600 flex items-center justify-center flex-wrap gap-1">
-                                    <span>Have questions?</span>
-                                    <button type="button" onclick="switchTab('#tabs-faq')" class="inline-flex items-center font-bold text-amber-600 hover:text-amber-800 transition duration-150 hover:underline">
-                                        View FAQs
-                                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
-                                    </button>
-                                </p>
-                            </div>
+                            </p>
+                            <span class="hidden sm:inline text-gray-300">|</span>
+                            <p>
+                                Need help? 
+                                <button type="button" onclick="switchTab('#tabs-faq')" class="font-bold text-[#0047BA] hover:underline">
+                                    View FAQs
+                                </button>
+                            </p>
                         </div>
                     </div>
-                    <div class="hidden opacity-0 transition-opacity duration-150 ease-linear data-[twe-tab-active]:block"
-                        id="tabs-profile02" role="tabpanel" aria-labelledby="tabs-profile-tab02">
-                        <!-- Register Card -->
-                        <div id="registerCard" class=" top-0 left-0 z-10 w-full py-8 rounded-xl">
-                            <form id="registerForm" class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                <div id="formTabs" class="md:col-span-2 mb-4 flex border-b">
-                                    <button type="button" id="tab1"
-                                        class="px-4 py-2 text-sm font-medium border-b-2 border-blue-600 text-blue-600 focus:outline-none">
-                                        Step 1: Account Details
-                                    </button>
-                                    <button type="button" id="tab2"
-                                        class="px-4 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent focus:outline-none">
-                                        Step 2: Supporting Documents
-                                    </button>
-                                </div>
+                </div>
 
-                                <div id="step1Content" class="md:col-span-2 grid grid-cols-1 gap-6 md:grid-cols-2">
-                                    <div>
-                                        <label class="block mb-1 text-sm font-medium">Full Name</label>
-                                        <input type="text" id="regName" placeholder="John Doe"
-                                            class="w-full px-4 py-2 border rounded-md bg-gray-50">
-                                    </div>
-                                    <div>
-                                        <label class="block mb-1 text-sm font-medium">Email Address</label>
-                                        <input type="email" id="regEmail" placeholder="email@example.com"
-                                            class="w-full px-4 py-2 border rounded-md bg-gray-50">
-                                    </div>
-                                    <div>
-                                        <label class="block mb-1 text-sm font-medium">Organization</label>
-                                        <input type="text" id="regOrganization" placeholder="Company or School"
-                                            class="w-full px-4 py-2 border rounded-md bg-gray-50">
-                                    </div>
-                                    <div>
-                                        <label class="block mb-1 text-sm font-medium">Account Type</label>
-                                        <select id="regAccountType"
-                                            class="w-full px-4 py-2 border rounded-md bg-gray-50">
-                                            <option value="PARTNER">Partner Organization</option>
-                                            <option value="DONOR">Donor Organization</option>
-                                        </select>
-                                    </div>
-                                    <div id="parentDonorSection" class="hidden md:col-span-2">
-                                        <label class="block mb-1 text-sm font-medium">Parent Donor ID (Optional)</label>
-                                        <input type="number" id="regParentDonorId"
-                                            placeholder="Enter donor ID if linking to existing donor"
-                                            class="w-full px-4 py-2 border rounded-md bg-gray-50">
-                                        <p class="text-sm text-gray-600 mt-1">Leave empty if this is a standalone
-                                            partner account</p>
-                                    </div>
-
-                                    <div class="md:col-span-2 mt-6">
-                                        <button type="button" id="nextStepBtn"
-                                            class="px-6 py-2 font-bold text-white bg-blue-600 rounded hover:bg-blue-700 w-full md:w-auto">
-                                            Next : <span class="font-medium ml-1"> Supporting Documents</span> &rarr;
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div id="step2Content" class="md:col-span-2 hidden">
-                                    <div class="supporting-documents bg-white p-4 rounded-xl">
-                                        <div class="flex items-center justify-between mb-4">
-                                            <label class="block text-sm font-semibold text-gray-800">
-                                                Supporting Documents <span
-                                                    class="font-light text-sm ml-1">(optional)</span>
-                                            </label>
-                                            <div id="documentsCount"
-                                                class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm font-medium">
-                                                <i class="fas fa-file mr-1"></i>
-                                                <span id="docsCount">0</span> files
-                                            </div>
-                                        </div>
-
-                                        <p class="text-sm text-gray-600 mb-4">
-                                            Upload relevant documents to support your project proposal
-                                            (PDF, DOC, DOCX, XLS, XLSX - Max 10MB each)
-                                        </p>
-
-                                        <div class="file-upload-area border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 hover:bg-blue-50 transition-all duration-200 cursor-pointer"
-                                            id="fileUploadArea">
-                                            <div class="upload-icon text-gray-400 mb-4">
-                                                <i class="fas fa-cloud-upload-alt text-4xl"></i>
-                                            </div>
-                                            <div class="upload-text">
-                                                <p class="text-lg font-medium text-gray-700 mb-2">
-                                                    Drop files here or click to browse
-                                                </p>
-                                                <p class="text-sm text-gray-500">
-                                                    Supported formats: PDF, DOC, DOCX, XLS, XLSX
-                                                </p>
-                                                <p class="text-xs text-gray-400 mt-1">
-                                                    Maximum file size: 10MB per file
-                                                </p>
-                                            </div>
-                                            <input type="file" id="documentFiles" name="documents" multiple
-                                                accept=".pdf,.doc,.docx,.xls,.xlsx" class="hidden" />
-                                        </div>
-
-                                        <div id="selectedFiles" class="mt-4 space-y-2 hidden">
-                                            <h4 class="text-sm font-medium text-gray-700 mb-3">Selected Files:</h4>
-                                            <div id="filesList" class="space-y-2">
-                                            </div>
-                                        </div>
-
-                                        <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg hidden"
-                                            id="fileUploadError">
-                                            <div class="flex items-center">
-                                                <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
-                                                <span class="text-red-700 text-sm" id="fileErrorMessage"></span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div
-                                        class="md:col-span-2 grid grid-cols-2 md:grid-cols-5 gap-4 mt-6 flex flex-wrap justify-between">
-                                        <button type="button" id="prevStepBtn"
-                                            class="px-6 py-2 lg:col-span-2 font-bold text-gray-600 border border-gray-300 rounded hover:bg-gray-50">
-                                            &larr; Previous Step
-                                        </button>
-                                        <button type="submit" id="registerBtn"
-                                            class="px-6 py-2 font-bold text-white lg:col-span-3 bg-blue-600 rounded hover:bg-blue-700">
-                                            <span id="registerBtnText">Create Account</span>
-                                            <span id="registerBtnSpinner" class="hidden">...Creating...</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
+                <!-- Register Tab -->
+                <div class="hidden opacity-0 transition-opacity duration-150 ease-linear data-[twe-tab-active]:block"
+                    id="tabs-profile02" role="tabpanel" aria-labelledby="tabs-profile-tab02">
+                    <div id="registerCard" class="py-2">
+                        <!-- Step headers -->
+                        <div id="formTabs" class="mb-6 flex border-b border-gray-200 w-full text-xs">
+                            <button type="button" id="tab1" class="flex-grow pb-3 font-semibold border-b-2 border-[#0047BA] text-[#0047BA] focus:outline-none">
+                                1. Account Details
+                            </button>
+                            <button type="button" id="tab2" class="flex-grow pb-3 font-semibold text-gray-400 border-b-2 border-transparent focus:outline-none">
+                                2. Supporting Documents
+                            </button>
                         </div>
-                    </div>
 
-                    <!-- FAQ Tab Panel -->
-                    <div class="hidden opacity-0 transition-opacity duration-150 ease-linear data-[twe-tab-active]:block"
-                        id="tabs-faq" role="tabpanel" aria-labelledby="tabs-faq-tab">
-                        <!-- FAQ Accordion Content -->
-                        <div id="faqCard" class="py-6 w-full mb-4 space-y-4 transition-all duration-500 ease-in-out rounded-xl" x-data="{ activeFaq: null }">
-                            <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <form id="registerForm" class="space-y-4">
+                            <!-- Step 1 Content -->
+                            <div id="step1Content" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
-                                    <h2 class="text-lg font-semibold text-gray-800">Frequently Asked Questions</h2>
-                                    <p class="text-xs text-gray-500">Quick answers to common questions about RMNCAH coordination</p>
+                                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Full Name</label>
+                                    <input type="text" id="regName" placeholder="e.g. Dr. Jane Kinyua"
+                                        class="w-full px-4 py-2.5 border border-gray-300 text-sm rounded-xl focus:ring-1 focus:ring-[#0047BA] focus:border-[#0047BA] outline-none transition bg-gray-50/50">
                                 </div>
-                                <a href="faq.html" class="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 hover:underline">
-                                    Full FAQ Page
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                                </a>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Email Address</label>
+                                    <input type="email" id="regEmail" placeholder="e.g. kinyua@moh.go.ke"
+                                        class="w-full px-4 py-2.5 border border-gray-300 text-sm rounded-xl focus:ring-1 focus:ring-[#0047BA] focus:border-[#0047BA] outline-none transition bg-gray-50/50">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Organization</label>
+                                    <input type="text" id="regOrganization" placeholder="e.g. World Health Organization"
+                                        class="w-full px-4 py-2.5 border border-gray-300 text-sm rounded-xl focus:ring-1 focus:ring-[#0047BA] focus:border-[#0047BA] outline-none transition bg-gray-50/50">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Account Type</label>
+                                    <select id="regAccountType"
+                                        class="w-full px-4 py-2.5 border border-gray-300 text-sm rounded-xl focus:ring-1 focus:ring-[#0047BA] focus:border-[#0047BA] outline-none transition bg-gray-50/50">
+                                        <option value="PARTNER">Partner Organization</option>
+                                        <option value="DONOR">Donor Organization</option>
+                                    </select>
+                                </div>
+                                <div id="parentDonorSection" class="hidden sm:col-span-2">
+                                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Parent Donor ID (Optional)</label>
+                                    <input type="number" id="regParentDonorId" placeholder="Enter ID to link account to parent donor"
+                                        class="w-full px-4 py-2.5 border border-gray-300 text-sm rounded-xl focus:ring-1 focus:ring-[#0047BA] focus:border-[#0047BA] outline-none transition bg-gray-50/50">
+                                </div>
+
+                                <div class="sm:col-span-2 pt-4">
+                                    <button type="button" id="nextStepBtn"
+                                        class="w-full py-3 bg-[#0047BA] hover:bg-[#003da1] text-white rounded-3xl font-semibold shadow-md transition flex items-center justify-center">
+                                        Next: Supporting Documents <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                                    </button>
+                                </div>
                             </div>
 
-                            <!-- FAQ items using Alpine.js -->
-                            <div class="space-y-3 max-h-[380px] overflow-y-auto pr-1">
-                                <!-- FAQ 1 -->
-                                <div class="border border-gray-200 rounded-lg bg-white overflow-hidden transition-all duration-200" :class="{ 'ring-1 ring-blue-500 border-blue-200': activeFaq === 1 }">
-                                    <button @click="activeFaq = activeFaq === 1 ? null : 1" type="button" class="flex justify-between items-center w-full p-4 text-left font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-150">
-                                        <span class="text-sm">What is the RMNCAH Coordination Hub?</span>
-                                        <svg class="w-4 h-4 text-gray-500 transition-transform duration-200" :class="{ 'rotate-180 text-blue-500': activeFaq === 1 }" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-                                    </button>
-                                    <div x-show="activeFaq === 1" x-transition.duration.200ms class="border-t border-gray-200 bg-blue-50/30 p-4">
-                                        <p class="text-xs md:text-sm text-gray-600 leading-relaxed">
-                                            The RMNCAH Coordination Hub is an official Ministry of Health digital platform designed to enhance visibility, coordination, and accountability among stakeholders implementing projects in Reproductive, Maternal, Newborn, Child, and Adolescent Health (RMNCAH). It enables partners and donors to register, submit projects, collaborate, and align efforts with national health priorities.
+                            <!-- Step 2 Content -->
+                            <div id="step2Content" class="hidden space-y-4">
+                                <div class="supporting-documents bg-gray-50/50 p-4 rounded-xl border border-gray-200">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                            Supporting Documents <span class="font-normal text-gray-400 lowercase">(optional)</span>
+                                        </label>
+                                        <div id="documentsCount" class="bg-[#0047BA]/10 text-[#0047BA] px-3 py-1 rounded-full text-xs font-bold">
+                                            <i class="fas fa-file mr-1"></i> <span id="docsCount">0</span> selected
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mb-4">
+                                        Upload letters or organizational certificates (PDF, Word, Excel - Max 10MB each) to speed up reviewer approval.
+                                    </p>
+
+                                    <!-- Upload drop area -->
+                                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-[#0047BA] hover:bg-[#0047BA]/5 transition-all duration-200 cursor-pointer bg-white"
+                                        id="fileUploadArea">
+                                        <div class="text-gray-400 mb-2">
+                                            <i class="fas fa-cloud-upload-alt text-3xl"></i>
+                                        </div>
+                                        <p class="text-sm font-medium text-gray-700 mb-1">
+                                            Drag & drop files here, or click to browse
                                         </p>
+                                        <p class="text-xs text-gray-400">
+                                            PDF, DOC, DOCX, XLS, XLSX up to 10MB
+                                        </p>
+                                        <input type="file" id="documentFiles" name="documents" multiple accept=".pdf,.doc,.docx,.xls,.xlsx" class="hidden" />
+                                    </div>
+
+                                    <!-- File list -->
+                                    <div id="selectedFiles" class="mt-4 space-y-2 hidden">
+                                        <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider">Files to Upload:</h4>
+                                        <div id="filesList" class="space-y-1.5 max-h-40 overflow-y-auto"></div>
+                                    </div>
+
+                                    <!-- Error message container -->
+                                    <div class="mt-3 p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs hidden flex items-center" id="fileUploadError">
+                                        <i class="fas fa-exclamation-triangle mr-2 text-rose-500"></i>
+                                        <span id="fileErrorMessage"></span>
                                     </div>
                                 </div>
 
-                                <!-- FAQ 2 -->
-                                <div class="border border-gray-200 rounded-lg bg-white overflow-hidden transition-all duration-200" :class="{ 'ring-1 ring-blue-500 border-blue-200': activeFaq === 2 }">
-                                    <button @click="activeFaq = activeFaq === 2 ? null : 2" type="button" class="flex justify-between items-center w-full p-4 text-left font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-150">
-                                        <span class="text-sm">Who is eligible to become a member?</span>
-                                        <svg class="w-4 h-4 text-gray-500 transition-transform duration-200" :class="{ 'rotate-180 text-blue-500': activeFaq === 2 }" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                                <div class="grid grid-cols-2 gap-4 pt-4">
+                                    <button type="button" id="prevStepBtn"
+                                        class="py-3 font-semibold text-gray-700 border border-gray-300 rounded-3xl hover:bg-gray-100 transition text-center text-sm">
+                                        <i class="fas fa-arrow-left mr-1 text-xs"></i> Back
                                     </button>
-                                    <div x-show="activeFaq === 2" x-transition.duration.200ms class="border-t border-gray-200 bg-blue-50/30 p-4">
-                                        <p class="text-xs md:text-sm text-gray-600 leading-relaxed">
-                                            Approved RMNCAH stakeholders including partner organizations (NGOs, CBOs, private sector implementers), donor organizations, and Ministry of Health (MOH) staff can register. Each account type requires verification and approval by the MOH admin to ensure authenticity and relevance.
-                                        </p>
-                                    </div>
+                                    <button type="submit" id="registerBtn"
+                                        class="py-3 font-semibold text-white bg-[#0047BA] hover:bg-[#003da1] rounded-3xl shadow-md transition text-center text-sm flex items-center justify-center">
+                                        <span id="registerBtnText">Submit Request</span>
+                                        <span id="registerBtnSpinner" class="hidden flex items-center justify-center">
+                                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Submitting...
+                                        </span>
+                                    </button>
                                 </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
 
-                                <!-- FAQ 3 -->
-                                <div class="border border-gray-200 rounded-lg bg-white overflow-hidden transition-all duration-200" :class="{ 'ring-1 ring-blue-500 border-blue-200': activeFaq === 3 }">
-                                    <button @click="activeFaq = activeFaq === 3 ? null : 3" type="button" class="flex justify-between items-center w-full p-4 text-left font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-150">
-                                        <span class="text-sm">How do I register / become a member?</span>
-                                        <svg class="w-4 h-4 text-gray-500 transition-transform duration-200" :class="{ 'rotate-180 text-blue-500': activeFaq === 3 }" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-                                    </button>
-                                    <div x-show="activeFaq === 3" x-transition.duration.200ms class="border-t border-gray-200 bg-blue-50/30 p-4">
-                                        <p class="text-xs md:text-sm text-gray-600 leading-relaxed mb-2">
-                                            To register, follow these simple steps:
-                                        </p>
-                                        <ol class="list-decimal pl-4 text-xs md:text-sm text-gray-600 space-y-1">
-                                            <li>Click the <strong>Become a Member</strong> tab on this page.</li>
-                                            <li>Fill in your Account Details (Name, Email, Organization, and Account Type).</li>
-                                            <li>Click <strong>Next</strong> to proceed to Step 2: Supporting Documents (Optional, but recommended for faster approval).</li>
-                                            <li>Submit your registration. Your credentials will be reviewed by the MOH team.</li>
-                                        </ol>
-                                    </div>
+                <!-- FAQ Tab -->
+                <div class="hidden opacity-0 transition-opacity duration-150 ease-linear data-[twe-tab-active]:block"
+                    id="tabs-faq" role="tabpanel" aria-labelledby="tabs-faq-tab">
+                    <div id="faqCard" class="py-2 space-y-4" x-data="{ activeFaq: null }">
+                        <div class="flex items-center justify-between border-b pb-3 mb-2">
+                            <div>
+                                <h2 class="text-base font-semibold text-gray-800">Frequently Asked Questions</h2>
+                                <p class="text-xs text-gray-500">Quick assistance for membership registration.</p>
+                            </div>
+                            <a href="faq.html" class="text-xs font-semibold text-[#0047BA] hover:underline flex items-center gap-1">
+                                Full FAQ Page <i class="fas fa-external-link-alt text-[10px]"></i>
+                            </a>
+                        </div>
+
+                        <!-- FAQ Items list -->
+                        <div class="space-y-2 max-h-[350px] overflow-y-auto pr-1">
+                            <!-- Item 1 -->
+                            <div class="border border-gray-200 rounded-xl bg-white overflow-hidden" :class="{ 'ring-1 ring-[#0047BA] border-[#0047BA]/20': activeFaq === 1 }">
+                                <button @click="activeFaq = activeFaq === 1 ? null : 1" type="button" class="flex justify-between items-center w-full p-4 text-left font-semibold text-gray-700 hover:bg-gray-50 text-sm">
+                                    <span>What is the RMNCAH Coordination Hub?</span>
+                                    <i class="fas fa-chevron-down text-xs transition-transform" :class="{ 'rotate-180 text-[#0047BA]': activeFaq === 1 }"></i>
+                                </button>
+                                <div x-show="activeFaq === 1" x-transition class="border-t border-gray-100 bg-gray-50 p-4 text-xs text-gray-600 leading-relaxed">
+                                    The RMNCAH Coordination Hub is an official Ministry of Health digital platform designed to enhance visibility, coordination, and accountability among stakeholders implementing projects in Reproductive, Maternal, Newborn, Child, and Adolescent Health (RMNCAH).
                                 </div>
-
-                                <!-- FAQ 4 -->
-                                <div class="border border-gray-200 rounded-lg bg-white overflow-hidden transition-all duration-200" :class="{ 'ring-1 ring-blue-500 border-blue-200': activeFaq === 4 }">
-                                    <button @click="activeFaq = activeFaq === 4 ? null : 4" type="button" class="flex justify-between items-center w-full p-4 text-left font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-150">
-                                        <span class="text-sm">What supporting documents are recommended?</span>
-                                        <svg class="w-4 h-4 text-gray-500 transition-transform duration-200" :class="{ 'rotate-180 text-blue-500': activeFaq === 4 }" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-                                    </button>
-                                    <div x-show="activeFaq === 4" x-transition.duration.200ms class="border-t border-gray-200 bg-blue-50/30 p-4">
-                                        <p class="text-xs md:text-sm text-gray-600 leading-relaxed">
-                                            Uploading organizational registration certificates, MOUs with the Ministry of Health, introductory letters, or recent project briefs helps verify your organization's legitimacy. Supported formats include PDF, DOC/DOCX, and XLS/XLSX, with a maximum file size of 10MB per file.
-                                        </p>
-                                    </div>
+                            </div>
+                            <!-- Item 2 -->
+                            <div class="border border-gray-200 rounded-xl bg-white overflow-hidden" :class="{ 'ring-1 ring-[#0047BA] border-[#0047BA]/20': activeFaq === 2 }">
+                                <button @click="activeFaq = activeFaq === 2 ? null : 2" type="button" class="flex justify-between items-center w-full p-4 text-left font-semibold text-gray-700 hover:bg-gray-50 text-sm">
+                                    <span>Who can become a member?</span>
+                                    <i class="fas fa-chevron-down text-xs transition-transform" :class="{ 'rotate-180 text-[#0047BA]': activeFaq === 2 }"></i>
+                                </button>
+                                <div x-show="activeFaq === 2" x-transition class="border-t border-gray-100 bg-gray-50 p-4 text-xs text-gray-600 leading-relaxed">
+                                    Approved RMNCAH stakeholders including partner organizations (NGOs, CBOs, private sector implementers), donor organizations, and Ministry of Health (MOH) staff can register. Each account type requires verification and approval by the MOH admin.
                                 </div>
-
-                                <!-- FAQ 5 -->
-                                <div class="border border-gray-200 rounded-lg bg-white overflow-hidden transition-all duration-200" :class="{ 'ring-1 ring-blue-500 border-blue-200': activeFaq === 5 }">
-                                    <button @click="activeFaq = activeFaq === 5 ? null : 5" type="button" class="flex justify-between items-center w-full p-4 text-left font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-150">
-                                        <span class="text-sm">How long does account approval take?</span>
-                                        <svg class="w-4 h-4 text-gray-500 transition-transform duration-200" :class="{ 'rotate-180 text-blue-500': activeFaq === 5 }" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-                                    </button>
-                                    <div x-show="activeFaq === 5" x-transition.duration.200ms class="border-t border-gray-200 bg-blue-50/30 p-4">
-                                        <p class="text-xs md:text-sm text-gray-600 leading-relaxed">
-                                            Once submitted, your account goes through a two-step validation process by the MOH reviewer and administrator. This typically takes up to 12 hours. You will receive an email confirmation once your account has been approved or if additional information is required.
-                                        </p>
-                                    </div>
+                            </div>
+                            <!-- Item 3 -->
+                            <div class="border border-gray-200 rounded-xl bg-white overflow-hidden" :class="{ 'ring-1 ring-[#0047BA] border-[#0047BA]/20': activeFaq === 3 }">
+                                <button @click="activeFaq = activeFaq === 3 ? null : 3" type="button" class="flex justify-between items-center w-full p-4 text-left font-semibold text-gray-700 hover:bg-gray-50 text-sm">
+                                    <span>How long does account approval take?</span>
+                                    <i class="fas fa-chevron-down text-xs transition-transform" :class="{ 'rotate-180 text-[#0047BA]': activeFaq === 3 }"></i>
+                                </button>
+                                <div x-show="activeFaq === 3" x-transition class="border-t border-gray-100 bg-gray-50 p-4 text-xs text-gray-600 leading-relaxed">
+                                    Once submitted, your account goes through a two-step validation process by the MOH reviewer and administrator. This typically takes up to 12 hours. You will receive an email confirmation once approved.
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="flex flex-col  w-full max-w-lg p-4 mx-auto items-center justify-center ">
-
-                </div>
-
-
             </div>
         </div>
     </div>
+
+    <!-- Footer matching eCitizen -->
+    <footer class="bg-[#272E28] text-white py-12 border-t border-white/10 mt-auto">
+        <div class="max-w-screen-2xl mx-auto px-6 sm:px-8">
+            <div class="flex flex-col lg:flex-row justify-between items-center space-y-6 lg:space-y-0">
+                <div class="text-center lg:text-left">
+                    <div class="flex items-center justify-center lg:justify-start space-x-3 mb-2">
+                        <img class="w-auto h-8" src="resources/images/logo.png" alt="RMNCAH Logo" onerror="this.src='resources/images/moh.png'">
+                        <span class="text-lg font-bold text-white">RMNCAH<span class="text-[#3482FF]">Hub</span></span>
+                    </div>
+                    <p class="text-xs text-gray-400">
+                        Giving partners easy access to RMNCAH project coordination.
+                    </p>
+                </div>
+                <div>
+                    <ul class="flex flex-wrap justify-center space-x-6 text-xs text-gray-300">
+                        <li><a href="index.html" class="hover:text-white transition font-medium">Home</a></li>
+                        <li><a href="index.html#features" class="hover:text-white transition font-medium">National</a></li>
+                        <li><a href="index.html#about" class="hover:text-white transition font-medium">Counties</a></li>
+                        <li><a href="faq.html" class="hover:text-white transition font-medium">Help &amp; Support</a></li>
+                        <li><a href="credits.html" class="hover:text-white transition font-medium">Credits</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-8 pt-6 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-xs text-gray-400">
+                <p>&copy; 2026 RMNCAH Coordination Hub. All rights reserved.</p>
+                <p class="mt-2 md:mt-0">Ministry of Health, Government of Kenya</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Form script step control and base script setups -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const step1Content = document.getElementById('step1Content');
@@ -431,35 +369,32 @@
             const prevBtn = document.getElementById('prevStepBtn');
             const tab1 = document.getElementById('tab1');
             const tab2 = document.getElementById('tab2');
-
+ 
             function showStep1() {
                 step1Content.classList.remove('hidden');
                 step2Content.classList.add('hidden');
-                tab1.classList.add('border-blue-600', 'text-blue-600');
-                tab1.classList.remove('border-transparent', 'text-gray-500');
-                tab2.classList.add('border-transparent', 'text-gray-500');
-                tab2.classList.remove('border-blue-600', 'text-blue-600');
+                tab1.className = "flex-grow pb-3 font-semibold border-b-2 border-[#0047BA] text-[#0047BA] focus:outline-none";
+                tab2.className = "flex-grow pb-3 font-semibold text-gray-400 border-b-2 border-transparent focus:outline-none";
             }
 
             function showStep2() {
-                // You might want to run client-side validation for Step 1 here first
-                // if (validateStep1() === false) { return; }
-
+                const name = document.getElementById("regName").value;
+                const email = document.getElementById("regEmail").value;
+                if (!name || !email) {
+                    showAlert("Please fill in required fields (Name and Email)", "Validation Error", "warning");
+                    return;
+                }
                 step1Content.classList.add('hidden');
                 step2Content.classList.remove('hidden');
-                tab2.classList.add('border-blue-600', 'text-blue-600');
-                tab2.classList.remove('border-transparent', 'text-gray-500');
-                tab1.classList.add('border-transparent', 'text-gray-500');
-                tab1.classList.remove('border-blue-600', 'text-blue-600');
+                tab2.className = "flex-grow pb-3 font-semibold border-b-2 border-[#0047BA] text-[#0047BA] focus:outline-none";
+                tab1.className = "flex-grow pb-3 font-semibold text-gray-400 border-b-2 border-transparent focus:outline-none";
             }
 
-            // Event Listeners
             nextBtn.addEventListener('click', showStep2);
             prevBtn.addEventListener('click', showStep1);
             tab1.addEventListener('click', showStep1);
             tab2.addEventListener('click', showStep2);
 
-            // Form submission handler
             const registerForm = document.getElementById('registerForm');
             if (registerForm) {
                 registerForm.addEventListener('submit', async (e) => {
@@ -468,29 +403,26 @@
                 });
             }
 
-            // Initial state: Show Step 1
             showStep1();
         });
-
-        // NOTE: You will need to integrate your existing 'validateBeforeSubmit()' and 
-        // any 'regAccountType' change listeners with this new structure.
     </script>
+    
     <script>
+        // Hero background image selection
         const images = [
             'resources/images/main-1.jpg',
             'resources/images/main-2.jpg',
             'resources/images/main-3.jpg'
         ];
-
         const randomImage = images[Math.floor(Math.random() * images.length)];
-        document.getElementById('heroSection').style.backgroundImage = `url('${randomImage}')`;
+        const hero = document.getElementById('heroSection');
+        if (hero) hero.style.backgroundImage = `url('${randomImage}'), linear-gradient(135deg, #1e3a8a, #00595E)`;
 
-        // Switch tab helper function for CTA buttons and deep-linking
+        // Switch tab helper function
         window.switchTab = function(targetId) {
             const tabEl = document.querySelector(`[data-twe-target="${targetId}"]`);
             if (tabEl) {
                 tabEl.click();
-                // Ensure form starts at step 1 if navigating to registration
                 if (targetId === '#tabs-profile02') {
                     const tab1Btn = document.getElementById('tab1');
                     if (tab1Btn) tab1Btn.click();
@@ -498,28 +430,30 @@
             }
         };
 
-        // Deep-linking based on URL Hash
+        // Deep-linking from URL params
         document.addEventListener('DOMContentLoaded', () => {
-            const hash = window.location.hash;
-            if (hash) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tab = urlParams.get('tab');
+            if (tab === 'register') {
+                setTimeout(() => window.switchTab('#tabs-profile02'), 200);
+            } else if (tab === 'faq') {
+                setTimeout(() => window.switchTab('#tabs-faq'), 200);
+            } else {
+                const hash = window.location.hash;
                 if (hash === '#register' || hash === '#tabs-profile02') {
-                    setTimeout(() => window.switchTab('#tabs-profile02'), 150);
+                    setTimeout(() => window.switchTab('#tabs-profile02'), 200);
                 } else if (hash === '#faq' || hash === '#tabs-faq') {
-                    setTimeout(() => window.switchTab('#tabs-faq'), 150);
-                } else if (hash === '#login' || hash === '#tabs-home02') {
-                    setTimeout(() => window.switchTab('#tabs-home02'), 150);
+                    setTimeout(() => window.switchTab('#tabs-faq'), 200);
                 }
             }
         });
     </script>
 
-
     <script>
-        // Global state for selected files (accessible by validateBeforeSubmit)
+        // Global state for selected files
         window.selectedFiles = [];
 
         document.addEventListener('DOMContentLoaded', () => {
-            // DOM Element References
             const fileUploadArea = document.getElementById('fileUploadArea');
             const documentFilesInput = document.getElementById('documentFiles');
             const docsCountSpan = document.getElementById('docsCount');
@@ -528,7 +462,6 @@
             const fileUploadErrorDiv = document.getElementById('fileUploadError');
             const fileErrorMessageSpan = document.getElementById('fileErrorMessage');
 
-            // Use the global selectedFiles array
             const MAX_FILE_SIZE_MB = 10;
             const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
             const SUPPORTED_MIMES = [
@@ -539,22 +472,14 @@
                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             ];
 
-            /**
-             * Shows the error message div with the specified message.
-             * @param {string} message - The error message to display.
-             */
             const showFileError = (message) => {
                 fileErrorMessageSpan.textContent = message;
                 fileUploadErrorDiv.classList.remove('hidden');
-                // Optionally hide after a delay
                 setTimeout(() => {
                     fileUploadErrorDiv.classList.add('hidden');
                 }, 5000);
             };
 
-            /**
-             * Updates the file count display and the visibility of the file list.
-             */
             const updateFileCount = () => {
                 docsCountSpan.textContent = window.selectedFiles.length;
                 if (window.selectedFiles.length > 0) {
@@ -564,162 +489,88 @@
                 }
             };
 
-            /**
-             * Renders the list of currently selected files.
-             */
             const renderFilesList = () => {
-                filesListDiv.innerHTML = ''; // Clear existing list
+                filesListDiv.innerHTML = '';
                 window.selectedFiles.forEach((file, index) => {
                     const fileItem = document.createElement('div');
-                    fileItem.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-md border border-gray-200';
+                    fileItem.className = 'flex items-center justify-between p-2.5 bg-gray-50 rounded-xl border border-gray-200 text-xs';
 
-                    // Convert size to human-readable format
                     const fileSize = (file.size / (1024 * 1024)).toFixed(2);
                     const fileName = file.name;
 
                     fileItem.innerHTML = `
-                <div class="flex items-center">
-                    <i class="fas fa-file-alt text-blue-500 mr-3"></i>
-                    <div>
-                        <p class="text-sm font-medium text-gray-800 truncate max-w-xs" title="${fileName}">
-                            ${fileName}
-                        </p>
-                        <p class="text-xs text-gray-500">${fileSize} MB</p>
-                    </div>
-                </div>
-                <button type="button" data-file-index="${index}" class="remove-file-btn text-red-500 hover:text-red-700 transition duration-150">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
+                        <div class="flex items-center">
+                            <i class="fas fa-file-alt text-[#0047BA] mr-2.5 text-base"></i>
+                            <div>
+                                <p class="font-medium text-gray-800 truncate max-w-[200px]" title="${fileName}">${fileName}</p>
+                                <p class="text-[10px] text-gray-500">${fileSize} MB</p>
+                            </div>
+                        </div>
+                        <button type="button" data-file-index="${index}" class="remove-file-btn text-red-500 hover:text-red-700 transition">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
                     filesListDiv.appendChild(fileItem);
                 });
-
                 updateFileCount();
             };
 
-            /**
-             * Handles file removal from the list.
-             * @param {Event} e - The click event.
-             */
-            const handleRemoveFile = (e) => {
-                const removeButton = e.target.closest('.remove-file-btn');
-                if (removeButton) {
-                    const indexToRemove = parseInt(removeButton.dataset.fileIndex);
-                    if (!isNaN(indexToRemove) && indexToRemove >= 0) {
-                        window.selectedFiles.splice(indexToRemove, 1);
-                        // Re-render the list and update the input to reflect the change
-                        // Note: The hidden input cannot be easily updated with a FileList, 
-                        // but the `selectedFiles` array now holds the source of truth for submission.
-                        renderFilesList();
-                    }
-                }
-            };
-
-            /**
-             * Processes files added from either the file input or drag-and-drop.
-             * @param {FileList} files - The FileList object from the event.
-             */
-            const processFiles = (files) => {
-                fileUploadErrorDiv.classList.add('hidden'); // Clear previous errors
-
-                // Loop through the new files
-                Array.from(files).forEach(file => {
-                    // Basic Validation: Size and Type
+            const handleFiles = (files) => {
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
                     if (file.size > MAX_FILE_SIZE_BYTES) {
-                        showFileError(`File "${file.name}" is too large (>${MAX_FILE_SIZE_MB}MB) and was skipped.`);
-                        return;
+                        showFileError(`File "${file.name}" exceeds the maximum limit of ${MAX_FILE_SIZE_MB}MB.`);
+                        continue;
                     }
-                    // Check if the file's MIME type is supported
-                    if (!SUPPORTED_MIMES.includes(file.type)) {
-                        showFileError(`File type for "${file.name}" is not supported and was skipped.`);
-                        return;
-                    }
-
-                    // Check for duplicates by name (simple check)
-                    if (window.selectedFiles.some(existingFile => existingFile.name === file.name)) {
-                        showFileError(`File "${file.name}" is already selected.`);
-                        return;
-                    }
-
-                    // Add valid file to the state
                     window.selectedFiles.push(file);
-                });
-
-                // Update the UI
+                }
                 renderFilesList();
             };
 
-            // --- Event Listeners ---
+            if (fileUploadArea && documentFilesInput) {
+                fileUploadArea.addEventListener('click', () => documentFilesInput.click());
+                documentFilesInput.addEventListener('change', (e) => handleFiles(e.target.files));
 
-            // 1. Click-to-Browse
-            fileUploadArea.addEventListener('click', () => {
-                documentFilesInput.click(); // Programmatically click the hidden file input
-            });
+                fileUploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    fileUploadArea.classList.add('border-[#0047BA]', 'bg-[#0047BA]/5');
+                });
 
-            // 2. File Selection (when the user selects files via browse)
-            documentFilesInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    processFiles(e.target.files);
-                }
-                // Reset the file input value so selecting the same file again triggers 'change'
-                e.target.value = '';
-            });
+                fileUploadArea.addEventListener('dragleave', () => {
+                    fileUploadArea.classList.remove('border-[#0047BA]', 'bg-[#0047BA]/5');
+                });
 
-            // 3. Remove File Button Listener (using event delegation)
-            filesListDiv.addEventListener('click', handleRemoveFile);
-
-
-            /* --- Optional: Drag-and-Drop Implementation --- */
-
-            // Prevent default drag behaviors
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                fileUploadArea.addEventListener(eventName, preventDefaults, false);
-                document.body.addEventListener(eventName, preventDefaults, false); // For safety
-            });
-
-            // Add visual cue on dragover
-            ['dragenter', 'dragover'].forEach(eventName => {
-                fileUploadArea.addEventListener(eventName, () => {
-                    fileUploadArea.classList.add('border-blue-500', 'bg-blue-100');
-                }, false);
-            });
-
-            // Remove visual cue on dragleave/drop
-            ['dragleave', 'drop'].forEach(eventName => {
-                fileUploadArea.addEventListener(eventName, () => {
-                    fileUploadArea.classList.remove('border-blue-500', 'bg-blue-100');
-                }, false);
-            });
-
-            // Handle dropped files
-            fileUploadArea.addEventListener('drop', handleDrop, false);
-
-            function preventDefaults(e) {
-                e.preventDefault();
-                e.stopPropagation();
+                fileUploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    fileUploadArea.classList.remove('border-[#0047BA]', 'bg-[#0047BA]/5');
+                    handleFiles(e.dataTransfer.files);
+                });
             }
 
-            function handleDrop(e) {
-                const dt = e.dataTransfer;
-                const files = dt.files;
-                processFiles(files);
+            if (filesListDiv) {
+                filesListDiv.addEventListener('click', (e) => {
+                    const btn = e.target.closest('.remove-file-btn');
+                    if (btn) {
+                        const index = parseInt(btn.getAttribute('data-file-index'), 10);
+                        window.selectedFiles.splice(index, 1);
+                        renderFilesList();
+                    }
+                });
             }
         });
     </script>
+
+    <!-- Core Form Actions Logic -->
     <script>
         async function requestOtp() {
-            const email = document.getElementById("loginEmail").value;
+            const emailInput = document.getElementById("loginEmail");
+            const email = emailInput.value.trim();
+
             if (!email) {
-                await showAlert("Please enter your email", "Validation Error", "warning");
+                await showAlert("Please enter your email address", "Input Error", "warning");
                 return;
             }
 
-            // Save Remember Me preference using temporary key (will be moved to session key during OTP verification)
-            const rememberMe = document.getElementById("rememberMe").checked;
-            localStorage.setItem("tempRememberMe", rememberMe.toString());
-            console.log("Remember Me preference saved:", rememberMe);
-
-            // Show loading state
             const btn = document.getElementById("loginBtn");
             const btnText = document.getElementById("loginBtnText");
             const btnSpinner = document.getElementById("loginBtnSpinner");
@@ -729,84 +580,32 @@
             btnText.classList.add("hidden");
             btnSpinner.classList.remove("hidden");
 
-            // Request OTP from backend
             try {
                 const apiBase = window.BASE_URL;
+                console.log("[access.html] Requesting OTP - using BASE_URL:", apiBase);
 
-                console.log("[access.html] Login request - using BASE_URL:", apiBase);
-
-                const startTime = performance.now();
-                const requestBody = JSON.stringify({ email });
-
-                console.log("[access.html] Making login request:", {
-                    url: `${apiBase}/api/auth/login`,
-                    method: "POST"
-                });
-
+                const requestBody = { email: email };
                 const res = await fetch(`${apiBase}/api/auth/login`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: requestBody
-                });
-
-                const endTime = performance.now();
-                const duration = endTime - startTime;
-
-                console.log("[access.html] Login response:", {
-                    status: res.status,
-                    duration: `${duration.toFixed(2)}ms`
+                    body: JSON.stringify(requestBody)
                 });
 
                 const data = await res.json();
-                console.log("[access.html] Response data:", data);
+                if (!res.ok) throw new Error(data.message || "Failed to send OTP");
 
-                if (!res.ok) {
-                    console.error("[access.html] Login failed:", {
-                        status: res.status,
-                        statusText: res.statusText,
-                        data: data,
-                        duration: `${duration.toFixed(2)}ms`
-                    });
-                    throw new Error(data.message || "Login failed");
-                }
-
-                console.log("[access.html] Login successful, redirecting to OTP page");
-                if (data.data && data.data.otp) {
-                    localStorage.setItem("testOtp", data.data.otp);
-                } else {
-                    localStorage.removeItem("testOtp");
-                }
-                await showAlert("OTP sent to your email. Please check your inbox.", "Success", "success");
                 localStorage.setItem("pendingEmail", email);
                 localStorage.setItem("isLogin", "true");
+                
+                const rememberMe = document.getElementById("rememberMe").checked;
+                localStorage.setItem("rememberMe", rememberMe);
+
+                await showAlert(data.message || "OTP sent successfully to your email. Check your inbox and spam folder.", "Success", "success");
                 window.location.href = "otp.html";
             } catch (err) {
-                console.error("[access.html] Login request failed:", {
-                    error: err,
-                    message: err.message,
-                    stack: err.stack,
-                    email: email,
-                    timestamp: new Date().toISOString()
-                });
-
-                // Log error to network debugger
-                // if (window.networkDebugger) {
-                //     window.networkDebugger.logError(
-                //         'login',
-                //         {
-                //             url: `${apiBase}/api/auth/login`,
-                //             method: "POST",
-                //             headers: { "Content-Type": "application/json" },
-                //             body: requestBody
-                //         },
-                //         err,
-                //         0 // Duration not available due to error before completion
-                //     );
-                // }
-
+                console.error("OTP send error:", err);
                 await showAlert(err.message || "Failed to send OTP", "Error", "error");
 
-                // Reset button state on error
                 btn.disabled = false;
                 btn.classList.remove("opacity-75", "cursor-not-allowed");
                 btnText.classList.remove("hidden");
@@ -822,13 +621,11 @@
             const accountType = document.getElementById("regAccountType").value;
             const parentDonorId = document.getElementById("regParentDonorId").value;
 
-            // Basic validation
             if (!name || !email) {
                 await showAlert("Please fill in all required fields (Name and Email)", "Validation Error", "warning");
-                return false;
+                return;
             }
 
-            // Show loading state
             const btn = document.getElementById("registerBtn");
             const btnText = document.getElementById("registerBtnText");
             const btnSpinner = document.getElementById("registerBtnSpinner");
@@ -842,7 +639,6 @@
                 const apiBase = window.BASE_URL;
                 console.log("[access.html] Registration - using BASE_URL:", apiBase);
 
-                // Create FormData to support file uploads
                 const formData = new FormData();
                 formData.append("name", name);
                 formData.append("email", email);
@@ -855,46 +651,37 @@
                     formData.append("parentDonorId", parentDonorId);
                 }
 
-                // Add supporting documents if any (OPTIONAL)
                 if (window.selectedFiles && window.selectedFiles.length > 0) {
-                    console.log(`Adding ${window.selectedFiles.length} supporting documents to registration`);
-                    window.selectedFiles.forEach((file, index) => {
+                    window.selectedFiles.forEach((file) => {
                         formData.append("documents", file);
                     });
-                } else {
-                    console.log("No supporting documents selected (this is optional)");
                 }
 
                 const res = await fetch(`${apiBase}/api/auth/register`, {
                     method: "POST",
                     body: formData
-                    // Note: Don't set Content-Type header - browser will set it automatically with boundary
                 });
 
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message || "Registration failed");
 
-                await showAlert(data.message || "Your registration has been received. You will receive a confirmation email from the team within 12 hours.", "Success", "success");
+                await showAlert(data.message || "Your registration request has been submitted. You will receive a confirmation email within 12 hours.", "Success", "success");
                 localStorage.removeItem("pendingEmail");
                 window.location.href = "index.html";
             } catch (err) {
                 console.error("Registration error:", err);
                 await showAlert(err.message, "Error", "error");
 
-                // Reset button state on error
                 btn.disabled = false;
                 btn.classList.remove("opacity-75", "cursor-not-allowed");
                 btnText.classList.remove("hidden");
                 btnSpinner.classList.add("hidden");
             }
         }
-
     </script>
-    
-    <!-- Session Expiration Message Display -->
     <script>
+        // Session messages handlers
         document.addEventListener('DOMContentLoaded', () => {
-            // Check for session expiration message
             const sessionExpiredMessage = sessionStorage.getItem('sessionExpiredMessage');
             const logoutMessage = sessionStorage.getItem('logoutMessage');
             
@@ -902,28 +689,24 @@
             const messageText = document.getElementById('sessionMessageText');
             
             if (sessionExpiredMessage) {
-                messageContainer.classList.remove('hidden', 'bg-blue-50', 'text-blue-800', 'border-blue-200');
-                messageContainer.classList.add('bg-amber-50', 'text-amber-800', 'border', 'border-amber-200');
+                messageContainer.classList.remove('hidden');
+                messageContainer.className = 'p-3 rounded-xl border text-xs bg-amber-50 text-amber-800 border-amber-200';
                 messageText.textContent = sessionExpiredMessage;
                 sessionStorage.removeItem('sessionExpiredMessage');
             } else if (logoutMessage) {
-                messageContainer.classList.remove('hidden', 'bg-amber-50', 'text-amber-800');
-                messageContainer.classList.add('bg-blue-50', 'text-blue-800', 'border', 'border-blue-200');
+                messageContainer.classList.remove('hidden');
+                messageContainer.className = 'p-3 rounded-xl border text-xs bg-blue-50 text-blue-800 border-blue-200';
                 messageText.textContent = logoutMessage;
                 sessionStorage.removeItem('logoutMessage');
             }
         });
     </script>
 
-
-
-    </div>
-
+    <!-- Load scripts dynamically -->
+    <script src="styles/loadNavg.js"></script>
+    <script src="styles/accessibility-helper.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/tw-elements/js/tw-elements.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
-    <!-- Leaflet JS -->
-
-
 </body>
 
 </html>
