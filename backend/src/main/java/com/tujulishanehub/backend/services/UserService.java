@@ -218,14 +218,15 @@ public class UserService {
         userRepository.save(user);
         
         // Send OTP via email
-        String subject = "RMCAH Hub - Login OTP";
+        String subject = "RMNCAH Hub - Your Login OTP";
         String body = String.format(
             "Hello %s,\n\n" +
-            "Your login OTP is: %s\n\n" +
-            "This OTP will expire in 10 minutes.\n\n" +
-            "If you did not request this, please ignore this email.\n\n" +
+            "You requested to log in to the RMNCAH Coordination Hub.\n" +
+            "Your One-Time Password (OTP) is: %s\n\n" +
+            "This OTP will expire in 10 minutes. For your security, please do not share this code with anyone.\n\n" +
+            "If you did not request this login, you can safely ignore this email.\n\n" +
             "Best regards,\n" +
-            "RMCAH Hub Team",
+            "RMNCAH Coordination Hub Team",
             user.getName(), otp
         );
         emailService.sendEmail(email, subject, body);
@@ -279,7 +280,29 @@ public class UserService {
             userRepository.save(user);
             
             // Send detailed onboarding email
-            emailService.sendHtmlEmail(user.getEmail(), "Welcome to Tujulishane Hub — Your Account is Approved!", buildApprovalEmail(user));
+            String subject = "Welcome to the RMNCAH Coordination Hub - Your Account is Approved";
+            String body = String.format(
+                "Hello %s,\n\n" +
+                "Thank you for registering with the RMNCAH Coordination Hub.\n" +
+                "We’re pleased to let you know that your account has been reviewed and approved by the Ministry of Health. You can now log in and start using the platform.\n\n" +
+                "With the RMNCAH Coordination Hub, you can:\n" +
+                "• Submit Projects – Create and submit health-related projects for review.\n" +
+                "• Collaborate – Connect and work with partner organisations on projects.\n" +
+                "• Stay Informed – Keep up to date with Ministry of Health announcements and collaboration opportunities.\n" +
+                "• Track Projects – Monitor the status and progress of your submitted projects.\n\n" +
+                "Getting Started:\n" +
+                "1. Log in using your registered email address.\n" +
+                "2. Complete your profile with your organisation details and contact information.\n" +
+                "3. Explore active projects and collaboration opportunities.\n" +
+                "4. Submit your project when you are ready.\n\n" +
+                "Access the RMNCAH Coordination Hub: https://cohub.go.ke\n\n" +
+                "If you have any questions or need assistance, please contact your designated Ministry of Health focal person or the platform support team.\n\n" +
+                "We look forward to having you on the platform.\n\n" +
+                "Best regards,\n" +
+                "RMNCAH Coordination Hub Team",
+                user.getName()
+            );
+            emailService.sendEmail(user.getEmail(), subject, body);
 
             return true;
         }
@@ -301,9 +324,19 @@ public class UserService {
             userRepository.save(user);
             
             // Send notification to user
-            emailService.sendEmail(user.getEmail(), 
-                "Account Rejected", 
-                "Your account has been rejected. Reason: " + reason);
+            String subject = "RMNCAH Hub - Update on Your Account Application";
+            String body = String.format(
+                "Hello %s,\n\n" +
+                "Thank you for your interest in joining the RMNCAH Coordination Hub.\n" +
+                "After reviewing your application, we’re unable to approve your account at this time because it did not meet the required activation criteria.\n\n" +
+                "Reason for Rejection: %s\n\n" +
+                "If you believe this decision was made in error or would like further clarification, please contact the platform support team.\n\n" +
+                "We appreciate your interest in the RMNCAH Coordination Hub and encourage you to address the issue outlined above where applicable.\n\n" +
+                "Best regards,\n" +
+                "RMNCAH Coordination Hub Team",
+                user.getName(), reason
+            );
+            emailService.sendEmail(user.getEmail(), subject, body);
             
             return true;
         }
@@ -322,9 +355,19 @@ public class UserService {
             userRepository.save(user);
             
             // Send notification to user
-            emailService.sendEmail(user.getEmail(), 
-                "Role Updated", 
-                "Your role has been updated from " + oldRole + " to " + newRole + " by MOH administrator.");
+            String subject = "RMNCAH Hub - Your Platform Role Has Been Updated";
+            String body = String.format(
+                "Hello %s,\n\n" +
+                "We’d like to let you know that your role on the RMNCAH Coordination Hub has been updated.\n\n" +
+                "Previous Role: %s\n" +
+                "New Role: %s\n\n" +
+                "Your new role is now active, and your access to the platform has been updated accordingly.\n\n" +
+                "If you have any questions about this change, please contact the platform support team.\n\n" +
+                "Best regards,\n" +
+                "RMNCAH Coordination Hub Team",
+                user.getName(), oldRole, newRole
+            );
+            emailService.sendEmail(user.getEmail(), subject, body);
             
             return true;
         }
@@ -418,10 +461,19 @@ public class UserService {
                 .map(com.tujulishanehub.backend.models.ProjectTheme::getDisplayName)
                 .collect(java.util.stream.Collectors.joining(", "));
             
-            emailService.sendEmail(user.getEmail(), 
-                "Thematic Areas Assigned", 
-                "You have been assigned to the following thematic areas: " + areasString + 
-                "\n\nYou can now review projects in these thematic areas.");
+            // Send notification to user
+            String subject = "RMNCAH Hub - New Thematic Areas Assigned";
+            String body = String.format(
+                "Hello %s,\n\n" +
+                "You have been assigned to review projects under the following thematic areas:\n" +
+                "%s\n\n" +
+                "You can now access and review projects submitted under these thematic areas through the Review Requests page.\n\n" +
+                "Thank you for supporting the project review process.\n\n" +
+                "Best regards,\n" +
+                "RMNCAH Coordination Hub Team",
+                user.getName(), areasString
+            );
+            emailService.sendEmail(user.getEmail(), subject, body);
             
             return true;
         }
@@ -469,10 +521,19 @@ public class UserService {
             userRepository.save(user);
             
             // Send notification to user
-            emailService.sendEmail(user.getEmail(), 
-                "New Thematic Area Assigned", 
-                "You have been assigned to the thematic area: " + thematicArea.getDisplayName() + 
-                "\n\nYou can now review projects in this thematic area.");
+            // Send notification to user
+            String subject = "RMNCAH Hub - New Thematic Area Assigned";
+            String body = String.format(
+                "Hello %s,\n\n" +
+                "A new thematic area has been assigned to you for project review:\n" +
+                "%s\n\n" +
+                "You can now review projects submitted under this thematic area through the Review Requests page.\n\n" +
+                "Thank you for your continued support.\n\n" +
+                "Best regards,\n" +
+                "RMNCAH Coordination Hub Team",
+                user.getName(), thematicArea.getDisplayName()
+            );
+            emailService.sendEmail(user.getEmail(), subject, body);
             
             return true;
         }
@@ -501,9 +562,20 @@ public class UserService {
             userRepository.save(user);
             
             // Send notification to user
-            emailService.sendEmail(user.getEmail(), 
-                "Thematic Area Removed", 
-                "You have been removed from the thematic area: " + thematicArea.getDisplayName());
+            String subject = "RMNCAH Hub - Thematic Area Assignment Updated";
+            String body = String.format(
+                "Hello %s,\n\n" +
+                "We’d like to let you know that your Reviewer assignment has been updated.\n\n" +
+                "You will no longer be assigned to review projects under the following thematic area:\n" +
+                "%s\n\n" +
+                "Your other Reviewer assignments, if applicable, remain unchanged.\n\n" +
+                "If you have any questions or believe this update was made in error, please contact the platform support team.\n\n" +
+                "Thank you for your continued support of the RMNCAH Coordination Hub.\n\n" +
+                "Best regards,\n" +
+                "RMNCAH Coordination Hub Team",
+                user.getName(), thematicArea.getDisplayName()
+            );
+            emailService.sendEmail(user.getEmail(), subject, body);
             
             return true;
         }
@@ -533,13 +605,38 @@ public class UserService {
             userRepository.save(user);
             
             // Send notification to user
-            String message = "Your role has been updated from " + oldRole + " to " + newRole;
-            if (newRole == User.Role.SUPER_ADMIN_REVIEWER && thematicArea != null) {
-                message += "\nThematic Area: " + thematicArea.getDisplayName();
+            String subject;
+            String body;
+            if (newRole == User.Role.SUPER_ADMIN_REVIEWER) {
+                String thematicAreaName = thematicArea != null ? thematicArea.getDisplayName() : "N/A";
+                subject = "RMNCAH Hub - You Have Been Assigned as a Reviewer";
+                body = String.format(
+                    "Hello %s,\n\n" +
+                    "We’d like to let you know that your role on the RMNCAH Coordination Hub has been updated from %s to Reviewer.\n\n" +
+                    "You have been assigned to review projects in the following thematic areas:\n" +
+                    "%s\n\n" +
+                    "You can now access the Review Requests page to review projects awaiting your attention.\n\n" +
+                    "Thank you for supporting the RMNCAH Coordination Hub review process.\n\n" +
+                    "Best regards,\n" +
+                    "RMNCAH Coordination Hub Team",
+                    user.getName(), oldRole, thematicAreaName
+                );
+            } else {
+                subject = "RMNCAH Hub - Your Platform Role Has Been Updated";
+                body = String.format(
+                    "Hello %s,\n\n" +
+                    "We’d like to let you know that your role on the RMNCAH Coordination Hub has been updated.\n\n" +
+                    "Previous Role: %s\n" +
+                    "New Role: %s\n\n" +
+                    "Your new role is now active, and your access to the platform has been updated accordingly.\n\n" +
+                    "If you have any questions about this change, please contact the platform support team.\n\n" +
+                    "Best regards,\n" +
+                    "RMNCAH Coordination Hub Team",
+                    user.getName(), oldRole, newRole
+                );
             }
-            message += "\n\nUpdated by MOH administrator.";
             
-            emailService.sendEmail(user.getEmail(), "Role Updated", message);
+            emailService.sendEmail(user.getEmail(), subject, body);
             
             return true;
         }
@@ -606,50 +703,50 @@ public class UserService {
                 try {
                     // Notify the partner
                     String partnerMessage = String.format(
-                        "Dear %s,\n\n" +
-                        "Your organization has been successfully linked to the donor organization: %s.\n\n" +
-                        "This partnership will enable better collaboration and project management.\n\n" +
-                        "Donor Organization Details:\n" +
-                        "Name: %s\n" +
-                        "Email: %s\n" +
-                        (donor.getOrganization() != null ? "Organization: " + donor.getOrganization().getName() + "\n" : "") +
-                        "\n" +
-                        "You can now view your donor details in the Donor Management section.\n\n" +
+                        "Hello %s,\n\n" +
+                        "We’re pleased to let you know that your organisation has been successfully linked to the following donor organisation:\n\n" +
+                        "Donor Organisation: %s\n" +
+                        "Donor Contact: %s\n" +
+                        "Email: %s\n\n" +
+                        "This partnership will support collaboration and improve coordination of projects through the RMNCAH Coordination Hub.\n\n" +
+                        "You can view the partnership details through the Donor Management section of the platform.\n\n" +
+                        "If you have any questions about this partnership, please contact the platform support team.\n\n" +
                         "Best regards,\n" +
-                        "RMCAH Hub Team",
+                        "RMNCAH Coordination Hub Team",
                         partner.getName(),
-                        donor.getName(),
+                        donor.getOrganization() != null ? donor.getOrganization().getName() : "N/A",
                         donor.getName(),
                         donor.getEmail()
                     );
                     
                     emailService.sendEmail(
                         partner.getEmail(),
-                        "Partnership Established - Linked to Donor Organization",
+                        "RMNCAH Hub - Partnership Successfully Linked",
                         partnerMessage
                     );
                     
                     // Notify the donor
                     String donorMessage = String.format(
-                        "Dear %s,\n\n" +
-                        "A new partner organization has been linked to your account.\n\n" +
-                        "Partner Organization Details:\n" +
-                        "Name: %s\n" +
+                        "Hello %s,\n\n" +
+                        "We’re pleased to let you know that a new partner organisation has been successfully linked to your account.\n\n" +
+                        "Partner Organisation: %s\n" +
+                        "Partner Contact: %s\n" +
                         "Email: %s\n" +
-                        (partner.getOrganization() != null ? "Organization: " + partner.getOrganization().getName() + "\n" : "") +
-                        (partner.getThematicArea() != null ? "Thematic Area: " + partner.getThematicArea().getDisplayName() + "\n" : "") +
-                        "\n" +
-                        "You can now manage this partnership through the Donor Management portal.\n\n" +
+                        "Thematic Area: %s\n\n" +
+                        "You can now view and manage this partnership through the Donor Management section of the RMNCAH Coordination Hub.\n\n" +
+                        "We look forward to supporting continued collaboration through the platform.\n\n" +
                         "Best regards,\n" +
-                        "RMCAH Hub Team",
+                        "RMNCAH Coordination Hub Team",
                         donor.getName(),
+                        partner.getOrganization() != null ? partner.getOrganization().getName() : "N/A",
                         partner.getName(),
-                        partner.getEmail()
+                        partner.getEmail(),
+                        partner.getThematicArea() != null ? partner.getThematicArea().getDisplayName() : "N/A"
                     );
                     
                     emailService.sendEmail(
                         donor.getEmail(),
-                        "New Partner Organization Linked",
+                        "RMNCAH Hub - New Partner Organisation Linked",
                         donorMessage
                     );
                 } catch (Exception e) {
@@ -681,39 +778,43 @@ public class UserService {
                     try {
                         // Notify the partner
                         String partnerMessage = String.format(
-                            "Dear %s,\n\n" +
-                            "Your partnership with the donor organization %s has been ended.\n\n" +
-                            "If you have any questions about this change, please contact the administrator.\n\n" +
+                            "Hello %s,\n\n" +
+                            "We’d like to let you know that your organisation is no longer linked to the following donor organisation:\n\n" +
+                            "Donor Organisation: %s\n\n" +
+                            "This update has been reflected on the RMNCAH Coordination Hub.\n\n" +
+                            "If you have any questions or concerns regarding this change, please contact the platform administrator or support team.\n\n" +
                             "Best regards,\n" +
-                            "RMCAH Hub Team",
+                            "RMNCAH Coordination Hub Team",
                             partner.getName(),
-                            donor.getName()
+                            donor.getOrganization() != null ? donor.getOrganization().getName() : donor.getName()
                         );
                         
                         emailService.sendEmail(
                             partner.getEmail(),
-                            "Partnership Ended - Unlinked from Donor Organization",
+                            "RMNCAH Hub - Partnership Update",
                             partnerMessage
                         );
                         
                         // Notify the donor
                         String donorMessage = String.format(
-                            "Dear %s,\n\n" +
-                            "The partner organization %s has been unlinked from your account.\n\n" +
-                            "Partner Details:\n" +
-                            "Name: %s\n" +
+                            "Hello %s,\n\n" +
+                            "We’d like to let you know that the following partner organisation has been unlinked from your account:\n\n" +
+                            "Partner Organisation: %s\n" +
+                            "Partner Contact: %s\n" +
                             "Email: %s\n\n" +
+                            "This update has been reflected on the RMNCAH Coordination Hub.\n\n" +
+                            "If you have any questions or concerns regarding this change, please contact the platform administrator or support team.\n\n" +
                             "Best regards,\n" +
-                            "RMCAH Hub Team",
+                            "RMNCAH Coordination Hub Team",
                             donor.getName(),
-                            partner.getName(),
+                            partner.getOrganization() != null ? partner.getOrganization().getName() : "N/A",
                             partner.getName(),
                             partner.getEmail()
                         );
                         
                         emailService.sendEmail(
                             donor.getEmail(),
-                            "Partner Organization Unlinked",
+                            "RMNCAH Hub - Partnership Update",
                             donorMessage
                         );
                     } catch (Exception e) {
@@ -879,21 +980,20 @@ public class UserService {
             })
             .collect(java.util.stream.Collectors.joining(", "));
         
-        String subject = "Role Updated - You Are Now a Reviewer";
+        String subject = "RMNCAH Hub - You Have Been Assigned as a Reviewer";
         String body = String.format(
-            "Dear %s,\n\n" +
-            "Your role has been updated from %s to REVIEWER.\n\n" +
+            "Hello %s,\n\n" +
+            "We’d like to let you know that your role on the RMNCAH Coordination Hub has been updated from %s to Reviewer.\n\n" +
             "You have been assigned to review projects in the following thematic areas:\n" +
             "%s\n\n" +
-            "You can now access the Review Requests page to review projects awaiting approval.\n\n" +
-            "Updated by MOH administrator.\n\n" +
+            "You can now access the Review Requests page to review projects awaiting your attention.\n\n" +
+            "Thank you for supporting the RMNCAH Coordination Hub review process.\n\n" +
             "Best regards,\n" +
-            "RMCAH Hub Team",
+            "RMNCAH Coordination Hub Team",
             user.getName(),
             oldRole,
             areasString
         );
-        
         emailService.sendEmail(user.getEmail(), subject, body);
         logger.info("User {} converted to reviewer with thematic areas: {}", userId, areasString);
         
@@ -952,97 +1052,26 @@ public class UserService {
             })
             .collect(java.util.stream.Collectors.joining(", "));
         
-        String subject = "Invitation to Join RMCAH Hub as a Reviewer";
+        String subject = "Invitation to Join the RMNCAH Coordination Hub as a Reviewer";
         String body = String.format(
-            "Dear %s,\n\n" +
-            "You have been invited to join the RMCAH Hub as a Reviewer.\n\n" +
+            "Hello %s,\n\n" +
+            "You have been invited to join the RMNCAH Coordination Hub as a Reviewer.\n\n" +
             "You have been assigned to review projects in the following thematic areas:\n" +
             "%s\n\n" +
-            "To activate your account, please use the following OTP:\n" +
-            "%s\n\n" +
+            "To activate your account, please use the following One-Time Password (OTP): %s\n\n" +
             "This OTP will expire in 24 hours.\n\n" +
-            "Once activated, you can access the Review Requests page to review projects awaiting approval.\n\n" +
+            "Once your account is activated, you can access the Review Requests page to view and review projects awaiting your attention.\n\n" +
+            "We’re pleased to have you supporting the review process on the RMNCAH Coordination Hub.\n\n" +
             "Best regards,\n" +
-            "RMCAH Hub Team",
+            "RMNCAH Coordination Hub Team",
             name,
             areasString,
             otp
         );
-        
         emailService.sendEmail(email, subject, body);
         logger.info("Reviewer created: {} with thematic areas: {}", email, areasString);
 
         return savedReviewer;
     }
 
-    private String buildApprovalEmail(User user) {
-        String name = user.getName() != null ? user.getName() : "Partner";
-        String loginUrl = "http://localhost:5500/frontend/index.html";
-        String dashboardUrl = "http://localhost:5500/frontend/dashboard.html";
-        return "<!DOCTYPE html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'></head>" +
-            "<body style='margin:0;padding:0;background:#f3f4f6;font-family:Inter,Arial,sans-serif;'>" +
-            "<table width='100%' cellpadding='0' cellspacing='0' style='background:#f3f4f6;padding:40px 0;'><tr><td align='center'>" +
-            "<table width='600' cellpadding='0' cellspacing='0' style='background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);'>" +
-
-            // Header
-            "<tr><td style='background:linear-gradient(135deg,#0f6dc9 0%,#0a4d8f 100%);padding:40px 48px;text-align:center;'>" +
-            "<h1 style='margin:0;color:#ffffff;font-size:26px;font-weight:700;letter-spacing:-0.5px;'>Tujulishane Hub</h1>" +
-            "<p style='margin:6px 0 0;color:rgba(255,255,255,0.75);font-size:14px;'>Ministry of Health · Kenya</p>" +
-            "</td></tr>" +
-
-            // Welcome banner
-            "<tr><td style='background:#ecfdf5;border-bottom:2px solid #6ee7b7;padding:24px 48px;text-align:center;'>" +
-            "<p style='margin:0;font-size:28px;'>🎉</p>" +
-            "<h2 style='margin:8px 0 4px;color:#065f46;font-size:20px;font-weight:700;'>Your account has been approved!</h2>" +
-            "<p style='margin:0;color:#047857;font-size:14px;'>You now have full access to the Tujulishane Hub platform.</p>" +
-            "</td></tr>" +
-
-            // Body
-            "<tr><td style='padding:40px 48px;'>" +
-            "<p style='margin:0 0 20px;color:#374151;font-size:15px;line-height:1.6;'>Dear <strong>" + name + "</strong>,</p>" +
-            "<p style='margin:0 0 28px;color:#374151;font-size:15px;line-height:1.6;'>We're pleased to inform you that your account on the Tujulishane Hub has been reviewed and approved by the Ministry of Health. You can now log in and begin using the platform.</p>" +
-
-            // What you can do
-            "<h3 style='margin:0 0 16px;color:#111827;font-size:15px;font-weight:700;'>Here's what you can do on the platform:</h3>" +
-            "<table cellpadding='0' cellspacing='0' width='100%' style='margin-bottom:28px;'>" +
-            "<tr><td style='padding:10px 14px;background:#f0f9ff;border-radius:8px;margin-bottom:8px;display:block;'>" +
-            "<span style='font-size:16px;'>📋</span>&nbsp;&nbsp;<strong style='color:#0369a1;'>Submit Projects</strong> — Create and submit health-related projects for review and funding consideration." +
-            "</td></tr><tr><td style='height:8px;'></td></tr>" +
-            "<tr><td style='padding:10px 14px;background:#f0fdf4;border-radius:8px;'>" +
-            "<span style='font-size:16px;'>🤝</span>&nbsp;&nbsp;<strong style='color:#15803d;'>Collaborate</strong> — Work with other partners and organizations on joint projects." +
-            "</td></tr><tr><td style='height:8px;'></td></tr>" +
-            "<tr><td style='padding:10px 14px;background:#faf5ff;border-radius:8px;'>" +
-            "<span style='font-size:16px;'>📣</span>&nbsp;&nbsp;<strong style='color:#7c3aed;'>Announcements</strong> — Stay updated with MOH announcements and collaboration opportunities." +
-            "</td></tr><tr><td style='height:8px;'></td></tr>" +
-            "<tr><td style='padding:10px 14px;background:#fff7ed;border-radius:8px;'>" +
-            "<span style='font-size:16px;'>📊</span>&nbsp;&nbsp;<strong style='color:#c2410c;'>Track Progress</strong> — Monitor the status and progress of your submitted projects." +
-            "</td></tr></table>" +
-
-            // Getting started steps
-            "<h3 style='margin:0 0 12px;color:#111827;font-size:15px;font-weight:700;'>Getting started:</h3>" +
-            "<ol style='margin:0 0 28px;padding-left:20px;color:#374151;font-size:14px;line-height:2;'>" +
-            "<li>Log in using your registered email address</li>" +
-            "<li>Complete your profile — add your organization details, phone number, and LinkedIn</li>" +
-            "<li>Explore active projects or submit your first project</li>" +
-            "<li>Respond to collaboration announcements from MOH</li>" +
-            "</ol>" +
-
-            // CTA button
-            "<div style='text-align:center;margin:32px 0;'>" +
-            "<a href='" + loginUrl + "' style='display:inline-block;background:linear-gradient(135deg,#0f6dc9,#0a4d8f);color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:14px 36px;border-radius:8px;letter-spacing:0.2px;'>Access the Platform →</a>" +
-            "</div>" +
-
-            // Support note
-            "<p style='margin:0;color:#6b7280;font-size:13px;line-height:1.6;border-top:1px solid #e5e7eb;padding-top:20px;'>" +
-            "If you have any questions or need assistance getting started, please reach out to your MOH focal person or reply to this email. We look forward to working with you." +
-            "</p></td></tr>" +
-
-            // Footer
-            "<tr><td style='background:#f9fafb;border-top:1px solid #e5e7eb;padding:24px 48px;text-align:center;'>" +
-            "<p style='margin:0 0 4px;color:#9ca3af;font-size:12px;'>This email was sent by Tujulishane Hub, Ministry of Health, Kenya.</p>" +
-            "<p style='margin:0;color:#9ca3af;font-size:12px;'>© 2026 Tujulishane Hub. All rights reserved.</p>" +
-            "</td></tr>" +
-
-            "</table></td></tr></table></body></html>";
-    }
 }

@@ -836,19 +836,19 @@ public class ProjectService {
             
             // Send notification email to both the contact person and the partner
             try {
-                String subject = "Project Approved - " + project.getTitle();
+                String subject = "RMNCAH Hub - Project Approved: " + project.getTitle();
                 String body = String.format(
-                    "Dear %s,\n\n" +
-                    "Congratulations! Your project '%s' has been approved by the MOH administrator.\n\n" +
-                    "Project Details:\n" +
-                    "- Project Number: %s\n" +
-                    "- Title: %s\n" +
-                    "- Partner: %s\n" +
-                    "- Status: Active\n\n" +
-                    "Your project is now active and visible in the system. You can proceed with project activities and reporting.\n\n" +
+                    "Hello %s,\n\n" +
+                    "We’re pleased to let you know that your project, %s, has received final approval from the Ministry of Health.\n\n" +
+                    "Project Number: %s\n" +
+                    "Project Title: %s\n" +
+                    "Partner Organisation: %s\n" +
+                    "Status: Active\n\n" +
+                    "Your project is now active on the RMNCAH Coordination Hub, and you can proceed with your planned project activities and reporting.\n\n" +
+                    "Congratulations, and thank you for contributing to RMNCAH coordination efforts.\n\n" +
                     "Best regards,\n" +
-                    "RMCAH Hub Team",
-                    project.getContactPersonName() != null ? project.getContactPersonName() : "User",
+                    "RMNCAH Coordination Hub Team",
+                    project.getContactPersonName() != null ? project.getContactPersonName() : "Partner",
                     project.getTitle(),
                     project.getProjectNo() != null ? project.getProjectNo() : "N/A",
                     project.getTitle(),
@@ -881,21 +881,20 @@ public class ProjectService {
             
             // Send notification email to both the contact person and the partner
             try {
-                String subject = "Project Rejected - " + project.getTitle();
+                String subject = "RMNCAH Hub - Project Review Outcome: " + project.getTitle();
                 String body = String.format(
-                    "Dear %s,\n\n" +
-                    "We regret to inform you that your project '%s' has been rejected by the MOH administrator.\n\n" +
-                    "Project Details:\n" +
-                    "- Project Number: %s\n" +
-                    "- Title: %s\n" +
-                    "- Partner: %s\n\n" +
-                    "Rejection Reason:\n" +
-                    "%s\n\n" +
-                    "If you have any questions or would like to resubmit your project with corrections, " +
-                    "please contact the MOH administrator or update your project accordingly.\n\n" +
+                    "Hello %s,\n\n" +
+                    "Thank you for submitting %s to the RMNCAH Coordination Hub.\n\n" +
+                    "Following review by the Ministry of Health, we’re unable to approve the project at this time.\n\n" +
+                    "Project Number: %s\n" +
+                    "Project Title: %s\n" +
+                    "Partner Organisation: %s\n" +
+                    "Reason for Rejection: %s\n\n" +
+                    "We encourage you to review the feedback provided and make any necessary updates. Where applicable, you may resubmit the project for consideration.\n\n" +
+                    "If you have any questions or require clarification, please contact the Ministry of Health administrator or platform support team.\n\n" +
                     "Best regards,\n" +
-                    "RMCAH Hub Team",
-                    project.getContactPersonName() != null ? project.getContactPersonName() : "User",
+                    "RMNCAH Coordination Hub Team",
+                    project.getContactPersonName() != null ? project.getContactPersonName() : "Partner",
                     project.getTitle(),
                     project.getProjectNo() != null ? project.getProjectNo() : "N/A",
                     project.getTitle(),
@@ -958,32 +957,53 @@ public class ProjectService {
             
             // Send notification email to both the contact person and the partner
             try {
-                String subject = approved ? 
-                    "Project Reviewed - Awaiting Final Approval: " + project.getTitle() :
-                    "Project Review - Revisions Required: " + project.getTitle();
-                String body = String.format(
-                    "Dear %s,\n\n" +
-                    "Your project '%s' has been reviewed by the thematic area reviewer.\n\n" +
-                    "Project Details:\n" +
-                    "- Project Number: %s\n" +
-                    "- Title: %s\n" +
-                    "- Partner: %s\n" +
-                    "- Review Status: %s\n" +
-                    "- Reviewer Comments: %s\n\n" +
-                    "%s\n\n" +
-                    "Best regards,\n" +
-                    "RMCAH Hub Team",
-                    project.getContactPersonName() != null ? project.getContactPersonName() : "User",
-                    project.getTitle(),
-                    project.getProjectNo() != null ? project.getProjectNo() : "N/A",
-                    project.getTitle(),
-                    project.getPartner(),
-                    approved ? "Approved for Final Review" : "Revisions Required",
-                    comments != null ? comments : "No comments provided",
-                    approved ? 
-                        "Your project has passed the thematic review and is now awaiting final approval from the MOH administrator." :
-                        "Please address the reviewer's comments and resubmit your project."
-                );
+                String subject;
+                String body;
+                String reviewerComments = comments != null ? comments : "No comments provided";
+                if (approved) {
+                    subject = "RMNCAH Hub - Project Reviewed: Awaiting Final Approval - " + project.getTitle();
+                    body = String.format(
+                        "Hello %s,\n\n" +
+                        "We’re pleased to let you know that your project, %s, has successfully completed the thematic area review.\n\n" +
+                        "Project Number: %s\n" +
+                        "Project Title: %s\n" +
+                        "Partner Organisation: %s\n" +
+                        "Review Status: Approved for Final Review\n" +
+                        "Reviewer Comments: %s\n\n" +
+                        "The project has now been forwarded to the Ministry of Health administrator for final approval.\n\n" +
+                        "You will receive another notification once the final review is complete.\n\n" +
+                        "Best regards,\n" +
+                        "RMNCAH Coordination Hub Team",
+                        project.getContactPersonName() != null ? project.getContactPersonName() : "Partner",
+                        project.getTitle(),
+                        project.getProjectNo() != null ? project.getProjectNo() : "N/A",
+                        project.getTitle(),
+                        project.getPartner(),
+                        reviewerComments
+                    );
+                } else {
+                    subject = "RMNCAH Hub - Revisions Required: " + project.getTitle();
+                    body = String.format(
+                        "Hello %s,\n\n" +
+                        "Thank you for submitting %s to the RMNCAH Coordination Hub.\n\n" +
+                        "The project has been reviewed by the relevant thematic area reviewer, and some updates are required before it can proceed.\n\n" +
+                        "Project Number: %s\n" +
+                        "Project Title: %s\n" +
+                        "Partner Organisation: %s\n" +
+                        "Review Status: Revisions Required\n" +
+                        "Reviewer Comments: %s\n\n" +
+                        "Please review the feedback provided, make the necessary updates, and resubmit your project for further review.\n\n" +
+                        "If you need clarification on any of the feedback, please contact the platform support team.\n\n" +
+                        "Best regards,\n" +
+                        "RMNCAH Coordination Hub Team",
+                        project.getContactPersonName() != null ? project.getContactPersonName() : "Partner",
+                        project.getTitle(),
+                        project.getProjectNo() != null ? project.getProjectNo() : "N/A",
+                        project.getTitle(),
+                        project.getPartner(),
+                        reviewerComments
+                    );
+                }
                 sendProjectNotificationEmail(project, subject, body);
             } catch (Exception e) {
                 logger.error("Failed to send review notification email for project {}: {}", projectId, e.getMessage(), e);
@@ -1029,19 +1049,19 @@ public class ProjectService {
             
             // Send notification email to both the contact person and the partner
             try {
-                String subject = "Project Approved - " + project.getTitle();
+                String subject = "RMNCAH Hub - Project Approved: " + project.getTitle();
                 String body = String.format(
-                    "Dear %s,\n\n" +
-                    "Congratulations! Your project '%s' has received final approval from the MOH administrator.\n\n" +
-                    "Project Details:\n" +
-                    "- Project Number: %s\n" +
-                    "- Title: %s\n" +
-                    "- Partner: %s\n" +
-                    "- Status: Active\n\n" +
-                    "Your project is now active and visible in the system. You can proceed with project activities and reporting.\n\n" +
+                    "Hello %s,\n\n" +
+                    "We’re pleased to let you know that your project, %s, has received final approval from the Ministry of Health.\n\n" +
+                    "Project Number: %s\n" +
+                    "Project Title: %s\n" +
+                    "Partner Organisation: %s\n" +
+                    "Status: Active\n\n" +
+                    "Your project is now active on the RMNCAH Coordination Hub, and you can proceed with your planned project activities and reporting.\n\n" +
+                    "Congratulations, and thank you for contributing to RMNCAH coordination efforts.\n\n" +
                     "Best regards,\n" +
-                    "RMCAH Hub Team",
-                    project.getContactPersonName() != null ? project.getContactPersonName() : "User",
+                    "RMNCAH Coordination Hub Team",
+                    project.getContactPersonName() != null ? project.getContactPersonName() : "Partner",
                     project.getTitle(),
                     project.getProjectNo() != null ? project.getProjectNo() : "N/A",
                     project.getTitle(),
@@ -1076,24 +1096,25 @@ public class ProjectService {
             
             // Send notification email to both the contact person and the partner
             try {
-                String subject = "Project Rejected - " + project.getTitle();
+                String subject = "RMNCAH Hub - Project Review Outcome: " + project.getTitle();
                 String body = String.format(
-                    "Dear %s,\n\n" +
-                    "Your project '%s' has been rejected at the final approval stage.\n\n" +
-                    "Project Details:\n" +
-                    "- Project Number: %s\n" +
-                    "- Title: %s\n" +
-                    "- Partner: %s\n" +
-                    "- Rejection Reason: %s\n\n" +
-                    "Please address the issues mentioned and resubmit your project for review.\n\n" +
+                    "Hello %s,\n\n" +
+                    "Thank you for submitting %s to the RMNCAH Coordination Hub.\n\n" +
+                    "Following the final review, the project has not been approved at this stage.\n\n" +
+                    "Project Number: %s\n" +
+                    "Project Title: %s\n" +
+                    "Partner Organisation: %s\n" +
+                    "Reason for Rejection: %s\n\n" +
+                    "Please review the feedback provided and address the issues identified. Where applicable, you may update and resubmit the project for consideration.\n\n" +
+                    "If you have any questions or require further clarification, please contact the Ministry of Health administrator or platform support team.\n\n" +
                     "Best regards,\n" +
-                    "RMCAH Hub Team",
-                    project.getContactPersonName() != null ? project.getContactPersonName() : "User",
+                    "RMNCAH Coordination Hub Team",
+                    project.getContactPersonName() != null ? project.getContactPersonName() : "Partner",
                     project.getTitle(),
                     project.getProjectNo() != null ? project.getProjectNo() : "N/A",
                     project.getTitle(),
                     project.getPartner(),
-                    reason
+                    reason != null ? reason : "No reason provided"
                 );
                 sendProjectNotificationEmail(project, subject, body);
             } catch (Exception e) {
