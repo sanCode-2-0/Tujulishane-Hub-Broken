@@ -1517,8 +1517,11 @@
 				JSON.stringify(locationsData);
 		}
 
-		// Make removeLocation function globally available
+		// Make location variables and functions globally available for E2E tests
 		window.removeLocation = removeLocation;
+		window.selectedLocations = selectedLocations;
+		window.updateLocationsDisplay = updateLocationsDisplay;
+		window.updateFormData = updateFormData;
 
 		function initializeMap() {
 			try {

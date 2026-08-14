@@ -41,7 +41,7 @@ public class AnnouncementController {
      * Create new announcement (Admins only)
      */
     @PostMapping
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'SUPER_ADMIN_REVIEWER', 'SUPER_ADMIN_APPROVER')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'SUPER_ADMIN_REVIEWER', 'SUPER_ADMIN_APPROVER', 'PARTNER')")
     public ResponseEntity<ApiResponse<Announcement>> createAnnouncement(
             @Valid @RequestBody AnnouncementRequest request) {
         try {

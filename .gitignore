@@ -180,3 +180,8 @@ dump_all_data.sql
 backend/bin
 .claude
 .factorypath
+
+# Playwright Test Artifacts
+test-results/
+playwright-report/
+tests/auth/

@@ -223,7 +223,7 @@ public class CollaborationRequestController {
      * Approve collaboration request (MOH only)
      */
     @PostMapping("/admin/{id}/approve")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('SUPER_ADMIN_REVIEWER') or hasRole('SUPER_ADMIN_APPROVER')")
     public ResponseEntity<ApiResponse<Object>> approveCollaborationRequest(
             @PathVariable Long id,
             @RequestBody(required = false) Map<String, String> payload) {
@@ -273,7 +273,7 @@ public class CollaborationRequestController {
      * Decline collaboration request (MOH only)
      */
     @PostMapping("/admin/{id}/decline")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('SUPER_ADMIN_REVIEWER') or hasRole('SUPER_ADMIN_APPROVER')")
     public ResponseEntity<ApiResponse<Object>> declineCollaborationRequest(
             @PathVariable Long id,
             @RequestBody(required = false) Map<String, String> payload) {

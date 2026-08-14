@@ -1,5 +1,8 @@
 const { defineConfig, devices } = require('@playwright/test');
 
+const baseURL = process.env.BASE_URL || 'http://localhost:8000';
+const isLocal = baseURL.includes('localhost') || baseURL.includes('127.0.0.1');
+
 module.exports = defineConfig({
   testDir: './tests',
   fullyParallel: false,
@@ -8,7 +11,7 @@ module.exports = defineConfig({
   workers: 1,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:8000',
+    baseURL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -18,10 +21,11 @@ module.exports = defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  webServer: {
+  webServer: isLocal ? {
     command: 'npx http-server frontend -p 8000',
     url: 'http://localhost:8000',
     reuseExistingServer: true,
     timeout: 60 * 1000,
-  },
+  } : undefined,
 });
+

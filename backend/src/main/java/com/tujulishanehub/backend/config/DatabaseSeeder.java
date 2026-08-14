@@ -246,7 +246,7 @@ public class DatabaseSeeder {
             project.setObjectives("Objectives for " + title);
             project.setContactPersonName("Contact Person");
             project.setContactPersonRole("Manager");
-            project.setContactPersonEmail("contact@example.com");
+            project.setContactPersonEmail(partnerEmail);
             project.setCreatedAt(LocalDateTime.now());
             project.setUpdatedAt(LocalDateTime.now());
 
