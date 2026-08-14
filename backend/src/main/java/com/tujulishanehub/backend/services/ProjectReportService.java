@@ -38,9 +38,11 @@ public class ProjectReportService {
         Project project = projectRepository.findById(projectId)
             .orElseThrow(() -> new RuntimeException("Project not found with ID: " + projectId));
         
-        // Check if user can create reports for this project (additional validation can be added)
-        if (!project.canCreateReports()) {
-            throw new RuntimeException("Project must be at least 50% complete to create reports");
+        // Allow reports on active or completed projects so partners can submit multiple
+        // reports (interim/progress, financial, completion, etc.) across the project lifecycle.
+        String projectStatus = project.getStatus() != null ? project.getStatus().toLowerCase() : "";
+        if (!("active".equals(projectStatus) || "completed".equals(projectStatus))) {
+            throw new RuntimeException("Reports can only be added to active or completed projects");
         }
         
         // Set project and submission details

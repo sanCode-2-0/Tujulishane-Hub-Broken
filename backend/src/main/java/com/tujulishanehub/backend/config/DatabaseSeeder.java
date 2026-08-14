@@ -15,6 +15,8 @@ import com.tujulishanehub.backend.models.ReviewerThematicArea;
 import com.tujulishanehub.backend.repositories.UserRepository;
 import com.tujulishanehub.backend.repositories.ProjectRepository;
 import com.tujulishanehub.backend.repositories.ReviewerThematicAreaRepository;
+import com.tujulishanehub.backend.repositories.ThematicAreaDefinitionRepository;
+import com.tujulishanehub.backend.models.ThematicAreaDefinition;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -42,12 +44,18 @@ public class DatabaseSeeder {
     private ReviewerThematicAreaRepository reviewerThematicAreaRepository;
 
     @Autowired
+    private ThematicAreaDefinitionRepository thematicAreaDefinitionRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Bean
     public CommandLineRunner seedDatabase() {
         return args -> {
             logger.info("Initializing database seeding...");
+            
+            // Seed dynamic thematic area definitions first
+            seedThematicAreas();
             
             String defaultPassword = passwordEncoder.encode("Password@123");
 
@@ -62,6 +70,17 @@ public class DatabaseSeeder {
 
             // 4. Braine Kapolon (SUPER_ADMIN_APPROVER)
             User braineApprover = seedUser("kapolonbraine@gmail.com", "Braine Kapolon", User.Role.SUPER_ADMIN_APPROVER, defaultPassword);
+
+            // 5. Test Donor (DONOR)
+            User testDonor = seedUser("donor.test@gmail.com", "Test Donor", User.Role.DONOR, defaultPassword);
+
+            // 6. Partner linked to the test donor (for donor visibility testing)
+            User donorLinkedPartner = seedUser("partner.donorlinked@gmail.com", "Donor Linked Partner", User.Role.PARTNER, defaultPassword);
+            if (donorLinkedPartner != null && testDonor != null && donorLinkedPartner.getParentDonor() == null) {
+                donorLinkedPartner.setParentDonor(testDonor);
+                userRepository.save(donorLinkedPartner);
+                logger.info("Linked partner {} to donor: {}", donorLinkedPartner.getEmail(), testDonor.getEmail());
+            }
 
             // Seed reviewer thematic area assignments
             if (lomoganReviewer != null) {
@@ -127,6 +146,27 @@ public class DatabaseSeeder {
                     ProjectTheme.FP,
                     new LocationData[] {
                         new LocationData("Kisumu", "Kisumu Central", "Kisumu Referral Hospital", -0.0917, 34.7680)
+                    }
+                );
+            }
+
+            // Seed a project owned by the donor-linked partner (visible to the donor in My Projects)
+            if (donorLinkedPartner != null) {
+                seedProject(
+                    "partner.donorlinked@gmail.com",
+                    "Donor Funded Child Health Program",
+                    "PRJ-004",
+                    ProjectCategory.IMPLEMENTING,
+                    LocalDate.of(2026, 2, 1),
+                    LocalDate.of(2026, 11, 30),
+                    "Child vaccination drives, nutrition outreach",
+                    new BigDecimal("8500000.00"),
+                    "active",
+                    ApprovalStatus.APPROVED,
+                    ApprovalWorkflowStatus.APPROVED,
+                    ProjectTheme.CH,
+                    new LocationData[] {
+                        new LocationData("Nairobi", "Embakasi East", "Embakasi Health Centre", -1.3150, 36.8900)
                     }
                 );
             }
@@ -244,6 +284,32 @@ public class DatabaseSeeder {
         } else {
             logger.info("Project already exists with number: {}", projectNo);
         }
+    }
+
+    private void seedThematicAreas() {
+        if (thematicAreaDefinitionRepository.count() == 0) {
+            logger.info("Seeding thematic area definitions...");
+            seedThematicArea("GBV", "Gender-Based Violence", "Programs focused on preventing and responding to gender-based violence across communities.", "fas fa-venus-mars", "text-pink-400");
+            seedThematicArea("AYPSRH", "Adolescent and Young People Sexual and Reproductive Health", "Comprehensive sexual and reproductive health services for adolescents and young people.", "far fa-heart px-2", "text-red-400");
+            seedThematicArea("MNH", "Maternal and Newborn Health", "Programs dedicated to improving maternal and newborn health outcomes.", "fas fa-baby", "text-blue-400");
+            seedThematicArea("FP", "Family Planning", "Family planning services and education to support reproductive choices.", "fas fa-users", "text-green-400");
+            seedThematicArea("CH", "Child Health", "Comprehensive child health programs and interventions.", "fas fa-child", "text-purple-400");
+            seedThematicArea("AH", "Adolescent Health", "Health programs specifically designed for adolescents.", "fas fa-user-graduate", "text-orange-400");
+            seedThematicArea("ADV_SBC", "Advocacy and SBC (Social & Behavior Change)", "Advocacy and strategic social/behavioral communication initiatives to promote health outcomes.", "fas fa-bullhorn", "text-teal-400");
+            seedThematicArea("MONITORING_EVALUATION", "Monitoring and Evaluation", "Systems and frameworks designed to track progress, evaluate outcomes, and measure overall project impact.", "fas fa-chart-line", "text-indigo-400");
+            seedThematicArea("RESEARCH_LEARNING", "Research and Learning", "Research, data collection, and academic learning processes designed to generate evidence for health policy implementation.", "fas fa-book-open", "text-rose-400");
+        }
+    }
+
+    private void seedThematicArea(String code, String title, String description, String icon, String color) {
+        ThematicAreaDefinition def = new ThematicAreaDefinition();
+        def.setCode(code);
+        def.setTitle(title);
+        def.setDescription(description);
+        def.setIcon(icon);
+        def.setColor(color);
+        thematicAreaDefinitionRepository.save(def);
+        logger.info("Seeded thematic area: {} ({})", title, code);
     }
 
     private static class LocationData {

@@ -39,6 +39,11 @@ public class ProjectCollaboratorService {
         Project project = projectRepository.findById(projectId)
             .orElseThrow(() -> new RuntimeException("Project not found"));
         
+        // Check if project is approved
+        if (project.getApprovalWorkflowStatus() != ApprovalWorkflowStatus.APPROVED) {
+            throw new RuntimeException("Collaborators can only be added after the project has been approved.");
+        }
+        
         // Check if already a collaborator
         if (collaboratorRepository.existsByProjectAndUserAndIsActive(project, user, true)) {
             throw new RuntimeException("User is already a collaborator on this project");

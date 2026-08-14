@@ -345,6 +345,11 @@ public class UserService {
     public java.util.List<User> getUsersByRole(User.Role role) {
         return userRepository.findByRole(role);
     }
+
+    // Get all partner users linked to a specific parent donor
+    public java.util.List<User> getUsersByParentDonorId(Long parentDonorId) {
+        return userRepository.findByParentDonorId(parentDonorId);
+    }
     
     /**
      * Save user (for direct database operations)

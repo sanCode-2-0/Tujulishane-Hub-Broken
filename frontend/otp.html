@@ -6,7 +6,7 @@
     <title>Enter OTP</title>
 
     <!-- Backend URL Configuration -->
-    <script src="./app-config.js?v=3"></script>
+    <script src="./app-config.js?v=5"></script>
     <script src="./set-base-url.js?v=3"></script>
     <script src="./network-debugger.js"></script>
     <!-- Session Configuration -->
@@ -327,6 +327,9 @@
             if (window.SESSION_CONFIG) {
               localStorage.setItem(window.SESSION_CONFIG.KEYS.LOGIN_TIME, Date.now().toString());
               localStorage.setItem(window.SESSION_CONFIG.KEYS.REMEMBER_ME, rememberMe.toString());
+              if (typeof window.getSessionTimeout === 'function') {
+                localStorage.setItem(window.SESSION_CONFIG.KEYS.SESSION_TIMEOUT, window.getSessionTimeout().toString());
+              }
             }
           }
 

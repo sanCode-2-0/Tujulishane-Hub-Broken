@@ -49,6 +49,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/register", "/api/users/verify-otp", "/api/users/resend-otp").permitAll()  // Public user registration and OTP endpoints
                         // Allow public GET access to specific project endpoints only (for guest/unauthenticated viewing)
                         .requestMatchers(HttpMethod.GET, "/api/projects/thematic-areas", "/api/projects/{id}", "/api/projects/public/statistics").permitAll()
+                        // Allow public GET access to thematic area definitions (dynamic, driven by SUPER_ADMIN_APPROVER)
+                        .requestMatchers(HttpMethod.GET, "/api/thematic-areas").permitAll()
                         // All other /api/projects/** endpoints require authentication and use @PreAuthorize for role-based access
                         .requestMatchers("/api/announcements", "/api/announcements/{id}").permitAll()  // Allow public access to view announcements
                         .requestMatchers("/api/general-announcements", "/api/general-announcements/{id}").permitAll()  // Allow public access to view general announcements

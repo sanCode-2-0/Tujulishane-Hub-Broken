@@ -179,6 +179,6 @@ button,
 /* Sticky header spacing on mobile */
 @media (max-width: 768px) {
   body {
-    padding-top: 60px; /* Account for fixed header */
+    padding-top: 0px; /* Reset padding since header is static */
   }
 }

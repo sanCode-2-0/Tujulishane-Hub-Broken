@@ -42,7 +42,7 @@
 			document.write('<script src="./config.local.js"><\/script>');
 		}
 	</script>
-	<script src="./app-config.js?v=3"></script>
+	<script src="./app-config.js?v=5"></script>
 	<script src="./set-base-url.js?v=3"></script>
 	<script src="./session-config.js"></script>
 	<script src="./modal-utils.js"></script>
@@ -234,6 +234,12 @@
 
 						<!-- Collaborators List -->
 						<div id="collaboratorsList" class="space-y-3"></div>
+
+						<!-- Approval Notice -->
+						<div id="collaboratorsApprovalNotice" class="hidden mt-4 p-3.5 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-xs flex items-start gap-2.5">
+							<i class="fas fa-info-circle text-amber-500 mt-0.5"></i>
+							<span>Collaborators can only be invited after the project has been approved.</span>
+						</div>
 					</div>
 				</div>
 
@@ -642,16 +648,24 @@
 				const isCollaborator = currentCollaborators.some(c => c.user.email === user.email);
 
 				const shouldShowCard = isOwner || isAdmin || isCollaborator;
+				const isApproved = (project.approvalWorkflowStatus || project.approvalStatus) === 'APPROVED';
 
 				if (shouldShowCard) {
 					document.getElementById("collaboratorsCard").classList.remove("hidden");
-					renderCollaboratorsList(project, isOwner || isAdmin || isCoOwner);
+					renderCollaboratorsList(project, (isOwner || isAdmin || isCoOwner) && isApproved);
 					
-					if (isOwner || isAdmin || isCoOwner) {
+					const canManage = isOwner || isAdmin || isCoOwner;
+					if (canManage && isApproved) {
 						document.getElementById("addCollaboratorBtn").classList.remove("hidden");
+						document.getElementById("collaboratorsApprovalNotice").classList.add("hidden");
 						setupAddCollaboratorUI(project);
 					} else {
 						document.getElementById("addCollaboratorBtn").classList.add("hidden");
+						if (canManage && !isApproved) {
+							document.getElementById("collaboratorsApprovalNotice").classList.remove("hidden");
+						} else {
+							document.getElementById("collaboratorsApprovalNotice").classList.add("hidden");
+						}
 					}
 				} else {
 					document.getElementById("collaboratorsCard").classList.add("hidden");

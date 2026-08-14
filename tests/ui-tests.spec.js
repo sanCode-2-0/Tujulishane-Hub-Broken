@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-test.describe('eCitizen Redesign UI Tests', () => {
+test.describe('Tujulishane Hub UI Tests', () => {
 
   test('should load landing page with RMNCAH branding and titles', async ({ page }) => {
     // Navigate to local server
@@ -9,7 +9,7 @@ test.describe('eCitizen Redesign UI Tests', () => {
     // Check title contains RMNCAH
     await expect(page).toHaveTitle(/RMNCAH Co-ordination Hub/);
 
-    // Verify eCitizen-styled logo is visible
+    // Verify brand logo is visible
     const logoText = page.locator('span.tracking-tight');
     await expect(logoText).toContainText('RMNCAH');
 

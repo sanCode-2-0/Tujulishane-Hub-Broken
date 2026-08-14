@@ -30,7 +30,7 @@
 	<script src="https://cdn.tailwindcss.com"></script>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tw-elements/css/tw-elements.min.css" />
 	<!-- Backend URL Configuration - Centralized in app-config.js -->
-	<script src="app-config.js?v=3"></script>
+	<script src="app-config.js?v=5"></script>
 	<script src="set-base-url.js?v=3"></script>
 	<script src="session-config.js"></script>
 	<!-- Modal Utilities -->
@@ -748,6 +748,14 @@
 							Manage Reviewers
 						</button>
 					</li>
+
+					<li x-show="userRole === 'SUPER_ADMIN_APPROVER' || userRole === 'SUPER_ADMIN'" class="mr-2">
+						<button @click="activeTab = 'thematic-areas'"
+							:class="activeTab === 'thematic-areas' ? 'border-b-2 border-primary text-white bg-primary shadow-md rounded-md' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md'"
+							class="px-4 py-2 font-medium transition duration-200 ease-in-out">
+							Thematic Areas
+						</button>
+					</li>
 				</ul>
 			</div>
 
@@ -1296,7 +1304,125 @@
 					</div>
 				</div>
 			</div>
+
+			<!-- Thematic Areas Management (Approver/SUPER_ADMIN Only) -->
+			<div x-show="activeTab === 'thematic-areas'" class="space-y-4" x-cloak>
+				<div class="bg-white rounded-lg shadow p-6">
+					<div class="flex justify-between items-center mb-4">
+						<h2 class="text-xl font-bold text-blue-900">Manage Thematic Areas</h2>
+						<button @click="openAddThematicAreaModal()"
+							class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 shadow-md">
+							<i class="fas fa-plus"></i> Add Thematic Area
+						</button>
+					</div>
+
+					<div class="overflow-x-auto">
+						<table class="min-w-full divide-y divide-gray-200">
+							<thead class="bg-gray-50">
+								<tr>
+									<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+									<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
+									<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Icon & Color</th>
+									<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+									<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+								</tr>
+							</thead>
+							<tbody class="bg-white divide-y divide-gray-200">
+								<template x-for="theme in thematicAreas" :key="theme.id">
+									<tr class="hover:bg-gray-50 transition-colors">
+										<td class="px-6 py-4 whitespace-nowrap">
+											<span class="font-semibold text-gray-900" x-text="theme.title"></span>
+										</td>
+										<td class="px-6 py-4 whitespace-nowrap">
+											<span class="px-2.5 py-1 rounded bg-blue-100 text-blue-800 text-xs font-medium" x-text="theme.code"></span>
+										</td>
+										<td class="px-6 py-4 whitespace-nowrap">
+											<div class="flex items-center gap-2">
+												<i :class="theme.icon || 'fas fa-tag'" class="text-lg text-blue-600"></i>
+												<span class="text-xs text-gray-500" x-text="theme.icon"></span>
+												<span class="text-xs px-1.5 py-0.5 rounded bg-gray-100" x-text="theme.color"></span>
+											</div>
+										</td>
+										<td class="px-6 py-4">
+											<p class="text-sm text-gray-600 line-clamp-2 max-w-md" x-text="theme.description"></p>
+										</td>
+										<td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+											<button @click="openEditThematicAreaModal(theme)" class="text-blue-600 hover:text-blue-900 mr-3">
+												<i class="fas fa-edit"></i> Edit
+											</button>
+											<button @click="deleteThematicArea(theme)" class="text-red-600 hover:text-red-900">
+												<i class="fas fa-trash-can"></i> Delete
+											</button>
+										</td>
+									</tr>
+								</template>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
 		</div>
+
+		<!-- Add/Edit Thematic Area Modal -->
+		<div x-show="showThematicAreaModal" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
+			<div class="flex items-center justify-center min-h-screen px-4">
+				<div class="fixed inset-0 bg-black opacity-50" @click="showThematicAreaModal = false"></div>
+				<div class="relative bg-white rounded-lg p-8 max-w-xl w-full shadow-2xl">
+					<h3 class="text-2xl font-bold mb-4" x-text="thematicAreaModalEditMode ? 'Edit Thematic Area' : 'Add Thematic Area'"></h3>
+					
+					<form @submit.prevent="saveThematicArea()">
+						<div class="space-y-4">
+							<div>
+								<label class="block text-sm font-medium text-gray-700 mb-1">Code / DB Identifier</label>
+								<input type="text" x-model="thematicAreaForm.code" required :disabled="thematicAreaModalEditMode"
+									placeholder="e.g. GBV"
+									class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary disabled:bg-gray-100" />
+								<p class="text-xs text-gray-500 mt-1" x-show="!thematicAreaModalEditMode">Must match a unique uppercase key (e.g. ADV_SBC). Cannot be changed after creation.</p>
+							</div>
+
+							<div>
+								<label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+								<input type="text" x-model="thematicAreaForm.title" required
+									placeholder="e.g. Gender-Based Violence"
+									class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" />
+							</div>
+
+							<div>
+								<label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+								<textarea x-model="thematicAreaForm.description" rows="4" required
+									placeholder="Provide a detailed description of this thematic area..."
+									class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"></textarea>
+							</div>
+
+							<div class="grid grid-cols-2 gap-4">
+								<div>
+									<label class="block text-sm font-medium text-gray-700 mb-1">Icon Class</label>
+									<input type="text" x-model="thematicAreaForm.icon"
+										placeholder="e.g. fas fa-venus-mars"
+										class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" />
+								</div>
+								<div>
+									<label class="block text-sm font-medium text-gray-700 mb-1">Color / CSS Class</label>
+									<input type="text" x-model="thematicAreaForm.color"
+										placeholder="e.g. text-pink-400"
+										class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" />
+								</div>
+							</div>
+						</div>
+
+						<div class="flex justify-end gap-3 mt-6">
+							<button type="button" @click="showThematicAreaModal = false"
+								class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-gray-700">
+								Cancel
+							</button>
+							<button type="submit"
+								class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+								Save
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
 
 		<!-- Review Modal -->
 		<div x-show="showReviewModal" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
@@ -2285,6 +2411,19 @@
 				assignedTheme: "",
 				assignedThemes: [], // NEW: Support for multiple thematic areas
 
+				// Thematic Areas Management
+				thematicAreas: [],
+				showThematicAreaModal: false,
+				thematicAreaModalEditMode: false,
+				thematicAreaForm: {
+					id: null,
+					code: "",
+					title: "",
+					description: "",
+					icon: "",
+					color: ""
+				},
+
 				// Add/Convert Reviewer Modal Data
 				reviewerModalTab: 'convert',
 				userSearchQuery: '',
@@ -2404,19 +2543,135 @@
 
 				async loadData() {
 					this.loading = true;
-					console.log("Loading data... User role:", this.userRole);
 					try {
 						await Promise.all([
 							this.loadProjectsForReview(),
 							this.loadProjectsForApproval(),
 							this.loadAllPendingProjects(),
 							this.loadReviewers(),
+							this.loadThematicAreas(),
 						]);
-						console.log("All data loaded successfully");
 					} catch (error) {
-						console.error("Error loading data:", error);
+						console.error("Error loading initial data:", error);
 					} finally {
 						this.loading = false;
+					}
+				},
+
+				async loadThematicAreas() {
+					try {
+						const token = localStorage.getItem("accessToken");
+						const response = await fetch(`${window.BASE_URL}/api/thematic-areas`, {
+							headers: {
+								Authorization: `Bearer ${token}`
+							}
+						});
+						if (response.ok) {
+							const data = await response.json();
+							this.thematicAreas = data.data || [];
+							console.log("Loaded dynamic thematic areas:", this.thematicAreas);
+							
+							// Update the static thematicAreaOptions dynamically
+							if (this.thematicAreas.length > 0) {
+								this.thematicAreaOptions = this.thematicAreas.map(t => ({
+									code: t.code,
+									label: `${t.code} - ${t.title}`
+								}));
+							}
+						} else {
+							console.error("Failed to load thematic areas:", response.status);
+						}
+					} catch (error) {
+						console.error("Error loading thematic areas:", error);
+					}
+				},
+
+				openAddThematicAreaModal() {
+					this.thematicAreaModalEditMode = false;
+					this.thematicAreaForm = {
+						id: null,
+						code: "",
+						title: "",
+						description: "",
+						icon: "fas fa-tag",
+						color: "text-blue-500"
+					};
+					this.showThematicAreaModal = true;
+				},
+
+				openEditThematicAreaModal(theme) {
+					this.thematicAreaModalEditMode = true;
+					this.thematicAreaForm = {
+						id: theme.id,
+						code: theme.code,
+						title: theme.title,
+						description: theme.description,
+						icon: theme.icon || "fas fa-tag",
+						color: theme.color || "text-blue-500"
+					};
+					this.showThematicAreaModal = true;
+				},
+
+				async saveThematicArea() {
+					try {
+						const token = localStorage.getItem("accessToken");
+						const url = this.thematicAreaModalEditMode 
+							? `${window.BASE_URL}/api/thematic-areas/${this.thematicAreaForm.id}`
+							: `${window.BASE_URL}/api/thematic-areas`;
+						
+						const method = this.thematicAreaModalEditMode ? "PUT" : "POST";
+
+						const response = await fetch(url, {
+							method: method,
+							headers: {
+								"Content-Type": "application/json",
+								Authorization: `Bearer ${token}`
+							},
+							body: JSON.stringify(this.thematicAreaForm)
+						});
+
+						if (response.ok) {
+							this.showThematicAreaModal = false;
+							this.showToast(
+								this.thematicAreaModalEditMode 
+									? "Thematic area updated successfully" 
+									: "Thematic area created successfully",
+								"success"
+							);
+							await this.loadThematicAreas();
+						} else {
+							const errorData = await response.json();
+							alert("Error saving thematic area: " + (errorData.message || response.statusText));
+						}
+					} catch (error) {
+						console.error("Error saving thematic area:", error);
+						alert("Error saving thematic area: " + error.message);
+					}
+				},
+
+				async deleteThematicArea(theme) {
+					if (!confirm(`Are you sure you want to delete the thematic area '${theme.title}'? This will not delete projects associated with this theme code.`)) {
+						return;
+					}
+					try {
+						const token = localStorage.getItem("accessToken");
+						const response = await fetch(`${window.BASE_URL}/api/thematic-areas/${theme.id}`, {
+							method: "DELETE",
+							headers: {
+								Authorization: `Bearer ${token}`
+							}
+						});
+
+						if (response.ok) {
+							this.showToast("Thematic area deleted successfully", "success");
+							await this.loadThematicAreas();
+						} else {
+							const errorData = await response.json();
+							alert("Error deleting thematic area: " + (errorData.message || response.statusText));
+						}
+					} catch (error) {
+						console.error("Error deleting thematic area:", error);
+						alert("Error deleting thematic area: " + error.message);
 					}
 				},
 

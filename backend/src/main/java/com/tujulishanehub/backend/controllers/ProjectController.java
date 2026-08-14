@@ -241,7 +241,8 @@ public class ProjectController {
     
     /**
      * Get all projects with pagination
-     * Filters out rejected/inactive projects for non-admin users
+     * Approved projects are shown to everyone (public).
+     * Pending/rejected projects are only shown to admin users (SUPER_ADMIN, SUPER_ADMIN_APPROVER, SUPER_ADMIN_REVIEWER).
      */
     @GetMapping
     public ResponseEntity<ApiResponse<Map<String, Object>>> getAllProjects(
@@ -255,14 +256,25 @@ public class ProjectController {
                 Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
 
             Pageable pageable = PageRequest.of(page, size, sort);
-        Page<Project> projectPage = projectService.getProjects(pageable);
+            
+            // Only admins see non-approved (pending/review) projects. Everyone else sees approved projects only.
+            boolean isAdmin = false;
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated()) {
+                User currentUser = userService.getUserByEmail(auth.getName());
+                isAdmin = currentUser != null && currentUser.isSuperAdmin();
+            }
 
-        List<ProjectResponse> projectResponses = projectPage.getContent().stream()
-            .map(projectService::toProjectResponse)
-            .collect(Collectors.toList());
+            Page<Project> projectPage = isAdmin
+                ? projectService.getProjects(pageable)
+                : projectRepository.findByApprovalWorkflowStatus(ApprovalWorkflowStatus.APPROVED, pageable);
+
+            List<ProjectResponse> projectResponses = projectPage.getContent().stream()
+                .map(projectService::toProjectResponse)
+                .collect(Collectors.toList());
 
             Map<String, Object> data = new HashMap<>();
-        data.put("projects", projectResponses);
+            data.put("projects", projectResponses);
             data.put("currentPage", projectPage.getNumber());
             data.put("totalItems", projectPage.getTotalElements());
             data.put("totalPages", projectPage.getTotalPages());
@@ -324,6 +336,7 @@ public class ProjectController {
     
     /**
      * Get project by ID
+     * Pending/rejected projects are only visible to their owners and admin users.
      */
     @GetMapping("/{id}")
     @PreAuthorize("permitAll()")
@@ -332,10 +345,37 @@ public class ProjectController {
             Optional<Project> project = projectService.getProjectById(id);
             
             if (project.isPresent()) {
+                Project p = project.get();
+                
+                // Hide pending/rejected projects from the public and non-owner non-admin users
+                boolean visible = p.getApprovalWorkflowStatus() == ApprovalWorkflowStatus.APPROVED
+                    || p.getApprovalStatus() == ApprovalStatus.APPROVED;
+                if (!visible) {
+                    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                    if (auth != null && auth.isAuthenticated()) {
+                        User currentUser = userService.getUserByEmail(auth.getName());
+                        boolean isOwner = currentUser != null && (
+                            currentUser.isSuperAdmin()
+                            || (p.getPartner() != null && p.getPartner().equalsIgnoreCase(auth.getName()))
+                            || (p.getContactPersonEmail() != null && p.getContactPersonEmail().equalsIgnoreCase(auth.getName()))
+                        );
+                        visible = isOwner;
+                    }
+                }
+                
+                if (!visible) {
+                    ApiResponse<ProjectResponse> response = new ApiResponse<>(
+                        HttpStatus.NOT_FOUND.value(), 
+                        "Project not found", 
+                        null
+                    );
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+                }
+                
                 ApiResponse<ProjectResponse> response = new ApiResponse<>(
                     HttpStatus.OK.value(),
                     "Project found", 
-                    projectService.toProjectResponse(project.get())
+                    projectService.toProjectResponse(p)
                 );
                 return ResponseEntity.ok(response);
             } else {
@@ -360,6 +400,7 @@ public class ProjectController {
     
     /**
      * Get a project by its project number
+     * Pending/rejected projects are only visible to their owners and admin users.
      */
     @GetMapping("/by-number/{projectNo}")
     @PreAuthorize("isAuthenticated()")
@@ -368,10 +409,35 @@ public class ProjectController {
             Optional<Project> project = projectRepository.findByProjectNo(projectNo);
 
             if (project.isPresent()) {
+                Project p = project.get();
+                
+                // Hide pending/rejected projects from non-owner non-admin users
+                boolean visible = p.getApprovalWorkflowStatus() == ApprovalWorkflowStatus.APPROVED
+                    || p.getApprovalStatus() == ApprovalStatus.APPROVED;
+                if (!visible) {
+                    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                    User currentUser = userService.getUserByEmail(auth.getName());
+                    boolean isOwner = currentUser != null && (
+                        currentUser.isSuperAdmin()
+                        || (p.getPartner() != null && p.getPartner().equalsIgnoreCase(auth.getName()))
+                        || (p.getContactPersonEmail() != null && p.getContactPersonEmail().equalsIgnoreCase(auth.getName()))
+                    );
+                    visible = isOwner;
+                }
+                
+                if (!visible) {
+                    ApiResponse<ProjectResponse> response = new ApiResponse<>(
+                        HttpStatus.NOT_FOUND.value(),
+                        "Project not found with number: " + projectNo,
+                        null
+                    );
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+                }
+                
                 ApiResponse<ProjectResponse> response = new ApiResponse<>(
                     HttpStatus.OK.value(),
                     "Project found",
-                    projectService.toProjectResponse(project.get())
+                    projectService.toProjectResponse(p)
                 );
                 return ResponseEntity.ok(response);
             } else {
@@ -1356,11 +1422,13 @@ public class ProjectController {
     
     /**
      * Get user's own projects (Authenticated users)
-     * PARTNER/DONOR: Returns projects they created
+     * PARTNER: Returns projects they created
+     * DONOR: Returns projects they created plus projects of their linked partner organizations
      * SUPER_ADMIN_REVIEWER: Returns projects in their thematic area
+     * SUPER_ADMIN / SUPER_ADMIN_APPROVER: Returns all projects
      */
     @GetMapping("/my-projects")
-    @PreAuthorize("hasAnyRole('PARTNER', 'DONOR', 'SUPER_ADMIN_REVIEWER', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('PARTNER', 'DONOR', 'SUPER_ADMIN_REVIEWER', 'SUPER_ADMIN', 'SUPER_ADMIN_APPROVER')")
     public ResponseEntity<ApiResponse<List<ProjectResponse>>> getMyProjects() {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -1370,23 +1438,45 @@ public class ProjectController {
             List<Project> projects;
             
             if (currentUser != null && currentUser.getRole() == User.Role.SUPER_ADMIN_REVIEWER) {
-                // Reviewers see projects in their thematic area(s)
+                // Reviewers see projects in their thematic area(s) done by MoH
+                List<Project> rawProjects;
                 if (currentUser.getThematicAreas() != null && !currentUser.getThematicAreas().isEmpty()) {
-                    // getThematicAreas() already returns List<ProjectTheme>
                     List<com.tujulishanehub.backend.models.ProjectTheme> thematicAreas = currentUser.getThematicAreas();
-                    projects = projectService.getProjectsForReviewerWithThematicAreas(thematicAreas);
+                    rawProjects = projectService.getProjectsForReviewerWithThematicAreas(thematicAreas);
                 } else if (currentUser.getThematicArea() != null) {
-                    // Legacy single thematic area support
-                    projects = projectService.getProjectsForReviewer(currentUser.getThematicArea());
+                    rawProjects = projectService.getProjectsForReviewer(currentUser.getThematicArea());
                 } else {
-                    // Reviewer without thematic area sees nothing
-                    projects = new java.util.ArrayList<>();
+                    rawProjects = new java.util.ArrayList<>();
                 }
-            } else if (currentUser != null && currentUser.getRole() == User.Role.SUPER_ADMIN) {
-                // Super admins see all projects
-                projects = projectService.getAllProjects();
+                
+                projects = rawProjects.stream()
+                    .filter(p -> p.getCreatedByRole() != null && (
+                        "SUPER_ADMIN".equalsIgnoreCase(p.getCreatedByRole()) ||
+                        "SUPER_ADMIN_APPROVER".equalsIgnoreCase(p.getCreatedByRole()) ||
+                        "SUPER_ADMIN_REVIEWER".equalsIgnoreCase(p.getCreatedByRole())
+                    ))
+                    .collect(java.util.stream.Collectors.toList());
+            } else if (currentUser != null && (currentUser.getRole() == User.Role.SUPER_ADMIN || currentUser.getRole() == User.Role.SUPER_ADMIN_APPROVER)) {
+                // Super admins and final approvers see all projects done by MoH
+                projects = projectService.getAllProjects().stream()
+                    .filter(p -> p.getCreatedByRole() != null && (
+                        "SUPER_ADMIN".equalsIgnoreCase(p.getCreatedByRole()) ||
+                        "SUPER_ADMIN_APPROVER".equalsIgnoreCase(p.getCreatedByRole()) ||
+                        "SUPER_ADMIN_REVIEWER".equalsIgnoreCase(p.getCreatedByRole())
+                    ))
+                    .collect(java.util.stream.Collectors.toList());
+            } else if (currentUser != null && currentUser.getRole() == User.Role.DONOR) {
+                // Donors see their own projects plus projects from partner organizations linked to them
+                java.util.Set<Project> donorProjects = new java.util.HashSet<>(
+                    projectService.getProjectsByPartnerEmail(userEmail)
+                );
+                List<User> linkedPartners = userService.getUsersByParentDonorId(currentUser.getId());
+                for (User partner : linkedPartners) {
+                    donorProjects.addAll(projectService.getProjectsByPartnerEmail(partner.getEmail()));
+                }
+                projects = new java.util.ArrayList<>(donorProjects);
             } else {
-                // PARTNER/DONOR see their own projects
+                // PARTNER (and fallback) see their own projects
                 projects = projectService.getProjectsByPartnerEmail(userEmail);
             }
             

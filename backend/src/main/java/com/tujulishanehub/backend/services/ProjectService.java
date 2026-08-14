@@ -653,10 +653,17 @@ public class ProjectService {
             Optional<User> partnerUser = userService.findByEmail(project.getPartner());
             if (partnerUser.isPresent()) {
                 response.setPartnerName(partnerUser.get().getName());
-                response.setCreatedByRole(partnerUser.get().getRole().name());
+                // Use persisted creator role if available (marks MoH-created projects), else fall back to partner's role
+                if (project.getCreatedByRole() != null && !project.getCreatedByRole().isEmpty()) {
+                    response.setCreatedByRole(project.getCreatedByRole());
+                } else {
+                    response.setCreatedByRole(partnerUser.get().getRole().name());
+                }
                 if (partnerUser.get().getOrganization() != null) {
                     response.setOrganizationName(partnerUser.get().getOrganization().getName());
                 }
+            } else if (project.getCreatedByRole() != null && !project.getCreatedByRole().isEmpty()) {
+                response.setCreatedByRole(project.getCreatedByRole());
             }
             response.setTitle(project.getTitle());
             response.setProjectCategory(project.getProjectCategory());
@@ -740,6 +747,14 @@ public class ProjectService {
                 // Regular user creating their own project
                 project.setPartner(userEmail);
                 logger.debug("User {} creating their own project", userEmail);
+            }
+            
+            // Mark who created the project (used to flag MoH-created projects)
+            if (currentUser != null) {
+                project.setCreatedByRole(currentUser.getRole().name());
+                logger.debug("Project created by role: {}", currentUser.getRole().name());
+            } else {
+                project.setCreatedByRole("PARTNER");
             }
             
             project.setProjectCategory(request.getProjectCategory());

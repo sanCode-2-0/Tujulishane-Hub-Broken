@@ -42,8 +42,8 @@
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <!-- Backend URL Configuration -->
-    <script src="./app-config.js?v=3"></script>
-    <script src="./set-base-url.js?v=3"></script>
+    <script src="./app-config.js?v=5"></script>
+    <script src="./set-base-url.js?v=4"></script>
     <script src="./network-debugger.js"></script>
     <script src="./modal-utils.js"></script>
     <script src="auth.js"></script>
@@ -70,13 +70,13 @@
     <div id="nav-placeholder"></div>
 
     <main class="flex-grow flex flex-col" id="main-content">
-        <!-- Hero section matching eCitizen -->
+        <!-- Hero section -->
         <div class="relative">
             <!-- Hero image with overlay -->
             <div class="absolute inset-0 isolate h-full w-full">
                 <!-- Using a fallback gradient/image representing Kenya healthcare/landscape -->
                 <div class="relative w-full h-full bg-no-repeat bg-center bg-cover -z-10" style="background-image: url('resources/images/main-1.jpg'), linear-gradient(135deg, #1e3a8a, #00595E)">
-                    <!-- Overlay matching eCitizen accounts page -->
+                    <!-- Overlay -->
                     <div class="w-full h-full absolute top-0 left-0 bg-black/60 md:bg-transparent md:bg-gradient-to-t md:from-black/80 md:via-black/50 lg:to-transparent">
                     </div>
                 </div>
@@ -98,22 +98,20 @@
                 <div class="mt-8 rounded-t-3xl bg-gray-900/40 px-5 py-6 backdrop-blur-sm backdrop-filter sm:px-10 sm:py-8 lg:bg-gray-900/30">
                     <!-- Search input -->
                     <div class="relative rounded-3xl shadow-sm">
-                        <div class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-6 w-6 text-gray-400">
+                        <button id="homepage_search_button" class="absolute inset-y-0 left-0 z-10 flex items-center pl-4 focus:outline-none" title="Search">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-6 w-6 text-gray-400 hover:text-[#0047BA] transition duration-150">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
                             </svg>
+                        </button>
+                        <input type="text" id="homepage_search_input" autocomplete="off" class="pl-12 pr-6 block h-14 w-full border-gray-100 focus:border-[#0047BA] focus:ring-0 focus:outline-none rounded-[30px] text-base placeholder:text-gray-400 bg-white" placeholder="Type name of project, county, stakeholder, or agency...">
+                        
+                        <!-- Search Suggestions Dropdown -->
+                        <div id="search-suggestions" class="hidden absolute left-0 right-0 z-50 mt-2 max-h-72 overflow-y-auto rounded-2xl bg-white shadow-2xl border border-gray-200 divide-y divide-gray-100 focus:outline-none transition-all duration-200">
                         </div>
-                        <input type="text" id="homepage_search_input" class="pl-12 pr-6 block h-14 w-full border-gray-100 focus:border-[#0047BA] focus:ring-0 focus:outline-none rounded-[30px] text-base placeholder:text-gray-400 bg-white" placeholder="Type name of project, county, stakeholder, or agency...">
                     </div>
 
-                    <!-- Services/Features Grid (eCitizen style) -->
-                    <div class="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-white text-center">
-                        <a href="access.html?tab=register" class="flex flex-col items-center p-3 rounded-2xl bg-white/10 hover:bg-white/20 transition backdrop-blur-md">
-                            <div class="h-10 w-10 flex items-center justify-center rounded-full bg-emerald-500 mb-2">
-                                <i class="fas fa-plus"></i>
-                            </div>
-                            <span class="text-xs font-semibold">New Project</span>
-                        </a>
+                    <!-- Services/Features Grid -->
+                    <div class="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 text-white text-center">
                         <a href="#about" class="flex flex-col items-center p-3 rounded-2xl bg-white/10 hover:bg-white/20 transition backdrop-blur-md">
                             <div class="h-10 w-10 flex items-center justify-center rounded-full bg-sky-500 mb-2">
                                 <i class="fas fa-circle-info"></i>
@@ -148,7 +146,7 @@
                 </div>
             </div>
 
-            <!-- Banner matching eCitizen "Over 22,000 services..." -->
+            <!-- Banner -->
             <div class="w-full mx-auto max-w-screen-2xl px-6 sm:px-8">
                 <div class="rounded-b-3xl relative overflow-hidden bg-[#00595E] text-white">
                     <div class="relative py-8 px-6 sm:px-10 max-w-3xl">
@@ -298,15 +296,15 @@
         <section id="contact" class="py-16 bg-gray-50 border-t border-gray-100">
             <div class="max-w-3xl mx-auto px-6 text-center">
                 <h3 class="text-2xl sm:text-3xl font-bold mb-4 text-[#272E28]">Contact Us</h3>
-                <p class="mb-6 text-gray-600">For inquiries or access requests, reach out to the RMNCAH Coordination Hub team.</p>
-                <a href="mailto:advocacy@familyhealth.go.ke" class="bg-[#0047BA] text-white font-semibold px-8 py-3 rounded-full hover:bg-[#003da1] transition shadow-sm">
-                    Send Message
+                <p class="mb-6 text-gray-600">For inquiries or access requests, reach out to the RMNCAH Coordination Hub team at <a href="mailto:comms.rmncah@health.go.ke" class="text-[#0047BA] hover:underline font-medium">comms.rmncah@health.go.ke</a>.</p>
+                <a href="mailto:comms.rmncah@health.go.ke" class="bg-[#0047BA] text-white font-semibold px-8 py-3 rounded-full hover:bg-[#003da1] transition shadow-sm">
+                    Send Email
                 </a>
             </div>
         </section>
     </main>
 
-    <!-- Footer matching eCitizen -->
+    <!-- Footer -->
     <footer class="bg-[#272E28] text-white py-12 border-t border-white/10">
         <div class="max-w-screen-2xl mx-auto px-6 sm:px-8">
             <div class="flex flex-col lg:flex-row justify-between items-center space-y-6 lg:space-y-0">
@@ -322,8 +320,6 @@
                 <div>
                     <ul class="flex flex-wrap justify-center space-x-6 text-xs text-gray-300">
                         <li><a href="index.html" class="hover:text-white transition font-medium">Home</a></li>
-                        <li><a href="index.html#features" class="hover:text-white transition font-medium">National</a></li>
-                        <li><a href="index.html#about" class="hover:text-white transition font-medium">Counties</a></li>
                         <li><a href="faq.html" class="hover:text-white transition font-medium">Help &amp; Support</a></li>
                         <li><a href="credits.html" class="hover:text-white transition font-medium">Credits</a></li>
                     </ul>
@@ -338,19 +334,211 @@
 
     <!-- Bootstrap/Flowbite and Navigation Loader JS -->
     <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
-    <script src="styles/loadNavg.js"></script>
+    <script src="styles/loadNavg.js?v=4"></script>
     <script src="styles/accessibility-helper.js" defer></script>
 
-    <!-- Load Real Statistics Script -->
+    <!-- Load Real Statistics and Search Scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', async function() {
+            // Handle landing page search bar redirection and suggestions dropdown
+            const searchInput = document.getElementById('homepage_search_input');
+            const searchButton = document.getElementById('homepage_search_button');
+            const suggestionsDiv = document.getElementById('search-suggestions');
+
+            // System-wide Search Suggestion Options
+            const searchOptions = [
+                {
+                    title: "Frequently Asked Questions (FAQ)",
+                    keywords: ["faq", "help", "support", "questions", "answers", "how to"],
+                    url: "faq.html",
+                    icon: "fa-circle-question text-emerald-500",
+                    description: "Browse frequently asked questions and get support.",
+                    requiresAuth: false
+                },
+                {
+                    title: "Project Directory",
+                    keywords: ["projects", "find projects", "search projects", "track projects", "active", "stalled"],
+                    url: "projects.html",
+                    icon: "fa-folder-open text-[#0047BA]",
+                    description: "View and filter coordinated health projects in Kenya.",
+                    requiresAuth: true
+                },
+                {
+                    title: "Register a New Project",
+                    keywords: ["new project", "add project", "create project", "submit project"],
+                    url: "new-project.html",
+                    icon: "fa-circle-plus text-[#0047BA]",
+                    description: "Submit a new coordinated RMNCAH project.",
+                    requiresAuth: true
+                },
+                {
+                    title: "User Dashboard",
+                    keywords: ["dashboard", "my dashboard", "analytics", "statistics", "portal"],
+                    url: "dashboard.html",
+                    icon: "fa-chart-pie text-teal-600",
+                    description: "Access your dashboard metrics, maps, and reports.",
+                    requiresAuth: true
+                },
+                {
+                    title: "Stakeholder Management",
+                    keywords: ["members", "stakeholders", "partners", "agencies"],
+                    url: "members.html",
+                    icon: "fa-users text-purple-600",
+                    description: "Manage stakeholder members and contact details.",
+                    requiresAuth: true
+                },
+                {
+                    title: "Announcements & Updates",
+                    keywords: ["announcements", "news", "updates", "alerts"],
+                    url: "general-announcements.html",
+                    icon: "fa-bullhorn text-orange-500",
+                    description: "View general announcements and updates from the Ministry of Health.",
+                    requiresAuth: false
+                },
+                {
+                    title: "Sign In Portal",
+                    keywords: ["sign in", "login", "auth", "sign-in"],
+                    url: "access.html?tab=login",
+                    icon: "fa-right-to-bracket text-gray-600",
+                    description: "Access your personalized account portal.",
+                    requiresAuth: false
+                },
+                {
+                    title: "Register Account",
+                    keywords: ["register", "sign up", "join", "sign-up"],
+                    url: "access.html?tab=register",
+                    icon: "fa-user-plus text-gray-600",
+                    description: "Create an account to coordinate health projects.",
+                    requiresAuth: false
+                }
+            ];
+
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        const query = e.target.value.trim();
+                        if (query) {
+                            window.location.href = 'projects.html?q=' + encodeURIComponent(query);
+                        }
+                    }
+                });
+            }
+            if (searchButton && searchInput) {
+                searchButton.addEventListener('click', function() {
+                    const query = searchInput.value.trim();
+                    if (query) {
+                        window.location.href = 'projects.html?q=' + encodeURIComponent(query);
+                    }
+                });
+            }
+
+            if (searchInput && suggestionsDiv) {
+                // Monitor input changes
+                searchInput.addEventListener('input', function(e) {
+                    const query = e.target.value.trim().toLowerCase();
+                    if (!query) {
+                        suggestionsDiv.classList.add('hidden');
+                        return;
+                    }
+
+                    const filtered = searchOptions.filter(opt => {
+                        return opt.title.toLowerCase().includes(query) || 
+                               opt.description.toLowerCase().includes(query) || 
+                               opt.keywords.some(k => k.toLowerCase().includes(query));
+                    });
+
+                    if (filtered.length === 0) {
+                        suggestionsDiv.innerHTML = `
+                            <div class="p-4 text-center text-sm text-gray-500 font-medium bg-white">
+                                No matching options found
+                            </div>
+                        `;
+                    } else {
+                        suggestionsDiv.innerHTML = filtered.map(opt => {
+                            const badgeClass = opt.requiresAuth ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800';
+                            const badgeText = opt.requiresAuth ? '🔒 Sign In Required' : '🌐 Public';
+                            
+                            return `
+                                <div class="suggestion-item p-3.5 hover:bg-[#0047BA]/5 cursor-pointer transition flex items-center gap-3.5 bg-white border-b border-gray-100" data-url="${opt.url}" data-auth="${opt.requiresAuth}">
+                                    <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
+                                        <i class="fas ${opt.icon} text-sm"></i>
+                                    </div>
+                                    <div class="flex-grow text-left">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-sm font-semibold text-gray-800">${opt.title}</span>
+                                            <span class="text-[10px] font-medium px-2 py-0.5 rounded-full ${badgeClass}">${badgeText}</span>
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-0.5 leading-relaxed">${opt.description}</p>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+
+                    suggestionsDiv.classList.remove('hidden');
+                });
+
+                // Handle clicks on suggestion items
+                suggestionsDiv.addEventListener('click', function(e) {
+                    const item = e.target.closest('.suggestion-item');
+                    if (!item) return;
+
+                    const url = item.getAttribute('data-url');
+                    const requiresAuth = item.getAttribute('data-auth') === 'true';
+
+                    if (requiresAuth) {
+                        const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+                        if (!token) {
+                            alert("🔒 Access Denied:\nThis feature is locked behind signing in. Redirecting you to the Sign In portal.");
+                            window.location.href = `access.html?tab=login&redirect=${encodeURIComponent(url)}`;
+                            return;
+                        }
+                    }
+
+                    window.location.href = url;
+                });
+
+                // Close suggestions when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!searchInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+                        suggestionsDiv.classList.add('hidden');
+                    }
+                });
+            }
+
+            let statsResponse;
             try {
-                const statsResponse = await fetch(`${window.BASE_URL}/api/projects/public/statistics`, {
+                // Try primary BASE_URL first
+                statsResponse = await fetch(`${window.BASE_URL || ''}/api/projects/public/statistics`, {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' }
                 });
-                
-                if (statsResponse.ok) {
+                if (!statsResponse.ok) throw new Error('Primary stats fetch failed');
+            } catch (primaryError) {
+                console.warn('⚠️ Primary stats fetch failed, trying online backend fallback...', primaryError);
+                try {
+                    // Try cohub.go.ke
+                    statsResponse = await fetch(`https://cohub.go.ke/api/projects/public/statistics`, {
+                        method: 'GET',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    if (!statsResponse.ok) throw new Error('First fallback failed');
+                } catch (fallbackError1) {
+                    console.warn('⚠️ First fallback failed, trying Render fallback...', fallbackError1);
+                    try {
+                        // Try Render URL
+                        statsResponse = await fetch(`https://tujulishane-hub-backend.onrender.com/api/projects/public/statistics`, {
+                            method: 'GET',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                    } catch (fallbackError2) {
+                        console.error('❌ All fallback routes failed:', fallbackError2);
+                    }
+                }
+            }
+
+            try {
+                if (statsResponse && statsResponse.ok) {
                     const statsData = await statsResponse.json();
                     const stats = statsData.data || {};
                     
@@ -369,7 +557,7 @@
                     document.getElementById('bannerStakeholdersCount').textContent = sCount + '+';
                 }
             } catch (error) {
-                console.error('❌ Error loading statistics:', error);
+                console.error('❌ Error parsing statistics data:', error);
             }
         });
         

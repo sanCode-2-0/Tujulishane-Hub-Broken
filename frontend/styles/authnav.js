@@ -73,3 +73,48 @@ document.addEventListener("DOMContentLoaded", () => {
     populateUserNav();
   }
 });
+
+// Dropdown toggle function for navigation menus
+window.navDrop = function(id) {
+  console.log("[authnav] navDrop called for:", id);
+  const target = document.getElementById(id);
+  console.log("[authnav] target exists in DOM:", !!target);
+  
+  const placeholder = document.getElementById("nav-placeholder");
+  if (placeholder) {
+    console.log("[authnav] nav-placeholder HTML has 'm-dd-user' string?", placeholder.innerHTML.includes("m-dd-user"));
+    console.log("[authnav] nav-placeholder HTML has 'id=\"m-dd-user\"'?", placeholder.innerHTML.includes('id="m-dd-user"'));
+    console.log("[authnav] nav-placeholder HTML has '<div id=\"m-dd-user\"'?", placeholder.innerHTML.includes('<div id="m-dd-user"'));
+    console.log("[authnav] nav-placeholder HTML has 'm-dd-admin' string?", placeholder.innerHTML.includes("m-dd-admin"));
+    console.log("[authnav] nav-placeholder HTML has 'id=\"m-dd-admin\"'?", placeholder.innerHTML.includes('id="m-dd-admin"'));
+    
+    const adminEl = document.getElementById("m-dd-admin");
+    if (adminEl && adminEl.parentElement && adminEl.parentElement.parentElement) {
+      console.log("[authnav] Mobile menu UL innerHTML:", adminEl.parentElement.parentElement.innerHTML);
+    } else {
+      console.log("[authnav] Mobile admin parent elements not found");
+    }
+  }
+  
+  console.log("[authnav] All dropdown IDs currently in DOM:", Array.from(document.querySelectorAll('.nav-dropdown')).map(el => el.id));
+  
+  document.querySelectorAll('.nav-dropdown').forEach(function(el) {
+    if (el.id !== id) el.classList.add('hidden');
+  });
+  
+  if (target) {
+    target.classList.toggle('hidden');
+    console.log("[authnav] Dropdown target toggled:", id);
+  } else {
+    console.warn("[authnav] Dropdown target not found:", id);
+  }
+};
+
+// Global click listener to close dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('nav') && !e.target.closest('header')) {
+    document.querySelectorAll('.nav-dropdown').forEach(function(el) {
+      el.classList.add('hidden');
+    });
+  }
+});

@@ -1,6 +1,7 @@
 package com.tujulishanehub.backend.repositories;
 
 import com.tujulishanehub.backend.models.ApprovalStatus;
+import com.tujulishanehub.backend.models.ApprovalWorkflowStatus;
 import com.tujulishanehub.backend.models.Project;
 import com.tujulishanehub.backend.models.ProjectCategory;
 import com.tujulishanehub.backend.models.ProjectTheme;
@@ -91,6 +92,10 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     // Find projects by approval status
     List<Project> findByApprovalStatus(ApprovalStatus approvalStatus);
+    
+    // Find projects by approval workflow status with pagination
+    @EntityGraph(attributePaths = {"themes", "locations", "themes.projectTheme"})
+    Page<Project> findByApprovalWorkflowStatus(ApprovalWorkflowStatus approvalWorkflowStatus, Pageable pageable);
     
     // Count projects by approval status
     long countByApprovalStatus(ApprovalStatus approvalStatus);

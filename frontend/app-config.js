@@ -11,15 +11,11 @@ const isLocal = typeof window !== "undefined" &&
    window.location.hostname === "127.0.0.1" || 
    window.location.hostname === "");
 
-const USE_PROD = !isLocal;
+const USE_PROD = false;
 
-// Backend endpoints - SET THESE ONCE FOR YOUR WHOLE APP
-// For Render deployment, we point directly to the backend URL.
-// For EC2, we use a relative path since Nginx proxies /api/ from the root.
-const PROD_URL = typeof window !== "undefined" && window.location.hostname.endsWith(".onrender.com")
-  ? "https://tujulishane-hub-backend.onrender.com"
-  : ""; 
-const DEV_URL = "http://localhost:8080"; // Local development backend
+// Backend endpoints - Centralized production backend URL
+const PROD_URL = "https://cohub.go.ke"; 
+const DEV_URL = "http://localhost:8080"; // Local backend for development
 
 // Compute base URL from toggle. If a runtime global override is set (by a
 // non-committed local file that sets window.__BASE_URL_OVERRIDE), prefer that.
@@ -42,6 +38,7 @@ window.DEV_URL = DEV_URL;
 window.PROD_URL = PROD_URL;
 window.USE_PROD = USE_PROD;
 window.MAPBOX_TOKEN = MAPBOX_TOKEN;
+
 
 // Also export for module scripts (if needed)
 if (typeof module !== "undefined" && module.exports) {

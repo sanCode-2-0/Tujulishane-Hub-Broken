@@ -4,6 +4,9 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+	<meta http-equiv="Pragma" content="no-cache" />
+	<meta http-equiv="Expires" content="0" />
 	<title>RMNCAH</title>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
 		integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
@@ -47,7 +50,7 @@
 		}
 	</script>
 	<!-- Backend URL Configuration - Centralized in app-config.js -->
-	<script src="./app-config.js?v=3"></script>
+	<script src="./app-config.js?v=5"></script>
 	<script src="./set-base-url.js?v=3"></script>
 	<!-- Session Configuration -->
 	<script src="./session-config.js"></script>
@@ -268,9 +271,9 @@
                     </a> -->
 					<button type="button" onclick="openVideoModal()"
 						class="flex items-center w-1/2 lg:w-full justify-between px-4 py-2 rounded-full bg-button_two hover:opacity-90 transition-opacity text-left">
-						<span class="text-sm"> Video Tutorial </span>
+						<span class="text-sm"> User Guide </span>
 						<span class="text-lg">
-							<i class="fas fa-play-circle"></i>
+							<i class="fas fa-book"></i>
 						</span>
 					</button>
 				</div>
@@ -324,8 +327,8 @@
 					<datalist id="mapCountyList"></datalist>
 				</div>
 
-				<!-- Sub-County Dropdown -->
-				<div class="relative">
+				<!-- Sub-County Dropdown (Hidden) -->
+				<div class="relative hidden">
 					<label for="mapSubCountySelect"
 						class="block text-sm font-medium text-gray-700 mb-2">Sub-County</label>
 					<input type="text" id="mapSubCountySelect" list="mapSubCountyList" autocomplete="off"
@@ -533,8 +536,8 @@
 	<script src="https://cdn.jsdelivr.net/npm/tw-elements/js/tw-elements.umd.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
 	<script src="styles/effects.js"></script>
-	<script src="styles/loadNav.js"></script>
-	<script src="styles/authnav.js"></script>
+	<script src="styles/loadNav-v4.js"></script>
+	<script src="styles/authnav.js?v=4"></script>
 
 	<script>
 		let map;
@@ -2223,6 +2226,8 @@
 		async function loadDashboardData() {
 			try {
 				console.log("Loading dashboard data...");
+				// Load thematic area definitions first (drives theme stats and grid cards)
+				await loadThematicAreaDefinitions();
 				// Load project statistics
 				await loadProjectStatistics();
 				// Load projects list (default: all projects)
@@ -2238,8 +2243,9 @@
 			}
 		}
 
-		// Theme definitions with metadata
-		const themeDefinitions = {
+		// Theme definitions with metadata.
+		// Fallback defaults used only while (or if) the dynamic list cannot be loaded.
+		let themeDefinitions = {
 			GBV: {
 				name: "Gender-Based Violence",
 				description:
@@ -2281,6 +2287,51 @@
 				color: "text-orange-400",
 			},
 		};
+
+		// Load thematic area definitions dynamically from the backend database table.
+		// Fallback defaults above remain in place if the fetch fails.
+		async function loadThematicAreaDefinitions() {
+			try {
+				const response = await fetch(
+					`${window.BASE_URL}/api/thematic-areas`
+				);
+				if (!response.ok) {
+					console.warn(
+						"Failed to load thematic area definitions:",
+						response.status
+					);
+					return;
+				}
+				const data = await response.json();
+				const areas = data && data.data ? data.data : [];
+				if (!Array.isArray(areas) || areas.length === 0) {
+					console.warn(
+						"Thematic area definitions endpoint returned no data"
+					);
+					return;
+				}
+				const definitions = {};
+				areas.forEach((area) => {
+					definitions[area.code] = {
+						name: area.title,
+						description: area.description,
+						icon: area.icon || "fas fa-tag",
+						color: area.color || "text-blue-500",
+					};
+				});
+				themeDefinitions = definitions;
+				console.log(
+					"Loaded dynamic thematic area definitions:",
+					Object.keys(themeDefinitions).length,
+					"areas"
+				);
+			} catch (error) {
+				console.error(
+					"Error loading thematic area definitions, using defaults:",
+					error
+				);
+			}
+		}
 
 		// Load theme statistics from projects
 		async function loadThemeStatistics() {
@@ -3740,7 +3791,7 @@
 				<iframe 
 					class="w-full h-full rounded-lg" 
 					src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1" 
-					title="RMNCAH Coordination Hub Video Tutorial" 
+					title="RMNCAH Coordination Hub User Guide" 
 					frameborder="0" 
 					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
 					allowfullscreen>
@@ -3792,14 +3843,14 @@
 		});
 	</script>
 
-	<!-- Video Tutorial Modal -->
+	<!-- User Guide Modal -->
 	<div id="videoTutorialModal" class="fixed inset-0 z-[9999] hidden flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm transition-opacity duration-300 opacity-0">
 		<div class="modal-content relative w-full max-w-4xl bg-white rounded-2xl overflow-hidden shadow-2xl transform scale-95 transition-all duration-300">
 			<!-- Header -->
 			<div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50">
 				<h3 class="text-lg font-semibold text-blue-900 flex items-center gap-2">
-					<i class="fas fa-play-circle text-blue-500 text-xl animate-pulse"></i>
-					RMNCAH Coordination Hub Video Tutorial
+					<i class="fas fa-book text-blue-500 text-xl"></i>
+					RMNCAH Coordination Hub User Guide
 				</h3>
 				<button onclick="closeVideoModal()" class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-full transition-colors focus:outline-none">
 					<i class="fas fa-times text-xl"></i>

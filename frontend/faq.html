@@ -31,12 +31,11 @@
       document.write('<script src="./config.local.js"><\/script>');
     }
   </script>
-  <script src="./app-config.js?v=3"></script>
-  <script src="./set-base-url.js?v=3"></script>
 
-  <!-- Modal Utilities -->
+  <script src="./app-config.js?v=5"></script>
+  <script src="./set-base-url.js?v=4"></script>
   <script src="./modal-utils.js"></script>
-
+  
   <!-- Authentication utilities -->
   <script type="module">
     // Use window.BASE_URL which is already set by app-config.js loaded via script tag
@@ -1343,7 +1342,13 @@
   </footer>
   <!-- Removed script that sets localStorage with undefined 'data' to fix ReferenceError. This should only be set after login. -->
   <script src="styles/authnav.js"></script>
-  <script src="styles/loadNav.js"></script>
+  <script>
+    if (localStorage.getItem("accessToken")) {
+      document.write('<script src="styles/loadNav.js?v=4"><\/script>');
+    } else {
+      document.write('<script src="styles/loadNavg.js?v=4"><\/script>');
+    }
+  </script>
   <script src="styles/effects.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tw-elements/js/tw-elements.umd.min.js"></script>
   <script>
@@ -1388,50 +1393,61 @@
       // Initialize authentication and load user data
       initializeUserSession();
 
-      // Set Mapbox access token (from config.local.js)
-      mapboxgl.accessToken = window.MAPBOX_TOKEN;
+      // Initialize Mapbox map only if container exists
+      if (document.getElementById("localMap")) {
+        // Set Mapbox access token (from config.local.js)
+        mapboxgl.accessToken = window.MAPBOX_TOKEN;
 
-      // Initialize Mapbox map
-      map = new mapboxgl.Map({
-        container: "localMap",
-        style: "mapbox://styles/lomogantech/clsa1f16r00wt01qqbnf741n6",
-        center: [37.9062, -0.0236],
-        zoom: 6.3,
-      });
+        map = new mapboxgl.Map({
+          container: "localMap",
+          style: "mapbox://styles/lomogantech/clsa1f16r00wt01qqbnf741n6",
+          center: [37.9062, -0.0236],
+          zoom: 6.3,
+        });
 
-      // Add zoom and rotation controls to the map
-      map.addControl(new mapboxgl.NavigationControl(), "top-right");
+        // Add zoom and rotation controls to the map
+        map.addControl(new mapboxgl.NavigationControl(), "top-right");
 
-      // Load projects after map is initialized
-      map.on("load", () => {
-        loadProjectsForMap();
-      });
+        // Load projects after map is initialized
+        map.on("load", () => {
+          loadProjectsForMap();
+        });
+      }
 
-      document
-        .getElementById("searchInput")
-        .addEventListener("input", (e) => {
+      // Add event listeners if elements exist
+      const searchInput = document.getElementById("searchInput");
+      if (searchInput) {
+        searchInput.addEventListener("input", (e) => {
           searchQuery = e.target.value.trim().toLowerCase();
           currentPage = 1;
           highlightMarkers(currentFilter);
         });
+      }
 
-      document.getElementById("dateFrom").addEventListener("change", (e) => {
-        dateRangeFrom = e.target.value ? new Date(e.target.value) : null;
-        currentPage = 1;
-        highlightMarkers(currentFilter);
-      });
+      const dateFrom = document.getElementById("dateFrom");
+      if (dateFrom) {
+        dateFrom.addEventListener("change", (e) => {
+          dateRangeFrom = e.target.value ? new Date(e.target.value) : null;
+          currentPage = 1;
+          highlightMarkers(currentFilter);
+        });
+      }
 
-      document.getElementById("dateTo").addEventListener("change", (e) => {
-        dateRangeTo = e.target.value ? new Date(e.target.value) : null;
-        currentPage = 1;
-        highlightMarkers(currentFilter);
-      });
+      const dateTo = document.getElementById("dateTo");
+      if (dateTo) {
+        dateTo.addEventListener("change", (e) => {
+          dateRangeTo = e.target.value ? new Date(e.target.value) : null;
+          currentPage = 1;
+          highlightMarkers(currentFilter);
+        });
+      }
 
-      document
-        .getElementById("sortSelect")
-        .addEventListener("change", (e) => {
+      const sortSelect = document.getElementById("sortSelect");
+      if (sortSelect) {
+        sortSelect.addEventListener("change", (e) => {
           sortProjects(e.target.value);
         });
+      }
     });
 
     // Load projects and add to map
@@ -1969,13 +1985,8 @@
     async function initializeUserSession() {
       // Check if user is authenticated
       if (!authManager.isAuthenticated()) {
-        await showAlert(
-          "You must be logged in to access this page. (See console for details)",
-          "Authentication Required",
-          "warning"
-        );
-        // Prevent redirect for debugging
-        throw new Error("Not authenticated");
+        console.log("Guest access: user is not authenticated. Skipping dashboard and session loading.");
+        return;
       }
 
       // Check for demo token

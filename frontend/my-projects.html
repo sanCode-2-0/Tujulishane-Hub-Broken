@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Projects Workspace | RMNCAH Hub</title>
+    
+    <!-- Icons and Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&family=Montserrat:wght@200;300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    
+    <!-- Tailwind CSS with custom configuration -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0047BA',     // MOH Navy Blue
+                        secondary: '#E31837',   // Red Accent
+                        accent: '#0D9488',      // Teal
+                        dark: '#0F172A',        // Slate-900
+                        slatebg: '#F8FAFC'      // Slate-50
+                    },
+                    fontFamily: {
+                        sans: ['Lexend', 'Montserrat', 'sans-serif'],
+                        display: ['Lexend', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- External CSS Libraries -->
+    <link rel="stylesheet" href="styles/main.css?v=2">
+    <link rel="stylesheet" href="styles/mobile.css?v=2">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tw-elements/css/tw-elements.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
+    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css" rel="stylesheet" />
+    
+    <!-- System Configurations & Auth -->
+    <script src="./app-config.js?v=5"></script>
+    <script src="./set-base-url.js?v=3"></script>
+    <script src="./modal-utils.js"></script>
+    <script src="auth.js"></script>
+    <script src="styles/workflow-status-helper.js"></script>
+    
+    <!-- UI Controllers -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+        body {
+            background-color: #F8FAFC;
+        }
+        @media (max-width: 768px) {
+            body {
+                padding-top: 0px !important;
+            }
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        /* Custom scrollbar for data tables */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #F1F5F9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+    </style>
+</head>
+
+<body x-data="myProjectsApp()" x-init="init()">
+    
+    <!-- Authentication Enforcement -->
+    <script>
+        (function () {
+            const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+            if (!token) {
+                console.warn('[Security] No authentication token found, redirecting to login');
+                window.location.href = 'index.html';
+                return;
+            }
+        })();
+    </script>
+
+    <!-- Navigation Header Placeholder -->
+    <div id="nav-placeholder"></div>
+
+    <!-- Main Workspace Container -->
+    <main class="min-h-screen pt-10 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        
+        <!-- Workspace Greeting & Header -->
+        <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <nav class="flex text-xs font-medium text-slate-500 mb-2 overflow-x-auto whitespace-nowrap scrollbar-none" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1 md:space-x-2">
+                        <li class="inline-flex items-center">
+                            <a href="index.html" class="hover:text-primary transition-colors"><i class="fas fa-home mr-1"></i> Home</a>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <i class="fas fa-chevron-right text-slate-400 mx-1 text-[10px]"></i>
+                                <a href="projects.html" class="hover:text-primary transition-colors">Projects</a>
+                            </div>
+                        </li>
+                        <li aria-current="page">
+                            <div class="flex items-center">
+                                <i class="fas fa-chevron-right text-slate-400 mx-1 text-[10px]"></i>
+                                <span class="text-slate-700 font-semibold" x-text="breadcrumbText">My Projects</span>
+                            </div>
+                        </li>
+                    </ol>
+                </nav>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight" x-text="workspaceTitle">My Projects Workspace</h1>
+                    <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-primary/10 text-primary uppercase tracking-wider"
+                          id="workspace-badge-text">Workspace</span>
+                </div>
+                <p class="text-slate-500 text-sm mt-1" x-text="workspaceDescription">
+                    Manage and monitor your specific RMNCAH initiatives, approvals status, and geographic implementations.
+                </p>
+            </div>
+            
+            <div class="flex items-center gap-3 self-start md:self-center">
+                <a href="new-project.html" class="inline-flex items-center px-4 py-2.5 bg-accent text-white text-sm font-semibold rounded-xl hover:bg-teal-700 transition shadow-sm hover:shadow active:scale-[0.98]">
+                    <i class="fas fa-plus mr-2"></i> Submit New Project
+                </a>
+            </div>
+        </div>
+
+        <!-- Role Data Visibility Info Section (Gives clear, direct feedback about what they see) -->
+        <div class="mb-6 p-4 rounded-xl border flex items-start gap-3 transition-all duration-300"
+             :class="{
+                 'bg-sky-50 border-sky-100 text-sky-800': userRole === 'PARTNER',
+                 'bg-teal-50 border-teal-100 text-teal-800': userRole === 'DONOR',
+                 'bg-purple-50 border-purple-100 text-purple-800': ['SUPER_ADMIN_REVIEWER', 'SUPER_ADMIN_APPROVER', 'SUPER_ADMIN'].includes(userRole)
+             }">
+            <div class="flex-shrink-0 mt-0.5">
+                <i class="fas" :class="{
+                    'fa-info-circle text-sky-600': userRole === 'PARTNER',
+                    'fa-hands-holding-child text-teal-600': userRole === 'DONOR',
+                    'fa-user-shield text-purple-600': ['SUPER_ADMIN_REVIEWER', 'SUPER_ADMIN_APPROVER', 'SUPER_ADMIN'].includes(userRole)
+                } + ' text-lg'"></i>
+            </div>
+            <div>
+                <h4 class="font-bold text-sm tracking-wide mb-0.5">
+                    Data Visibility Information
+                </h4>
+                <p class="text-xs leading-relaxed opacity-90" id="visibility-alert-text">
+                    Loading account permissions...
+                </p>
+            </div>
+        </div>
+
+        <!-- Loading Skeleton Overlay -->
+        <div x-show="loading" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+                <div class="h-28 bg-white border border-slate-200 rounded-2xl animate-pulse"></div>
+                <div class="h-28 bg-white border border-slate-200 rounded-2xl animate-pulse"></div>
+                <div class="h-28 bg-white border border-slate-200 rounded-2xl animate-pulse"></div>
+                <div class="h-28 bg-white border border-slate-200 rounded-2xl animate-pulse"></div>
+            </div>
+            <div class="h-96 bg-white border border-slate-200 rounded-2xl animate-pulse"></div>
+        </div>
+
+        <div x-show="!loading" x-cloak class="space-y-8">
+            
+            <!-- Statistics Panel (Dynamic Glassmorphic Cards) -->
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                
+                <!-- Stat Card 1 -->
+                <div class="glass-card p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+                    <div class="absolute -right-3 -top-3 w-16 h-16 bg-primary/5 rounded-full group-hover:scale-125 transition-transform duration-300"></div>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2" x-text="totalProjectsLabel">Total Workspace Projects</p>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-3xl font-extrabold text-slate-900" x-text="stats.total">0</span>
+                        <span class="text-xs font-medium text-slate-400">Listed</span>
+                    </div>
+                    <div class="mt-3 flex items-center gap-1.5 text-xs text-primary font-medium">
+                        <i class="fas fa-folder-open"></i> View project inventory
+                    </div>
+                </div>
+
+                <!-- Stat Card 2 -->
+                <div class="glass-card p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+                    <div class="absolute -right-3 -top-3 w-16 h-16 bg-accent/5 rounded-full group-hover:scale-125 transition-transform duration-300"></div>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Active Implementations</p>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-3xl font-extrabold text-teal-700" x-text="stats.active">0</span>
+                        <span class="text-xs font-medium text-teal-500">Ongoing</span>
+                    </div>
+                    <div class="mt-3 flex items-center gap-1.5 text-xs text-accent font-medium">
+                        <i class="fas fa-check-circle"></i> Delivering impact
+                    </div>
+                </div>
+
+                <!-- Stat Card 3 -->
+                <div class="glass-card p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+                    <div class="absolute -right-3 -top-3 w-16 h-16 bg-amber/5 rounded-full group-hover:scale-125 transition-transform duration-300"></div>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2" x-text="pendingActionsLabel">Pending Workflow Actions</p>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-3xl font-extrabold text-amber-600" x-text="stats.pending">0</span>
+                        <span class="text-xs font-medium text-amber-500">Awaiting Action</span>
+                    </div>
+                    <div class="mt-3 flex items-center gap-1.5 text-xs text-amber-600 font-medium">
+                        <i class="fas fa-hourglass-half"></i> <span x-text="pendingActionsSub">Awaiting verification steps</span>
+                    </div>
+                </div>
+
+                <!-- Stat Card 4 -->
+                <div class="glass-card p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+                    <div class="absolute -right-3 -top-3 w-16 h-16 bg-emerald-500/5 rounded-full group-hover:scale-125 transition-transform duration-300"></div>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Total Financial Budget</p>
+                    <div class="flex items-baseline gap-1">
+                        <span class="text-xs font-bold text-slate-400">KES</span>
+                        <span class="text-2xl font-extrabold text-emerald-600" x-text="stats.budget.toLocaleString()">0</span>
+                    </div>
+                    <div class="mt-3 flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
+                        <i class="fas fa-circle-dollar-to-slot"></i> Resource allocation
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Table & Filters Section -->
+            <section class="glass-card rounded-2xl shadow-sm overflow-hidden">
+                
+                <!-- Table Controls Panel -->
+                <div class="p-6 border-b border-slate-200 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    
+                    <!-- Search Input -->
+                    <div class="relative w-full md:max-w-md">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i class="fas fa-search text-sm"></i>
+                        </div>
+                        <input type="text" x-model="searchQuery"
+                               class="block w-full pl-10 pr-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm placeholder-slate-400 shadow-sm"
+                               placeholder="Search by Title, ID, Partner, or Location...">
+                    </div>
+                    
+                    <!-- Tab Pills -->
+                    <div class="flex gap-1.5 bg-slate-200/60 p-1.5 rounded-xl self-start md:self-auto overflow-x-auto whitespace-nowrap max-w-full scrollbar-none">
+                        <button @click="activeTab = 'active'" :class="activeTab === 'active' ? 'bg-white shadow text-slate-900 font-semibold' : 'text-slate-600 hover:text-slate-950 font-medium'" class="px-4 py-2 text-xs rounded-lg transition">
+                            Active (<span x-text="stats.active">0</span>)
+                        </button>
+                        <button @click="activeTab = 'pending'" :class="activeTab === 'pending' ? 'bg-white shadow text-slate-900 font-semibold' : 'text-slate-600 hover:text-slate-950 font-medium'" class="px-4 py-2 text-xs rounded-lg transition">
+                            Pending (<span x-text="stats.pending">0</span>)
+                        </button>
+                        <button @click="activeTab = 'completed'" :class="activeTab === 'completed' ? 'bg-white shadow text-slate-900 font-semibold' : 'text-slate-600 hover:text-slate-950 font-medium'" class="px-4 py-2 text-xs rounded-lg transition">
+                            Completed (<span x-text="stats.completed">0</span>)
+                        </button>
+                        <button @click="activeTab = 'stalled'" :class="activeTab === 'stalled' ? 'bg-white shadow text-slate-900 font-semibold' : 'text-slate-600 hover:text-slate-950 font-medium'" class="px-4 py-2 text-xs rounded-lg transition">
+                            Stalled (<span x-text="stats.stalled">0</span>)
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- Structured Projects Data Table -->
+                <div class="hidden md:block overflow-x-auto custom-scrollbar">
+                    <table class="w-full min-w-[1200px] text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                                <th class="w-[4%] px-6 py-4 bg-slate-50 text-left">#</th>
+                                <th class="w-[26%] px-6 py-4 bg-slate-50 text-left">Project Details</th>
+                                <th class="w-[18%] px-6 py-4 bg-slate-50 text-left">Implementing Agency</th>
+                                <th class="w-[18%] px-6 py-4 bg-slate-50 text-left">Thematic Areas</th>
+                                <th class="w-[12%] px-6 py-4 bg-slate-50 text-left">Financial Budget</th>
+                                <th class="w-[12%] px-6 py-4 bg-slate-50 text-left">Locations</th>
+                                <th class="w-[12%] px-6 py-4 bg-slate-50 text-left">Workflow Status</th>
+                                <th class="w-[10%] px-6 py-4 bg-slate-50 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 bg-white">
+                            
+                            <!-- Template Row Loop -->
+                            <template x-for="(project, index) in filteredProjects" :key="project.id">
+                                <tr class="hover:bg-slate-50/70 transition duration-150 ease-in-out group">
+                                    
+                                    <!-- Index counter -->
+                                    <td class="px-6 py-4 text-xs font-semibold text-slate-400" x-text="index + 1"></td>
+                                    
+                                    <!-- Project Details -->
+                                    <td class="px-6 py-4">
+                                        <div class="flex flex-col gap-1">
+                                            <div class="flex items-center gap-1.5 flex-wrap">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 w-fit" x-text="project.projectNo || '#' + project.id"></span>
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-bold bg-amber-100 border border-amber-200 text-amber-800 uppercase tracking-wider w-fit animate-pulse" x-show="project.partner === userEmail || project.contactPersonEmail === userEmail"><i class="fas fa-user-circle mr-1"></i> Owner</span>
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-bold bg-teal-100 border border-teal-200 text-teal-800 uppercase tracking-wider w-fit" x-show="['SUPER_ADMIN', 'SUPER_ADMIN_APPROVER', 'SUPER_ADMIN_REVIEWER'].includes(project.createdByRole)"><i class="fas fa-landmark mr-1"></i> MoH Initiative</span>
+                                            </div>
+                                            <span class="text-sm font-bold text-slate-900 group-hover:text-primary transition-colors" x-text="project.title || 'Untitled Project'"></span>
+                                            <span class="text-xs text-slate-500" x-text="project.projectCategory || 'N/A'"></span>
+                                        </div>
+                                    </td>
+                                    
+                                    <!-- Implementing Partner -->
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700 font-medium" x-text="project.partner || 'N/A'"></td>
+                                    
+                                    <!-- Thematic Areas -->
+                                    <td class="px-6 py-4">
+                                        <div class="flex flex-wrap gap-1 max-w-full">
+                                            <template x-for="theme in (project.themes || [])">
+                                                <span class="px-2 py-0.5 bg-blue-50 border border-blue-100 text-blue-800 rounded-md text-[10px] font-medium" x-text="theme.name || theme.code"></span>
+                                            </template>
+                                            <template x-if="!(project.themes && project.themes.length)">
+                                                <span class="text-xs text-slate-400 italic">N/A</span>
+                                            </template>
+                                        </div>
+                                    </td>
+                                    
+                                    <!-- Financial Budget -->
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900 font-bold">
+                                        KES <span x-text="project.budget ? project.budget.toLocaleString() : '0'"></span>
+                                    </td>
+                                    
+                                    <!-- Geographic Locations -->
+                                    <td class="px-6 py-4">
+                                        <div class="flex flex-wrap gap-1 max-w-full">
+                                            <template x-for="loc in (project.locations || [])">
+                                                <span class="inline-flex items-center px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-700 rounded-md text-[10px]">
+                                                    <i class="fas fa-map-marker-alt text-red-500 mr-1"></i>
+                                                    <span x-text="loc.county || loc.mapsAddress || 'Location'"></span>
+                                                </span>
+                                            </template>
+                                            <template x-if="!(project.locations && project.locations.length)">
+                                                <span class="text-xs text-slate-400 italic">N/A</span>
+                                            </template>
+                                        </div>
+                                    </td>
+                                    
+                                    <!-- Workflow Status -->
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex flex-col gap-1.5">
+                                            <!-- Enhanced workflow status badges -->
+                                            <span x-html="createWorkflowStatusBadge(project.approvalWorkflowStatus || project.status)"></span>
+                                        </div>
+                                    </td>
+                                    
+                                    <!-- Actions Panel -->
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-xs">
+                                        <div class="flex gap-2 justify-end">
+                                            <button @click="openProjectDetails(project.id)"
+                                                    class="inline-flex items-center gap-1.5 text-slate-700 hover:text-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition active:scale-95"
+                                                    title="View Details">
+                                                <i class="fas fa-eye"></i> Details
+                                            </button>
+                                            
+
+
+
+
+                                            <!-- Edit action for Project Owner (drafts or rejected items, regardless of current role) -->
+                                            <template x-if="(project.partner === userEmail || project.contactPersonEmail === userEmail || userRole === 'PARTNER') && ['DRAFT', 'REJECTED_BY_REVIEWER', 'REJECTED_BY_APPROVER'].includes(project.approvalWorkflowStatus)">
+                                                <a :href="'new-project.html?id=' + project.id"
+                                                   class="inline-flex items-center gap-1 text-amber-600 hover:text-white px-2.5 py-1.5 rounded-lg border border-amber-300 hover:bg-amber-500 transition active:scale-[0.96]">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </a>
+                                            </template>
+                                        </div>
+                                    </td>
+
+                                </tr>
+                            </template>
+
+                            <!-- Empty State Table Template -->
+                            <template x-if="filteredProjects.length === 0">
+                                <tr>
+                                    <td colspan="8" class="px-6 py-12 text-center">
+                                        <div class="flex flex-col items-center justify-center text-slate-400">
+                                            <i class="fas fa-folder-open text-4xl mb-3 opacity-50"></i>
+                                            <p class="text-sm font-semibold">No projects found in this list</p>
+                                            <p class="text-xs mt-1">Try resetting your search query or choosing another tab.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile-Friendly Cards Layout -->
+                <div class="block md:hidden divide-y divide-slate-100 bg-white">
+                    <template x-for="(project, index) in filteredProjects" :key="project.id">
+                        <div class="p-5 space-y-4 hover:bg-slate-50/50 transition">
+                            
+                            <!-- Card Header: ID / Status / Owner -->
+                            <div class="flex items-center justify-between gap-2 flex-wrap">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700" x-text="project.projectNo || '#' + project.id"></span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-bold bg-amber-100 border border-amber-200 text-amber-800 uppercase tracking-wider w-fit animate-pulse" x-show="project.partner === userEmail || project.contactPersonEmail === userEmail"><i class="fas fa-user-circle mr-1"></i> Owner</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-bold bg-teal-100 border border-teal-200 text-teal-800 uppercase tracking-wider w-fit" x-show="['SUPER_ADMIN', 'SUPER_ADMIN_APPROVER', 'SUPER_ADMIN_REVIEWER'].includes(project.createdByRole)"><i class="fas fa-landmark mr-1"></i> MoH Initiative</span>
+                                </div>
+                                <span x-html="createWorkflowStatusBadge(project.approvalWorkflowStatus || project.status)"></span>
+                            </div>
+
+                            <!-- Title -->
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-900 leading-snug" x-text="project.title || 'Untitled Project'"></h4>
+                                <span class="text-xs text-slate-400 block mt-0.5" x-text="project.projectCategory || 'N/A'"></span>
+                            </div>
+
+                            <!-- Details Section -->
+                            <div class="grid grid-cols-2 gap-3 text-xs border-t border-slate-100 pt-3">
+                                <div>
+                                    <span class="text-slate-400 block mb-0.5 uppercase tracking-wider text-[10px] font-medium">Implementing Agency</span>
+                                    <span class="text-slate-700 font-semibold truncate block text-ellipsis overflow-hidden whitespace-nowrap" x-text="project.partner || 'N/A'"></span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block mb-0.5 uppercase tracking-wider text-[10px] font-medium">Financial Budget</span>
+                                    <span class="text-slate-900 font-extrabold block">
+                                        KES <span x-text="project.budget ? project.budget.toLocaleString() : '0'"></span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Themes & Locations -->
+                            <div class="space-y-2.5 pt-1">
+                                <div>
+                                    <span class="text-slate-400 block mb-1 uppercase tracking-wider text-[10px] font-medium">Thematic Areas</span>
+                                    <div class="flex flex-wrap gap-1">
+                                        <template x-for="theme in (project.themes || [])">
+                                            <span class="px-2 py-0.5 bg-blue-50 border border-blue-100 text-blue-800 rounded-md text-[10px] font-medium" x-text="theme.name || theme.code"></span>
+                                        </template>
+                                        <template x-if="!(project.themes && project.themes.length)">
+                                            <span class="text-xs text-slate-400 italic">N/A</span>
+                                        </template>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block mb-1 uppercase tracking-wider text-[10px] font-medium">Locations</span>
+                                    <div class="flex flex-wrap gap-1">
+                                        <template x-for="loc in (project.locations || [])">
+                                            <span class="inline-flex items-center px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-700 rounded-md text-[10px]">
+                                                <i class="fas fa-map-marker-alt text-red-500 mr-1"></i>
+                                                <span x-text="loc.county || loc.mapsAddress || 'Location'"></span>
+                                             </span>
+                                        </template>
+                                        <template x-if="!(project.locations && project.locations.length)">
+                                            <span class="text-xs text-slate-400 italic">N/A</span>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Footer Actions -->
+                            <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
+                                <button @click="openProjectDetails(project.id)"
+                                        class="inline-flex items-center gap-1.5 text-slate-700 hover:text-slate-900 px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-xs font-semibold transition active:scale-95">
+                                    <i class="fas fa-eye"></i> Details
+                                </button>
+                                
+
+
+
+
+                                <!-- Edit action -->
+                                <template x-if="(project.partner === userEmail || project.contactPersonEmail === userEmail || userRole === 'PARTNER') && ['DRAFT', 'REJECTED_BY_REVIEWER', 'REJECTED_BY_APPROVER'].includes(project.approvalWorkflowStatus)">
+                                    <a :href="'new-project.html?id=' + project.id"
+                                       class="inline-flex items-center gap-1 text-white bg-amber-500 px-3 py-2 rounded-xl text-xs font-bold hover:bg-amber-600 transition active:scale-95">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                </template>
+                            </div>
+
+                        </div>
+                    </template>
+                    
+                    <!-- Mobile Empty State -->
+                    <template x-if="filteredProjects.length === 0">
+                        <div class="px-6 py-12 text-center text-slate-400">
+                            <i class="fas fa-folder-open text-4xl mb-3 opacity-50"></i>
+                            <p class="text-sm font-semibold">No projects found in this list</p>
+                            <p class="text-xs mt-1">Try resetting your search query or choosing another tab.</p>
+                        </div>
+                    </template>
+                </div>
+
+            </section>
+        </div>
+
+    </main>
+
+    <!-- Redesigned Project Details Modal with Mapping and Workflows -->
+    <div id="projectDetailsModal"
+         class="fixed inset-0 z-[1056] hidden items-center justify-center backdrop-blur-md bg-black/60 px-4 py-6"
+         role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-white rounded-2xl shadow-2xl overflow-hidden animate-fade-in">
+            
+            <!-- Modal Header -->
+            <div class="sticky top-0 z-10 flex items-center justify-between p-5 bg-slate-50 border-b border-slate-200">
+                <div>
+                    <span class="px-2 py-0.5 text-[10px] font-bold bg-slate-200 rounded-md text-slate-700 uppercase" id="modal-project-no">#</span>
+                    <h2 id="modal-title" class="text-lg font-bold text-slate-900 mt-1">Project Details</h2>
+                </div>
+                <button type="button" class="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-xl transition"
+                        onclick="closeProjectDetailsModal()">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Scrollable Content -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar" id="projectDetailsContent">
+                <!-- Javascript will render details template dynamically here -->
+            </div>
+            
+            <!-- Modal Action Footer -->
+            <div class="border-t border-slate-100 bg-slate-50 px-6 py-4 flex items-center justify-end gap-3" id="modal-footer-actions">
+                <button type="button"
+                        class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 transition"
+                        onclick="closeProjectDetailsModal()">Close</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- UI Core Scripts -->
+    <script src="styles/loadNav-v4.js"></script>
+    <script src="styles/authnav.js?v=4"></script>
+    <script src="styles/effects.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tw-elements/js/tw-elements.umd.min.js"></script>
+
+    <script>
+        // Store global components references
+        const API_BASE = (window.BASE_URL || '') + '/api';
+        let detailsMapInstance = null;
+
+        // Alpine controller setup
+        window.myProjectsApp = function myProjectsApp() {
+            return {
+                userRole: '',
+                userName: '',
+                userOrg: '',
+                userEmail: '',
+                searchQuery: '',
+                activeTab: 'active',
+                projectsList: [],
+                stats: { total: 0, active: 0, pending: 0, budget: 0, completed: 0, stalled: 0 },
+                loading: true,
+
+                async init() {
+                    window.myProjectsAppInstance = this;
+                    console.log('Alpine.js ready, initializing My Projects portal');
+                    
+                    const userStr = localStorage.getItem('currentUser') || localStorage.getItem('user');
+                    const role = localStorage.getItem('userRole');
+                    this.userRole = (role || '').toUpperCase();
+                    
+                    if (userStr) {
+                        try {
+                            const userObj = JSON.parse(userStr);
+                            this.userName = userObj.name || 'User';
+                            this.userOrg = userObj.organizationName || '';
+                            this.userEmail = userObj.email || '';
+                        } catch(e) {
+                            console.error('Error parsing user object', e);
+                        }
+                    }
+
+                    // Customize view settings and alerts per role
+                    setupRoleDisplayInfo(this);
+                    
+                    // Fetch initial projects array
+                    await fetchMyProjectsData(this);
+                },
+
+                get filteredProjects() {
+                    const query = this.searchQuery.toLowerCase().trim();
+                    let list = this.projectsList;
+
+                    // 1. Filter by Search Query
+                    if (query) {
+                        list = list.filter(p => {
+                            const idMatch = String(p.id).toLowerCase().includes(query) || String(p.projectNo || '').toLowerCase().includes(query);
+                            const titleMatch = (p.title || '').toLowerCase().includes(query);
+                            const partnerMatch = (p.partner || '').toLowerCase().includes(query);
+                            const catMatch = (p.projectCategory || '').toLowerCase().includes(query);
+                            const countyMatch = (p.locations || []).some(l => (l.county || '').toLowerCase().includes(query));
+                            return idMatch || titleMatch || partnerMatch || catMatch || countyMatch;
+                        });
+                    }
+
+                    // 2. Filter by Active Tab
+                    if (this.activeTab === 'active') {
+                        return list.filter(p => {
+                            const workflowStatus = p.approvalWorkflowStatus || p.status || 'PENDING_REVIEW';
+                            const status = (p.status || p.projectStatus || 'active').toLowerCase();
+                            return ['approved', 'ongoing', 'active'].includes(status) && !['COMPLETED', 'STALLED', 'PENDING_REVIEW', 'UNDER_REVIEW', 'PENDING_FINAL_APPROVAL'].includes(workflowStatus);
+                        });
+                    } else if (this.activeTab === 'pending') {
+                        return list.filter(p => {
+                            const workflowStatus = (p.approvalWorkflowStatus || p.status || 'PENDING_REVIEW').toLowerCase();
+                            const status = (p.status || p.projectStatus || '').toLowerCase();
+                            return ['pending_review', 'under_review', 'pending_final_approval', 'submitted', 'pending'].includes(workflowStatus) || status === 'pending';
+                        });
+                    } else if (this.activeTab === 'completed') {
+                        return list.filter(p => {
+                            const workflowStatus = p.approvalWorkflowStatus || p.status || '';
+                            const status = (p.status || p.projectStatus || '').toLowerCase();
+                            return workflowStatus === 'COMPLETED' || status === 'completed';
+                        });
+                    } else if (this.activeTab === 'stalled') {
+                        return list.filter(p => {
+                            const workflowStatus = p.approvalWorkflowStatus || p.status || '';
+                            const status = (p.status || p.projectStatus || '').toLowerCase();
+                            return workflowStatus === 'STALLED' || status === 'stalled' || status === 'stall';
+                        });
+                    }
+
+                    return list;
+                },
+
+                get workspaceTitle() {
+                    return 'My Projects Workspace';
+                },
+
+                get workspaceDescription() {
+                    return 'Manage and monitor your specific RMNCAH initiatives, approvals status, and geographic implementations.';
+                },
+
+                get breadcrumbText() {
+                    return 'My Projects';
+                },
+
+                get totalProjectsLabel() {
+                    return 'Total Workspace Projects';
+                },
+
+                get pendingActionsLabel() {
+                    return 'Pending Admin Review';
+                },
+
+                get pendingActionsSub() {
+                    return 'Awaiting peer reviews';
+                }
+            }
+        };
+
+        // Configure role text headers and banners
+        function setupRoleDisplayInfo(scope) {
+            const badgeText = document.getElementById('workspace-badge-text');
+            const visibilityAlert = document.getElementById('visibility-alert-text');
+            
+            if (scope.userRole === 'PARTNER') {
+                if (badgeText) badgeText.textContent = 'Partner Workspace';
+                if (visibilityAlert) {
+                    visibilityAlert.innerHTML = `<strong>Note:</strong> You are currently viewing projects created exclusively by your organization (<strong>${scope.userOrg || 'Partner Agency'}</strong>). You can monitor their review status in the two-tier workflow, edit drafts or rejected projects, and submit new proposals.`;
+                }
+            } else if (scope.userRole === 'DONOR') {
+                if (badgeText) badgeText.textContent = 'Donor Portal';
+                if (visibilityAlert) {
+                    visibilityAlert.innerHTML = `<strong>Note:</strong> You are currently viewing projects sponsored by your organization plus those matching your <strong>linked partner organizations</strong>. This allows you to track implementation metrics and budgets for funded partners.`;
+                }
+            } else if (scope.userRole === 'SUPER_ADMIN_REVIEWER') {
+                if (badgeText) badgeText.textContent = 'Reviewer Workspace';
+                if (visibilityAlert) {
+                    visibilityAlert.innerHTML = `<strong>Note:</strong> This is your personal projects workspace. As a Reviewer, you can create new projects here using the <strong>Submit New Project</strong> button. Your projects will enter the two-tier approvals workflow for review by a peer. To review pending projects in your queue, please visit the <a href="admin-approvals.html" class="font-semibold underline text-blue-600 hover:text-blue-800">Two-Tier Approvals</a> page.`;
+                }
+            } else if (scope.userRole === 'SUPER_ADMIN_APPROVER') {
+                if (badgeText) badgeText.textContent = 'Approver Workspace';
+                if (visibilityAlert) {
+                    visibilityAlert.innerHTML = `<strong>Note:</strong> This is your personal projects workspace. As an Approver, you can create new projects here using the <strong>Submit New Project</strong> button. Your projects will enter the two-tier approvals workflow for review. To authorize pending projects in your queue, please visit the <a href="admin-approvals.html" class="font-semibold underline text-blue-600 hover:text-blue-800">Two-Tier Approvals</a> page.`;
+                }
+            } else {
+                if (badgeText) badgeText.textContent = 'Admin Workspace';
+                if (visibilityAlert) {
+                    visibilityAlert.innerHTML = `<strong>Note:</strong> This is your personal projects workspace. As a System Administrator, you can create new projects here using the <strong>Submit New Project</strong> button. Your projects will enter the two-tier approvals workflow. To manage pending approvals or system configurations, please visit the <a href="admin-approvals.html" class="font-semibold underline text-blue-600 hover:text-blue-800">Two-Tier Approvals</a> page.`;
+                }
+            }
+        }
+
+        // Retrieve projects dataset from Server
+        async function fetchMyProjectsData(scope) {
+            scope.loading = true;
+            const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+            const hasAuthManager = !!(window.authManager && typeof window.authManager.apiCall === 'function');
+            
+            try {
+                let res;
+                if (hasAuthManager && authManager.isAuthenticated()) {
+                    res = await authManager.apiCall('/api/projects/my-projects', 'GET');
+                } else {
+                    res = await fetch(`${API_BASE}/projects/my-projects`, {
+                        method: 'GET',
+                        credentials: 'include',
+                        headers: token ? { Authorization: `Bearer ${token}` } : {}
+                    });
+                }
+
+                if (!res || !res.ok) {
+                    console.error('Failed to fetch user projects', res);
+                    scope.loading = false;
+                    return;
+                }
+
+                const json = await res.json();
+                let projects = (json && json.data) || [];
+                
+                console.log('[API Response] projects retrieved:', projects.length);
+                
+                scope.projectsList = projects;
+                calculateProjectStatistics(scope, projects);
+
+            } catch (err) {
+                console.error('Error fetching dashboard projects list:', err);
+            } finally {
+                scope.loading = false;
+            }
+        }
+
+        // Calculate and cache workflow numbers
+        function calculateProjectStatistics(scope, projects) {
+            const stats = { total: 0, active: 0, pending: 0, budget: 0, completed: 0, stalled: 0 };
+            
+            projects.forEach(p => {
+                stats.total++;
+                
+                // Track budget sum
+                if (p.budget) {
+                    stats.budget += p.budget;
+                }
+                
+                // Map status into standard groups
+                const workflowStatus = p.approvalWorkflowStatus || p.status || 'PENDING_REVIEW';
+                const status = (p.status || p.projectStatus || 'active').toLowerCase();
+                
+                if (['approved', 'ongoing', 'active'].includes(status) && !['COMPLETED', 'STALLED'].includes(workflowStatus)) {
+                    stats.active++;
+                }
+                
+                if (['pending_review', 'under_review', 'pending_final_approval', 'submitted', 'pending'].includes(workflowStatus.toLowerCase()) || status === 'pending') {
+                    stats.pending++;
+                }
+
+                if (workflowStatus === 'COMPLETED' || status === 'completed') {
+                    stats.completed++;
+                }
+
+                if (workflowStatus === 'STALLED' || status === 'stalled' || status === 'stall') {
+                    stats.stalled++;
+                }
+            });
+
+            scope.stats = stats;
+        }
+
+        // Refresh helper to safely reload dataset
+        window.refreshMyProjects = async function() {
+            const app = document.querySelector('[x-data]');
+            if (app) {
+                if (window.Alpine) {
+                    const data = Alpine.$data(app);
+                    if (data) {
+                        await fetchMyProjectsData(data);
+                        return;
+                    }
+                }
+                if (window.myProjectsAppInstance) {
+                    await fetchMyProjectsData(window.myProjectsAppInstance);
+                }
+            }
+        };
+
+        // Detail Modal Controller
+        window.openProjectDetails = async function (projectId, actionType = 'view') {
+            const modal = document.getElementById('projectDetailsModal');
+            const content = document.getElementById('projectDetailsContent');
+            const footer = document.getElementById('modal-footer-actions');
+            const projectNoSpan = document.getElementById('modal-project-no');
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            content.innerHTML = `
+                <div class="flex items-center justify-center py-12">
+                    <i class="fas fa-spinner fa-spin text-3xl text-primary mb-2"></i>
+                    <span class="ml-3 text-slate-500 font-medium">Loading project sheet details...</span>
+                </div>
+            `;
+
+            try {
+                const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+                const headers = {
+                    'Content-Type': 'application/json',
+                    Authorization: 'Bearer ' + token
+                };
+
+                const res = await fetch(`${API_BASE}/projects/${projectId}`, {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers
+                });
+
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const data = await res.json();
+
+                if (data.status === 200 && data.data) {
+                    const project = data.data;
+                    projectNoSpan.textContent = project.projectNo || '#' + project.id;
+                    
+                    // Enforce conflict-of-interest check: force view mode if user is project owner
+                    let currentUserEmail = '';
+                    const appEl = document.querySelector('[x-data]');
+                    if (appEl && window.Alpine) {
+                        currentUserEmail = Alpine.$data(appEl).userEmail;
+                    } else if (window.myProjectsAppInstance) {
+                        currentUserEmail = window.myProjectsAppInstance.userEmail;
+                    }
+                    
+                    let activeActionType = actionType;
+                    if ((project.partner === currentUserEmail || project.contactPersonEmail === currentUserEmail) && actionType !== 'view') {
+                        console.warn('[Conflict of Interest] User cannot review/approve their own project. Forcing view mode.');
+                        activeActionType = 'view';
+                    }
+                    
+                    // Render details templates
+                    renderProjectDetailsMarkup(project, content, activeActionType);
+                    
+                    // Configure footer buttons based on mode
+                    configureModalFooter(project, footer, activeActionType);
+                    
+                    // Initialize leaflet map
+                    setTimeout(() => {
+                        initializeProjectDetailsMap(project);
+                    }, 200);
+
+                } else {
+                    throw new Error('Project data could not be parsed');
+                }
+
+            } catch (err) {
+                console.error('Error opening details modal', err);
+                content.innerHTML = `
+                    <div class="p-6 text-center text-red-600 bg-red-50 border border-red-100 rounded-xl">
+                        <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                        <p class="font-bold">Failed to load project details</p>
+                        <p class="text-xs mt-1">${err.message}</p>
+                    </div>
+                `;
+            }
+        };
+
+        // Render project sheets HTML
+        function renderProjectDetailsMarkup(project, container, actionType) {
+            const workflowStatus = project.approvalWorkflowStatus || project.status || 'PENDING_REVIEW';
+            const progress = getWorkflowProgress(workflowStatus);
+            
+            // Map status classes
+            const badgeHtml = createWorkflowStatusBadge(workflowStatus);
+            const progressBar = createWorkflowProgressBar(workflowStatus);
+            
+            let actionSectionHtml = '';
+            if (actionType === 'review') {
+                actionSectionHtml = `
+                    <div class="bg-blue-50/50 border border-blue-200 rounded-2xl p-5 mt-6">
+                        <h4 class="text-sm font-bold text-blue-900 mb-3"><i class="fas fa-file-signature mr-1.5"></i> Thematic Area Review Decision</h4>
+                        <p class="text-xs text-blue-800 mb-4">Please examine the project details, budget parameters, and attachments. Provide your review feedback below.</p>
+                        
+                        <div class="space-y-3">
+                            <label class="block text-xs font-bold text-slate-700 uppercase">Review Feedback / Comments</label>
+                            <textarea id="action-comments" rows="3" 
+                                      class="w-full text-sm border border-slate-300 rounded-xl focus:ring-primary/20 focus:border-primary placeholder-slate-400"
+                                      placeholder="Provide details about compliance, scope recommendations, or reasons for requesting revisions..."></textarea>
+                        </div>
+                        <div class="mt-4 flex gap-3">
+                            <button onclick="submitReviewAction(${project.id}, 'approve')" class="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 active:scale-95 transition">
+                                Recommend for Approval
+                            </button>
+                            <button onclick="submitReviewAction(${project.id}, 'reject')" class="px-4 py-2 bg-red-600 text-white rounded-xl text-xs font-bold hover:bg-red-700 active:scale-95 transition">
+                                Request Revisions
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (actionType === 'approve') {
+                actionSectionHtml = `
+                    <div class="bg-emerald-50/50 border border-emerald-200 rounded-2xl p-5 mt-6">
+                        <h4 class="text-sm font-bold text-emerald-900 mb-3"><i class="fas fa-check-double mr-1.5"></i> Final Approval Authority Decision</h4>
+                        <p class="text-xs text-emerald-800 mb-4">You are making the final decision on this project. This will transition the status to APPROVED or REJECTED.</p>
+                        
+                        <div class="space-y-3">
+                            <label class="block text-xs font-bold text-slate-700 uppercase">Approval / Rejection Comments</label>
+                            <textarea id="action-comments" rows="3" 
+                                      class="w-full text-sm border border-slate-300 rounded-xl focus:ring-primary/20 focus:border-primary placeholder-slate-400"
+                                      placeholder="Add comments to justify final approval or rejection..."></textarea>
+                        </div>
+                        <div class="mt-4 flex gap-3">
+                            <button onclick="submitApprovalAction(${project.id}, 'approve')" class="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 active:scale-95 transition">
+                                Final Approve
+                            </button>
+                            <button onclick="submitApprovalAction(${project.id}, 'reject')" class="px-4 py-2 bg-red-600 text-white rounded-xl text-xs font-bold hover:bg-red-700 active:scale-95 transition">
+                                Reject Project
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    
+                    <!-- Left: Main Parameters -->
+                    <div class="md:col-span-2 space-y-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900 mb-1" id="modal-project-title">${project.title || 'Untitled Project'}</h3>
+                            <p class="text-xs text-slate-500 font-medium">Category: <span class="font-bold text-slate-700">${project.projectCategory || 'N/A'}</span></p>
+                        </div>
+
+                        <!-- Basic Information Sheet -->
+                        <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Implementing Agency</span>
+                                <span class="text-sm font-semibold text-slate-800">${project.partner || 'N/A'}</span>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Financial Budget</span>
+                                <span class="text-sm font-extrabold text-emerald-700">KES ${(project.budget || 0).toLocaleString()}</span>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Start Date</span>
+                                <span class="text-sm font-semibold text-slate-800">${project.startDate || 'N/A'}</span>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">End Date</span>
+                                <span class="text-sm font-semibold text-slate-800">${project.endDate || 'N/A'}</span>
+                            </div>
+                            <div class="col-span-2">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Contact Person</span>
+                                <span class="text-sm font-semibold text-slate-800">${project.contactPersonName || 'N/A'}</span>
+                                <span class="text-xs text-slate-500 block">${project.contactPersonEmail || ''}</span>
+                            </div>
+                        </div>
+
+                        <!-- Project Description / Context -->
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Project Description & Goal</h4>
+                            <p class="text-sm text-slate-600 leading-relaxed bg-white p-4 rounded-xl border border-slate-100 min-h-[100px] whitespace-pre-line">${project.description || 'No description provided.'}</p>
+                        </div>
+
+                        <!-- Geographic Mapping -->
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Geographic Mapping</h4>
+                            <div id="details-project-map" class="w-full h-64 rounded-xl border border-slate-200 shadow-sm z-0"></div>
+                            <div id="no-map-coords" class="hidden py-10 text-center border border-slate-200 border-dashed rounded-xl bg-slate-50 text-slate-400 text-xs">
+                                <i class="fas fa-map-location-dot text-2xl mb-1.5 opacity-50"></i>
+                                <p>No geographic coordinates mapped for this project.</p>
+                            </div>
+                        </div>
+
+                        <!-- Supporting Documents -->
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Supporting Documents</h4>
+                            <div class="divide-y divide-slate-100 border border-slate-100 rounded-xl bg-white overflow-hidden shadow-sm" id="details-documents-list">
+                                <!-- Loaded dynamically -->
+                                <div class="p-3 text-center text-xs text-slate-400">Loading documents...</div>
+                            </div>
+                        </div>
+
+                        <!-- Project Implementation Reports -->
+                        <div class="mt-6">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Project Progress & Implementation Reports</h4>
+                                <button id="btn-show-add-report" onclick="toggleAddReportForm()" class="hidden px-2.5 py-1 bg-teal-600 text-white rounded-lg text-[10px] font-bold hover:bg-teal-700 active:scale-95 transition">
+                                    <i class="fas fa-plus mr-1"></i> Add Report
+                                </button>
+                            </div>
+                            
+                            <!-- Add Report Form (hidden by default) -->
+                            <div id="add-report-form-container" class="hidden bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4 space-y-4 text-left">
+                                <h5 class="text-xs font-bold text-slate-800"><i class="fas fa-file-invoice mr-1.5"></i> Submit Progress Report</h5>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Report Title</label>
+                                        <input type="text" id="report-title" class="w-full text-xs border border-slate-300 rounded-lg p-2 focus:ring-1 focus:ring-primary focus:border-primary" placeholder="e.g. Q1 Progress Update">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Report Type</label>
+                                        <select id="report-type" class="w-full text-xs border border-slate-300 rounded-lg p-2 focus:ring-1 focus:ring-primary focus:border-primary">
+                                            <option value="INTERIM">Interim/Progress Report</option>
+                                            <option value="FINANCIAL">Financial Report</option>
+                                            <option value="IMPACT">Impact Assessment Report</option>
+                                            <option value="EVALUATION">Project Evaluation Report</option>
+                                            <option value="COMPLETION">Completion Report</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Completion Percentage (%)</label>
+                                        <input type="number" id="report-completion" min="0" max="100" class="w-full text-xs border border-slate-300 rounded-lg p-2 focus:ring-1 focus:ring-primary focus:border-primary" placeholder="e.g. 25">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Budget Utilized (KES)</label>
+                                        <input type="number" id="report-budget" min="0" class="w-full text-xs border border-slate-300 rounded-lg p-2 focus:ring-1 focus:ring-primary focus:border-primary" placeholder="e.g. 150000">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Executive Summary</label>
+                                    <textarea id="report-summary" rows="2" class="w-full text-xs border border-slate-300 rounded-lg p-2 focus:ring-1 focus:ring-primary focus:border-primary" placeholder="Brief high-level summary of report outcomes..."></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Detailed Content</label>
+                                    <textarea id="report-content" rows="4" class="w-full text-xs border border-slate-300 rounded-lg p-2 focus:ring-1 focus:ring-primary focus:border-primary" placeholder="Detailed report description, milestones achieved..."></textarea>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Outcomes Achieved</label>
+                                        <textarea id="report-outcomes" rows="2" class="w-full text-xs border border-slate-300 rounded-lg p-2 focus:ring-1 focus:ring-primary focus:border-primary" placeholder="Outcomes achieved during this period..."></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Challenges & Mitigations</label>
+                                        <textarea id="report-challenges" rows="2" class="w-full text-xs border border-slate-300 rounded-lg p-2 focus:ring-1 focus:ring-primary focus:border-primary" placeholder="Challenges faced and actions taken..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2 justify-end pt-2">
+                                    <button onclick="toggleAddReportForm()" class="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">Cancel</button>
+                                    <button onclick="submitNewReport(${project.id})" class="px-3 py-1.5 bg-teal-600 text-white rounded-lg text-xs font-bold hover:bg-teal-700 active:scale-95 transition">Submit Report</button>
+                                </div>
+                            </div>
+
+                            <div class="divide-y divide-slate-100 border border-slate-100 rounded-xl bg-white overflow-hidden shadow-sm" id="details-reports-list">
+                                <div class="p-3 text-center text-xs text-slate-400">Loading implementation reports...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Workflow Timeline & Metadata -->
+                    <div class="space-y-6">
+                        
+                        <!-- Workflow Tracker Card -->
+                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-4">
+                            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Approval Workflow</h4>
+                            
+                            <div>
+                                <span class="text-[10px] text-slate-500 block mb-1">Current State</span>
+                                ${badgeHtml}
+                            </div>
+                            
+                            <div>
+                                <span class="text-[10px] text-slate-500 block mb-1">Workflow Completion</span>
+                                ${progressBar}
+                            </div>
+
+                            <!-- Reviewer comments if populated -->
+                            ${createReviewerCommentsSection(project)}
+
+                            <!-- Final Approval comments if populated -->
+                            ${project.approvalComments ? `
+                                <div class="bg-emerald-50 border-l-4 border-emerald-500 p-3 mb-2">
+                                    <p class="text-sm text-emerald-800 mb-1"><strong>Final Comments:</strong></p>
+                                    <p class="text-sm text-emerald-700 italic">${project.approvalComments}</p>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <!-- Thematic Alignments -->
+                        <div class="bg-white p-5 rounded-2xl border border-slate-100 space-y-3 shadow-sm">
+                            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Thematic Alignments</h4>
+                            <div class="flex flex-col gap-2">
+                                <span class="text-[10px] text-slate-400 block">Assigned Themes</span>
+                                <div class="flex flex-wrap gap-1">
+                                    ${(project.themes || []).map(t => `<span class="px-2 py-1 bg-blue-50 text-blue-700 border border-blue-100 text-xs font-medium rounded-lg">${t.name || t.code}</span>`).join('') || '<span class="text-xs text-slate-400">No themes mapped</span>'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Form Panels -->
+                ${actionSectionHtml}
+            `;
+
+            // Load project supporting docs
+            loadSupportingDocuments(project.id);
+            
+            // Load project reports list
+            setTimeout(() => {
+                loadProjectReports(project.id, project);
+            }, 100);
+        }
+
+        // Configure footer buttons dynamically
+        function configureModalFooter(project, footer, actionType) {
+            const userRole = localStorage.getItem('userRole');
+            
+            let actionsHtml = `
+                <button type="button"
+                        class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 transition active:scale-95"
+                        onclick="closeProjectDetailsModal()">Close</button>
+            `;
+
+            // Edit actions for Partners
+            if (userRole === 'PARTNER' && ['DRAFT', 'REJECTED_BY_REVIEWER', 'REJECTED_BY_APPROVER'].includes(project.approvalWorkflowStatus || project.status)) {
+                actionsHtml += `
+                    <a href="new-project.html?id=${project.id}"
+                       class="rounded-xl bg-amber-500 hover:bg-amber-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition active:scale-95">
+                        <i class="fas fa-edit mr-1"></i> Edit Project
+                    </a>
+                `;
+            }
+
+            footer.innerHTML = actionsHtml;
+        }
+
+        // Map rendering controller
+        function initializeProjectDetailsMap(project) {
+            const mapContainer = document.getElementById('details-project-map');
+            const noCoordsMsg = document.getElementById('no-map-coords');
+            
+            // Clean up old maps
+            if (detailsMapInstance) {
+                detailsMapInstance.remove();
+                detailsMapInstance = null;
+            }
+
+            const locations = project.locations || [];
+            const coords = locations.filter(l => l.latitude && l.longitude);
+
+            if (coords.length === 0) {
+                mapContainer.classList.add('hidden');
+                noCoordsMsg.classList.remove('hidden');
+                return;
+            }
+
+            mapContainer.classList.remove('hidden');
+            noCoordsMsg.classList.add('hidden');
+
+            try {
+                mapboxgl.accessToken = window.MAPBOX_TOKEN;
+                
+                const first = coords[0];
+                detailsMapInstance = new mapboxgl.Map({
+                    container: 'details-project-map',
+                    style: 'mapbox://styles/lomogantech/clsa1f16r00wt01qqbnf741n6',
+                    center: [first.longitude, first.latitude],
+                    zoom: 8.5
+                });
+
+                detailsMapInstance.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+                // Place pins
+                coords.forEach(l => {
+                    const popupHtml = `
+                        <div class="text-xs p-1">
+                            <strong class="text-slate-900 font-bold block">${l.county || 'Project Location'}</strong>
+                            <span class="text-slate-500">${l.mapsAddress || ''}</span>
+                        </div>
+                    `;
+                    const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(popupHtml);
+
+                    new mapboxgl.Marker()
+                        .setLngLat([l.longitude, l.latitude])
+                        .setPopup(popup)
+                        .addTo(detailsMapInstance);
+                });
+            } catch(e) {
+                console.error('Failed to render Mapbox project details map', e);
+            }
+        }
+
+        // Load project documents
+        async function loadSupportingDocuments(projectId) {
+            const docContainer = document.getElementById('details-documents-list');
+            try {
+                const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+                const res = await fetch(`${API_BASE}/projects/${projectId}/documents`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const json = await res.json();
+                const docs = json.data || [];
+
+                if (docs.length === 0) {
+                    docContainer.innerHTML = '<div class="p-4 text-center text-xs text-slate-400 italic">No supporting documents uploaded for this project.</div>';
+                    return;
+                }
+
+                docContainer.innerHTML = docs.map(doc => `
+                    <div class="flex items-center justify-between p-3.5 hover:bg-slate-50 transition">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <i class="fas fa-file-pdf text-red-500 text-lg flex-shrink-0"></i>
+                            <div class="min-w-0">
+                                <span class="text-xs font-bold text-slate-800 truncate block">${doc.fileName || 'document.pdf'}</span>
+                                <span class="text-[10px] text-slate-400 block">${doc.documentType || 'Supporting Document'}</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="downloadDocument(${doc.id}, '${doc.fileName}')" class="text-slate-500 hover:text-primary p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-xs transition">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                console.error('Error loading documents list:', err);
+                docContainer.innerHTML = '<div class="p-4 text-center text-xs text-red-500">Failed to load supporting documents.</div>';
+            }
+        }
+
+        // Document download trigger
+        async function downloadDocument(docId, fileName) {
+            const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+            try {
+                const res = await fetch(`${API_BASE}/projects/documents/download/${docId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Download failed');
+                
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = fileName || 'download';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } catch(e) {
+                alert('Failed to download document: ' + e.message);
+            }
+        }
+
+        // Close Modal Details handler
+        window.closeProjectDetailsModal = function () {
+            const modal = document.getElementById('projectDetailsModal');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+            
+            // Cleanup Leaflet
+            if (detailsMapInstance) {
+                detailsMapInstance.remove();
+                detailsMapInstance = null;
+            }
+        };
+
+        // Submit review feedback (Reviewer portal)
+        window.submitReviewAction = async function(projectId, decision) {
+            const commentsEl = document.getElementById('action-comments');
+            const comments = commentsEl ? commentsEl.value.trim() : '';
+            
+            if (decision === 'reject' && !comments) {
+                alert('Please provide comments justifying why revisions are requested.');
+                return;
+            }
+
+            const confirmMsg = decision === 'approve' 
+                ? 'Recommend this project for final approval?' 
+                : 'Send this project back to the partner for revisions?';
+                
+            if (!confirm(confirmMsg)) return;
+
+            try {
+                const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+                const endpoint = decision === 'approve' 
+                    ? `/api/projects/admin/review/${projectId}/recommend` 
+                    : `/api/projects/admin/review/${projectId}/reject`;
+
+                const res = await fetch(`${API_BASE}${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ reviewerComments: comments })
+                });
+
+                if (!res.ok) throw new Error('API request failed');
+                
+                alert(decision === 'approve' ? 'Project successfully recommended for approval!' : 'Project returned to partner.');
+                closeProjectDetailsModal();
+                
+                // Refresh data
+                await window.refreshMyProjects();
+            } catch (err) {
+                alert('Failed to submit review: ' + err.message);
+            }
+        };
+
+        // Submit approval action (Approver portal)
+        window.submitApprovalAction = async function(projectId, decision) {
+            const commentsEl = document.getElementById('action-comments');
+            const comments = commentsEl ? commentsEl.value.trim() : '';
+
+            if (decision === 'reject' && !comments) {
+                alert('Please provide comments justifying the rejection.');
+                return;
+            }
+
+            const confirmMsg = decision === 'approve' 
+                ? 'Approve this project? This will set it as APPROVED.' 
+                : 'Reject this project? This will set it as REJECTED.';
+                
+            if (!confirm(confirmMsg)) return;
+
+            try {
+                const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+                const endpoint = decision === 'approve' 
+                    ? `/api/projects/admin/approve/${projectId}` 
+                    : `/api/projects/admin/reject/${projectId}`;
+
+                const res = await fetch(`${API_BASE}${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ approvalComments: comments })
+                });
+
+                if (!res.ok) throw new Error('API request failed');
+                
+                alert(decision === 'approve' ? 'Project approved successfully!' : 'Project rejected.');
+                closeProjectDetailsModal();
+                
+                // Refresh data
+                await window.refreshMyProjects();
+            } catch (err) {
+                alert('Failed to submit decision: ' + err.message);
+            }
+        };
+
+        // Global toggler for add report form
+        window.toggleAddReportForm = function() {
+            const container = document.getElementById('add-report-form-container');
+            if (container) {
+                container.classList.toggle('hidden');
+            }
+        };
+
+        // Load project reports
+        window.loadProjectReports = async function(projectId, project) {
+            const listContainer = document.getElementById('details-reports-list');
+            const addReportBtn = document.getElementById('btn-show-add-report');
+            if (!listContainer) return;
+
+            // Show add report button only if user is owner and project is active/completed
+            const userStr = localStorage.getItem('currentUser') || localStorage.getItem('user');
+            let currentUserEmail = '';
+            if (userStr) {
+                try {
+                    currentUserEmail = JSON.parse(userStr).email || '';
+                } catch(e) {}
+            }
+            
+            const isOwner = (project.partner === currentUserEmail || project.contactPersonEmail === currentUserEmail);
+            const projectStatus = (project.status || project.projectStatus || '').toLowerCase();
+            const canAddReport = isOwner && (projectStatus === 'active' || projectStatus === 'completed');
+
+            if (addReportBtn) {
+                if (canAddReport) {
+                    addReportBtn.classList.remove('hidden');
+                } else {
+                    addReportBtn.classList.add('hidden');
+                }
+            }
+
+            try {
+                const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+                const res = await fetch(`${API_BASE}/reports/projects/${projectId}`, {
+                    method: 'GET',
+                    headers: token ? { Authorization: `Bearer ${token}` } : {}
+                });
+
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const json = await res.json();
+                const reports = json.data || [];
+
+                if (reports.length === 0) {
+                    listContainer.innerHTML = `
+                        <div class="p-5 text-center text-xs text-slate-400">
+                            <i class="fas fa-file-lines text-2xl mb-1.5 opacity-40"></i>
+                            <p>No implementation reports submitted yet.</p>
+                            ${canAddReport ? '<p class="mt-1 text-[10px] text-primary font-semibold">Click "Add Report" to submit your first progress update.</p>' : ''}
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+                reports.forEach(report => {
+                    const formattedDate = report.submittedAt ? new Date(report.submittedAt).toLocaleDateString() : 'N/A';
+                    html += `
+                        <div class="p-4 space-y-3 bg-white border border-slate-100 rounded-xl mt-3 text-left">
+                            <div class="flex justify-between items-start gap-2 flex-wrap">
+                                <div>
+                                    <h5 class="text-sm font-bold text-slate-900">${report.title || 'Untitled Report'}</h5>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-50 text-blue-700 uppercase tracking-wide mt-1">${report.reportType || 'INTERIM'}</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-[10px] text-slate-400 block font-medium">Submitted: ${formattedDate}</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold bg-green-50 text-green-700 uppercase mt-1">${report.reportStatus || 'PUBLISHED'}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4 text-xs bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                <div>
+                                    <span class="text-[10px] text-slate-400 block">Completion Progress</span>
+                                    <span class="font-bold text-slate-800">${report.completionPercentage || 0}%</span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-400 block">Budget Utilized</span>
+                                    <span class="font-bold text-slate-850">KES ${(report.budgetUtilized || 0).toLocaleString()}</span>
+                                </div>
+                            </div>
+
+                            <div class="text-xs text-slate-600 space-y-2">
+                                <div>
+                                    <strong class="text-[10px] text-slate-400 block uppercase">Executive Summary</strong>
+                                    <p class="leading-relaxed bg-slate-50/50 p-2 rounded-lg border border-slate-100/50 whitespace-pre-line">${report.summary || 'No summary provided.'}</p>
+                                </div>
+                                <div>
+                                    <strong class="text-[10px] text-slate-400 block uppercase">Outcomes & Accomplishments</strong>
+                                    <p class="leading-relaxed whitespace-pre-line">${report.outcomesAchieved || 'None listed.'}</p>
+                                </div>
+                                ${report.challengesFaced ? `
+                                <div>
+                                    <strong class="text-[10px] text-slate-400 block uppercase">Challenges Faced</strong>
+                                    <p class="leading-relaxed text-red-650/90 whitespace-pre-line">${report.challengesFaced}</p>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                listContainer.innerHTML = html;
+
+            } catch (err) {
+                console.error('Error fetching project reports', err);
+                listContainer.innerHTML = `<div class="p-3 text-center text-xs text-red-500">Failed to load implementation reports.</div>`;
+            }
+        };
+
+        // Submit new project report
+        window.submitNewReport = async function(projectId) {
+            const title = document.getElementById('report-title').value.trim();
+            const reportType = document.getElementById('report-type').value;
+            const completionPercentage = parseInt(document.getElementById('report-completion').value);
+            const budgetUtilized = parseFloat(document.getElementById('report-budget').value);
+            const summary = document.getElementById('report-summary').value.trim();
+            const content = document.getElementById('report-content').value.trim();
+            const outcomesAchieved = document.getElementById('report-outcomes').value.trim();
+            const challengesFaced = document.getElementById('report-challenges').value.trim();
+
+            if (!title) {
+                alert('Report Title is required.');
+                return;
+            }
+            if (isNaN(completionPercentage) || completionPercentage < 0 || completionPercentage > 100) {
+                alert('Please enter a valid Completion Percentage (0-100).');
+                return;
+            }
+            if (isNaN(budgetUtilized) || budgetUtilized < 0) {
+                alert('Please enter a valid Budget Utilized amount.');
+                return;
+            }
+            if (!summary || !content) {
+                alert('Summary and Content fields are required.');
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+                const headers = {
+                    'Content-Type': 'application/json',
+                    Authorization: 'Bearer ' + token
+                };
+
+                const body = {
+                    title,
+                    reportType,
+                    completionPercentage,
+                    budgetUtilized,
+                    summary,
+                    content,
+                    outcomesAchieved,
+                    challengesFaced,
+                    reportStatus: 'PUBLISHED' // Automatically mark it published
+                };
+
+                const res = await fetch(`${API_BASE}/reports/projects/${projectId}`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(body)
+                });
+
+                if (!res.ok) {
+                    const errorJson = await res.json();
+                    throw new Error(errorJson.message || 'HTTP ' + res.status);
+                }
+
+                alert('Progress report submitted successfully!');
+                
+                // Hide form and clear inputs
+                toggleAddReportForm();
+                document.getElementById('report-title').value = '';
+                document.getElementById('report-completion').value = '';
+                document.getElementById('report-budget').value = '';
+                document.getElementById('report-summary').value = '';
+                document.getElementById('report-content').value = '';
+                document.getElementById('report-outcomes').value = '';
+                document.getElementById('report-challenges').value = '';
+
+                // Reload the reports list and the main projects page stats
+                if (window.myProjectsAppInstance) {
+                    // Get the project details and reload reports
+                    const resProj = await fetch(`${API_BASE}/projects/${projectId}`, {
+                        method: 'GET',
+                        headers: { Authorization: 'Bearer ' + token }
+                    });
+                    if (resProj.ok) {
+                        const jsonProj = await resProj.json();
+                        loadProjectReports(projectId, jsonProj.data);
+                    }
+                }
+                
+                // Refresh main page stats
+                window.refreshMyProjects();
+
+            } catch (err) {
+                console.error('Error submitting report:', err);
+                alert('Failed to submit report: ' + err.message);
+            }
+        };
+    </script>
+</body>
+
+</html>

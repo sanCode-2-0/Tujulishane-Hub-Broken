@@ -140,6 +140,10 @@ public class Project {
     @Column(name = "last_modified_at")
     private LocalDateTime lastModifiedAt;
     
+    // Role of the user who created the project (e.g. "SUPER_ADMIN" for MoH-created projects)
+    @Column(name = "created_by_role")
+    private String createdByRole;
+    
     // Bidirectional relationship with ProjectReports
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonManagedReference(value = "project-reports")
@@ -260,6 +264,14 @@ public class Project {
 
     public void setRejectionReason(String rejectionReason) {
         this.rejectionReason = rejectionReason;
+    }
+
+    public String getCreatedByRole() {
+        return createdByRole;
+    }
+
+    public void setCreatedByRole(String createdByRole) {
+        this.createdByRole = createdByRole;
     }
     
     public Long getReviewedBy() {

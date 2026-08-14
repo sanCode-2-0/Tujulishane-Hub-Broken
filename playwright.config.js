@@ -22,6 +22,6 @@ module.exports = defineConfig({
     command: 'npx http-server frontend -p 8000',
     url: 'http://localhost:8000',
     reuseExistingServer: true,
-    timeout: 15 * 1000,
+    timeout: 60 * 1000,
   },
 });

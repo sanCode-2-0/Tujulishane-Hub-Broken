@@ -1,6 +1,7 @@
+
 document.addEventListener("DOMContentLoaded", () => {
     console.log("Loading navigation...");
-    fetch("nav.html?v=" + Date.now())
+    fetch("nav-v4.html?v=" + Date.now())
         .then((response) => {
             console.log("Navigation fetch response:", response.status);
             if (!response.ok) throw new Error("Failed to load navigation");
@@ -8,26 +9,34 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .then((data) => {
             console.log("Navigation HTML loaded, length:", data.length);
+            console.log("[loadNav] HTML string contains m-dd-user?", data.includes('id="m-dd-user"'));
+            console.log("[loadNav] HTML string contains m-dd-admin?", data.includes('id="m-dd-admin"'));
             const placeholder = document.getElementById("nav-placeholder");
-            // Use Alpine.mutateDom so Alpine properly tracks the new DOM nodes
-            if (window.Alpine) {
-                console.log("Alpine.js found, inserting nav with mutateDom");
-                Alpine.mutateDom(() => {
-                    placeholder.innerHTML = data;
-                });
-                Alpine.initTree(placeholder);
-            } else {
-                console.log("Alpine.js not found, inserting nav directly");
-                placeholder.innerHTML = data;
-            }
-            // Re-execute any <script> tags injected with the nav HTML
+            placeholder.innerHTML = data;
+            
+            // Re-execute any <script> tags injected with the nav HTML BEFORE Alpine initializes
             placeholder.querySelectorAll("script").forEach((s) => {
                 const script = document.createElement("script");
-                script.textContent = s.textContent;
+                if (s.src) {
+                    script.src = s.src;
+                    if (s.defer) script.defer = true;
+                    if (s.async) script.async = true;
+                } else {
+                    script.textContent = s.textContent;
+                }
                 document.head.appendChild(script);
                 s.remove();
             });
-            console.log("Navigation inserted into DOM");
+            console.log("Navigation inserted into DOM and scripts re-executed");
+
+            // Initialize Alpine.js on the clean DOM tree
+            if (window.Alpine) {
+                console.log("Alpine.js found, initializing tree");
+                window.Alpine.initTree(placeholder);
+            } else {
+                console.log("Alpine.js not found");
+            }
+
             // Trigger navigation loaded event
             window.dispatchEvent(new CustomEvent("navLoaded"));
             console.log("Navigation loaded event dispatched");

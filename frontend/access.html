@@ -26,7 +26,7 @@
     </script>
     <link rel="stylesheet" href="styles/main.css">
     <!-- Backend URL Configuration -->
-    <script src="./app-config.js?v=3"></script>
+    <script src="./app-config.js?v=5"></script>
     <script src="./set-base-url.js?v=3"></script>
     <script src="./network-debugger.js"></script>
     <!-- Session Configuration -->
@@ -43,7 +43,7 @@
 </head>
 
 <body class="text-[#272E28] bg-white antialiased min-h-full flex flex-col font-sans">
-    <!-- We wrap the login page in the standard eCitizen header/footer structure -->
+    <!-- We wrap the login page in the standard header/footer structure -->
     <!-- Navigation Placeholder -->
     <div id="nav-placeholder"></div>
 
@@ -62,7 +62,7 @@
                 </div>
             </div>
 
-            <!-- Tabs navigation matching eCitizen -->
+            <!-- Tabs navigation -->
             <ul class="flex border-b border-gray-200 mb-6 w-full justify-center space-x-2" role="tablist" data-twe-nav-ref>
                 <li role="presentation" class="flex-grow">
                     <a href="#tabs-home02"
@@ -330,7 +330,7 @@
         </div>
     </div>
 
-    <!-- Footer matching eCitizen -->
+    <!-- Footer -->
     <footer class="bg-[#272E28] text-white py-12 border-t border-white/10 mt-auto">
         <div class="max-w-screen-2xl mx-auto px-6 sm:px-8">
             <div class="flex flex-col lg:flex-row justify-between items-center space-y-6 lg:space-y-0">
@@ -598,7 +598,7 @@
                 localStorage.setItem("isLogin", "true");
                 
                 const rememberMe = document.getElementById("rememberMe").checked;
-                localStorage.setItem("rememberMe", rememberMe);
+                localStorage.setItem("tempRememberMe", rememberMe);
 
                 await showAlert(data.message || "OTP sent successfully to your email. Check your inbox and spam folder.", "Success", "success");
                 window.location.href = "otp.html";

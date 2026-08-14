@@ -1,13 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap');
 
-:root {
-  --ecitizen-blue: #0047BA;
-  --ecitizen-blue-hover: #003da1;
-  --ecitizen-accent: #3482FF;
-  --ecitizen-dark-green: #00595E;
-  --ecitizen-footer-bg: #272E28;
-}
-
 * {
   font-family: "Lexend", "Montserrat", sans-serif;
 }

@@ -31,7 +31,7 @@
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/mobile.css">
     <!-- Backend URL Configuration -->
-    <script src="./app-config.js?v=3"></script>
+    <script src="./app-config.js?v=5"></script>
     <script src="./set-base-url.js?v=3"></script>
     <!-- Modal Utilities -->
     <script src="./modal-utils.js"></script>
@@ -815,6 +815,11 @@
             }
 
             console.log('[Security] Authentication check passed');
+            
+            if (window.location.hash === '#my-projects') {
+                console.log('[Routing] Redirecting hash #my-projects to my-projects.html');
+                window.location.href = 'my-projects.html';
+            }
         })();
     </script>
     <!-- Nav Start -->
@@ -2514,6 +2519,26 @@
                             async function autoFillSearchFromURL() {
                                 const urlParams = new URLSearchParams(window.location.search);
                                 const projectId = urlParams.get('id');
+                                const query = urlParams.get('q') || urlParams.get('search');
+
+                                if (query) {
+                                    const searchInputs = [
+                                        'project-search-active',
+                                        'project-search-pending',
+                                        'project-search-stalled',
+                                        'project-search-completed'
+                                    ];
+
+                                    searchInputs.forEach(inputId => {
+                                        const input = document.getElementById(inputId);
+                                        if (input) {
+                                            input.value = query;
+                                            const tbodyId = inputId.replace('project-search-', 'tbody-');
+                                            filterProjectTables(tbodyId);
+                                        }
+                                    });
+                                    console.log(`Auto-filled search with query: ${query}`);
+                                }
 
                                 if (!projectId) return;
 
@@ -2652,8 +2677,8 @@
         </div>
     </div>
     </div>
-    <script src="styles/loadNav.js"></script>
-    <script src="styles/authnav.js"></script>
+    <script src="styles/loadNav-v4.js"></script>
+    <script src="styles/authnav.js?v=4"></script>
     <script src="styles/effects.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tw-elements/js/tw-elements.umd.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

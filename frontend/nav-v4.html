@@ -104,7 +104,7 @@
             <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 22 23">
               <rect width="22" height="22" y=".5" fill="#3482FF" rx="11"></rect>
               <g fill="#fff">
-                <path d="M9.94 8.456 5.9 6.943a.662.662 0 0 0-.52.023.693.693 0 0 0-.352.395.719.719 0 0 0 .023.535.688.688 0 0 0 .383.362l3.25 1.218a.878.878 0 0 1 .417.329.919.919 0 0 1 .158.516v1.986c0 .27-.05.536-.148.786l-1.744 4.445a.718.718 0 0 0 .15.767.678.678 0 0 0 .485.201.666.666 0 0 0 .481-.213.702.702 0 0 0 .144-.23l1.57-3.999a.865.865 0 0 1 1.62 0l1.57 3.998c.069.17.2.306.365.377a.662.662 0 0 0 .517.003.69.69 0 0 0 .37-.372.72.72 0 0 0 .009-.532l-1.743-4.442a2.155 2.155 0 0 1-.149-.786v-1.99a.9.9 0 0 1 .575-.845l3.25-1.218a.688.688 0 0 0 .384-.362.72.72 0 0 0 .023-.535.693.693 0 0 0-.352-.395.662.662 0 0 0-.52-.024l-4.04 1.514a2.456 2.456 0 0 1-2.137 0Z"></path>
+                <path d="M9.94 8.456 5.9 6.943a.662.662 0 0 0-.52.023.693.693 0 0 0-.352.395.719.719 0 0 0 .023.535.688.688 0 0 0 .383.362l3.25 1.218a.878.878 0 0 1 .417.329.919.919 0 0 1 .158.516v1.986c0 .27-.05.536-.148.786l-1.744 4.445a.718.718 0 0 0 .15.767.678.678 0 0 0 .485.201.666.666 0 0 0 .481-.213.702.702 0 0 0 .144-.23l1.57-3.999a.865.865 0 0 1 .62 0l1.57 3.998c.069.17.2.306.365.377a.662.662 0 0 0 .517.003.69.69 0 0 0 .37-.372.72.72 0 0 0 .009-.532l-1.743-4.442a2.155 2.155 0 0 1-.149-.786v-1.99a.9.9 0 0 1 .575-.845l3.25-1.218a.688.688 0 0 0 .384-.362.72.72 0 0 0 .023-.535.693.693 0 0 0-.352-.395.662.662 0 0 0-.52-.024l-4.04 1.514a2.456 2.456 0 0 1-2.137 0Z"></path>
                 <path d="M9.454 6.1c0 .298.08.59.233.844.153.253.372.458.631.59l.191.072c.322.12.675.12.997 0l.191-.072a1.57 1.57 0 0 0 .61-.558 1.632 1.632 0 0 0-.48-2.235 1.522 1.522 0 0 0-1.575-.039 1.576 1.576 0 0 0-.584.587 1.64 1.64 0 0 0-.214.81Z"></path>
               </g>
             </svg>
@@ -275,18 +275,10 @@
         <button onclick="navDrop('m-dd-user')" class="w-full flex items-center justify-between py-2 text-left hover:text-[#0047BA]">
           <span><i class="fas fa-circle-user text-teal-600 mr-2"></i> Account (<span id="mUserDisplayName">User</span>)</span> <i class="fas fa-chevron-down text-xs"></i>
         </button>
-        <div id="m-dd-user" class="nav-dropdown hidden w-full mt-1 bg-gray-50 divide-y divide-gray-100 rounded-lg pl-4">
-          <ul class="py-2 text-sm text-left text-gray-700">
-            <li>
-              <a href="profile.html" class="block py-2 hover:text-[#0047BA]"><i class="mr-2 far fa-user"></i> Profile</a>
-            </li>
-            <li>
-              <a href="settings.html" class="block py-2 hover:text-[#0047BA]"><i class="mr-2 fas fa-gear"></i> Settings</a>
-            </li>
-            <li>
-              <button onclick="authManager.logout()" class="w-full text-left py-2 text-red-600 hover:text-red-800"><i class="mr-2 fas fa-right-from-bracket"></i> Logout</button>
-            </li>
-          </ul>
+        <div id="m-dd-user" class="nav-dropdown hidden w-full mt-1 bg-gray-50 rounded-lg pl-4 pr-2 py-2">
+          <a href="profile.html" class="block py-2 hover:text-[#0047BA]"><i class="mr-2 far fa-user text-gray-500"></i> Profile</a>
+          <a href="settings.html" class="block py-2 hover:text-[#0047BA]"><i class="mr-2 fas fa-gear text-gray-500"></i> Settings</a>
+          <button onclick="authManager.logout()" class="w-full text-left py-2 text-red-600 hover:text-red-800"><i class="mr-2 fas fa-right-from-bracket"></i> Logout</button>
         </div>
       </li>
     </ul>
