@@ -393,6 +393,10 @@
           message.textContent = "";
         }
 
+        function getCode() {
+          return inputs.map((i) => i.value.trim()).join("");
+        }
+
         // Input events
         inputs.forEach((input, idx) => {
           input.addEventListener("input", (e) => {
