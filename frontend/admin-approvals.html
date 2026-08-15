@@ -1395,53 +1395,90 @@
 							</div>
 
 							<div class="grid grid-cols-2 gap-4">
-								<div>
+								<!-- Icon Custom Picker -->
+								<div class="relative" x-data="{ open: false }" @click.outside="open = false">
 									<label class="block text-sm font-medium text-gray-700 mb-1">Icon</label>
-									<select x-model="thematicAreaForm.icon" required
-										class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
-										<option value="fas fa-tag">Default (Tag)</option>
-										<option value="fas fa-venus-mars">Gender/GBV (Venus &amp; Mars)</option>
-										<option value="far fa-heart px-2">Reproductive Health (Heart)</option>
-										<option value="fas fa-baby">Maternal Health (Baby)</option>
-										<option value="fas fa-users">Family Planning (People/Users)</option>
-										<option value="fas fa-child">Child Health (Child)</option>
-										<option value="fas fa-user-graduate">Adolescent Health (Graduate/Youth)</option>
-										<option value="fas fa-bullhorn">Advocacy/SBC (Bullhorn)</option>
-										<option value="fas fa-chart-line">Monitoring &amp; Evaluation (Chart Line)</option>
-										<option value="fas fa-book-open">Research/Learning (Open Book)</option>
-										<option value="fas fa-stethoscope">Clinical/Medical (Stethoscope)</option>
-										<option value="fas fa-ribbon">HIV/AIDS (Ribbon)</option>
-										<option value="fas fa-hospital">Hospital/Facilities (Hospital)</option>
-										<option value="fas fa-shield-halved">Protection (Shield)</option>
-										<option value="fas fa-hand-holding-heart">Care/Support (Hand &amp; Heart)</option>
-										<option value="fas fa-briefcase-medical">Medical Supplies (Medical Briefcase)</option>
-										<option x-show="thematicAreaForm.icon && !['fas fa-tag', 'fas fa-venus-mars', 'far fa-heart px-2', 'fas fa-baby', 'fas fa-users', 'fas fa-child', 'fas fa-user-graduate', 'fas fa-bullhorn', 'fas fa-chart-line', 'fas fa-book-open', 'fas fa-stethoscope', 'fas fa-ribbon', 'fas fa-hospital', 'fas fa-shield-halved', 'fas fa-hand-holding-heart', 'fas fa-briefcase-medical'].includes(thematicAreaForm.icon)"
-											:value="thematicAreaForm.icon"
-											x-text="'Custom (' + thematicAreaForm.icon + ')'"
-											selected>
-										</option>
-									</select>
+									<button type="button" @click="open = !open"
+										class="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 min-h-[42px]">
+										<span class="flex items-center">
+											<i :class="thematicAreaForm.icon || 'fas fa-tag'" class="text-gray-600 text-lg"></i>
+										</span>
+										<svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+											<path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+										</svg>
+									</button>
+									
+									<div x-show="open" x-transition
+										class="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg p-2 max-h-48 overflow-y-auto">
+										<div class="grid grid-cols-4 gap-2">
+											<template x-for="iconClass in [
+												'fas fa-tag', 'fas fa-venus-mars', 'far fa-heart px-2', 'fas fa-baby', 
+												'fas fa-users', 'fas fa-child', 'fas fa-user-graduate', 'fas fa-bullhorn', 
+												'fas fa-chart-line', 'fas fa-book-open', 'fas fa-stethoscope', 'fas fa-ribbon', 
+												'fas fa-hospital', 'fas fa-shield-halved', 'fas fa-hand-holding-heart', 'fas fa-briefcase-medical'
+											]">
+												<button type="button" @click="thematicAreaForm.icon = iconClass; open = false"
+													class="p-2 border rounded hover:bg-gray-50 flex items-center justify-center transition"
+													:class="thematicAreaForm.icon === iconClass ? 'border-blue-500 bg-blue-50/50' : 'border-gray-200'">
+													<i :class="iconClass" class="text-lg text-gray-700"></i>
+												</button>
+											</template>
+											<template x-if="thematicAreaForm.icon && ![
+												'fas fa-tag', 'fas fa-venus-mars', 'far fa-heart px-2', 'fas fa-baby', 
+												'fas fa-users', 'fas fa-child', 'fas fa-user-graduate', 'fas fa-bullhorn', 
+												'fas fa-chart-line', 'fas fa-book-open', 'fas fa-stethoscope', 'fas fa-ribbon', 
+												'fas fa-hospital', 'fas fa-shield-halved', 'fas fa-hand-holding-heart', 'fas fa-briefcase-medical'
+											].includes(thematicAreaForm.icon)">
+												<button type="button" @click="open = false"
+													class="p-2 border border-blue-500 bg-blue-50/50 rounded flex items-center justify-center transition">
+													<i :class="thematicAreaForm.icon" class="text-lg text-gray-700"></i>
+												</button>
+											</template>
+										</div>
+									</div>
 								</div>
-								<div>
+
+								<!-- Color Custom Picker -->
+								<div class="relative" x-data="{ open: false }" @click.outside="open = false">
 									<label class="block text-sm font-medium text-gray-700 mb-1">Color / Theme</label>
-									<select x-model="thematicAreaForm.color" required
-										class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
-										<option value="text-blue-500">Default Blue</option>
-										<option value="text-pink-400">Pink</option>
-										<option value="text-red-400">Red</option>
-										<option value="text-blue-400">Light Blue</option>
-										<option value="text-green-400">Green</option>
-										<option value="text-purple-400">Purple</option>
-										<option value="text-orange-400">Orange</option>
-										<option value="text-teal-400">Teal</option>
-										<option value="text-indigo-400">Indigo</option>
-										<option value="text-rose-400">Rose</option>
-										<option x-show="thematicAreaForm.color && !['text-blue-500', 'text-pink-400', 'text-red-400', 'text-blue-400', 'text-green-400', 'text-purple-400', 'text-orange-400', 'text-teal-400', 'text-indigo-400', 'text-rose-400'].includes(thematicAreaForm.color)"
-											:value="thematicAreaForm.color"
-											x-text="'Custom (' + thematicAreaForm.color + ')'"
-											selected>
-										</option>
-									</select>
+									<button type="button" @click="open = !open"
+										class="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 min-h-[42px]">
+										<span class="flex items-center">
+											<span class="inline-block w-5 h-5 rounded-full border border-gray-200"
+												:class="thematicAreaForm.color ? thematicAreaForm.color.replace('text-', 'bg-') : 'bg-blue-500'"></span>
+										</span>
+										<svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+											<path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+										</svg>
+									</button>
+									
+									<div x-show="open" x-transition
+										class="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg p-2 max-h-48 overflow-y-auto">
+										<div class="grid grid-cols-5 gap-2">
+											<template x-for="colorClass in [
+												'text-blue-500', 'text-pink-400', 'text-red-400', 'text-blue-400', 
+												'text-green-400', 'text-purple-400', 'text-orange-400', 'text-teal-400', 
+												'text-indigo-400', 'text-rose-400'
+											]">
+												<button type="button" @click="thematicAreaForm.color = colorClass; open = false"
+													class="p-2 border rounded hover:bg-gray-50 flex items-center justify-center transition"
+													:class="thematicAreaForm.color === colorClass ? 'border-blue-500 bg-blue-50/50' : 'border-gray-200'">
+													<span class="w-5 h-5 rounded-full border border-gray-200 block"
+														:class="colorClass.replace('text-', 'bg-')"></span>
+												</button>
+											</template>
+											<template x-if="thematicAreaForm.color && ![
+												'text-blue-500', 'text-pink-400', 'text-red-400', 'text-blue-400', 
+												'text-green-400', 'text-purple-400', 'text-orange-400', 'text-teal-400', 
+												'text-indigo-400', 'text-rose-400'
+											].includes(thematicAreaForm.color)">
+												<button type="button" @click="open = false"
+													class="p-2 border border-blue-500 bg-blue-50/50 rounded flex items-center justify-center transition">
+													<span class="w-5 h-5 rounded-full border border-gray-200 block bg-gray-500"></span>
+												</button>
+											</template>
+										</div>
+									</div>
 								</div>
 							</div>
 						</div>
