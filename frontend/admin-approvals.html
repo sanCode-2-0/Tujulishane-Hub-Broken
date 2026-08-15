@@ -826,19 +826,18 @@
 							</div>
 						</div>
 
-						<div class="overflow-x-auto shadow-lg rounded-xl border border-slate-200">
+						<div class="overflow-x-auto shadow-sm rounded-xl border border-slate-200/80">
 							<table id="project-table" class="w-full min-w-[1000px] text-left border-collapse bg-white">
 								<thead>
 									<tr class="border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-										<th class="px-6 py-4 bg-slate-50 text-left">#</th>
-										<th class="px-6 py-4 bg-slate-50 text-left">Project Details</th>
-										<th class="px-6 py-4 bg-slate-50 text-left">Partner</th>
-										<th class="px-6 py-4 bg-slate-50 text-left">Thematic Areas</th>
-										<th class="px-6 py-4 bg-slate-50 text-left">Financial Budget</th>
-										<th class="px-6 py-4 bg-slate-50 text-left">Locations</th>
-										<th class="px-6 py-4 bg-slate-50 text-left">Dates</th>
-										<th class="px-6 py-4 bg-slate-50 text-left">Status</th>
-										<th class="px-6 py-4 bg-slate-50 text-right">Actions</th>
+										<th class="px-6 py-4 bg-slate-50 text-left w-[4%]">#</th>
+										<th class="px-6 py-4 bg-slate-50 text-left w-[38%]">Project Details</th>
+										<th class="px-6 py-4 bg-slate-50 text-left w-[12%]">Themes</th>
+										<th class="px-6 py-4 bg-slate-50 text-left w-[14%]">Budget (KES)</th>
+										<th class="px-6 py-4 bg-slate-50 text-left w-[12%]">Locations</th>
+										<th class="px-6 py-4 bg-slate-50 text-left w-[10%]">Timeline</th>
+										<th class="px-6 py-4 bg-slate-50 text-left w-[10%]">Status</th>
+										<th class="px-6 py-4 bg-slate-50 text-right w-[10%]">Actions</th>
 									</tr>
 								</thead>
 								<tbody id="table-body" class="divide-y divide-slate-100 bg-white">
@@ -849,7 +848,7 @@
 											
 											<!-- Project Details -->
 											<td class="px-6 py-4">
-												<div class="flex flex-col gap-1">
+												<div class="flex flex-col gap-1.5">
 													<div class="flex items-center gap-1.5 flex-wrap">
 														<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 w-fit">
 															#<span x-text="project.projectNo || project.id"></span>
@@ -859,18 +858,21 @@
 														</span>
 													</div>
 													<span class="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors" x-text="project.title || 'Untitled Project'"></span>
-													<span class="text-xs text-slate-500" x-text="project.projectCategory || 'N/A'"></span>
+													<div class="flex flex-wrap gap-2 text-xs text-slate-500">
+														<span>Category: <span class="font-medium text-slate-700" x-text="project.projectCategory || 'N/A'"></span></span>
+														<span class="text-slate-300">|</span>
+														<span>Partner: <span class="font-medium text-slate-700" x-text="project.partner || 'N/A'"></span></span>
+													</div>
 												</div>
 											</td>
 
-											<!-- Partner -->
-											<td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700 font-medium" x-text="project.partner || 'N/A'"></td>
-
-											<!-- Themes -->
+											<!-- Themes (Compact Code badges) -->
 											<td class="px-6 py-4">
 												<div class="flex flex-wrap gap-1 max-w-full">
 													<template x-for="theme in (project.themes || [])" :key="theme.code">
-														<span class="px-2 py-0.5 bg-blue-50 border border-blue-100 text-blue-800 rounded-md text-[10px] font-medium" x-text="theme.name || theme.code"></span>
+														<span class="px-2 py-0.5 bg-blue-50 border border-blue-100 text-blue-800 rounded-md text-[10px] font-semibold cursor-help"
+															:title="theme.name || theme.displayName || theme.code"
+															x-text="theme.code || theme.name"></span>
 													</template>
 													<template x-if="!(project.themes && project.themes.length)">
 														<span class="text-xs text-slate-400 italic">N/A</span>
@@ -898,11 +900,11 @@
 												</div>
 											</td>
 
-											<!-- Dates -->
-											<td class="px-6 py-4 text-xs text-slate-600">
-												<div class="flex flex-col gap-0.5">
-													<span x-show="project.startDate"><i class="far fa-calendar-alt text-gray-400 mr-1"></i>Start: <span x-text="project.startDate"></span></span>
-													<span x-show="project.endDate"><i class="far fa-calendar-check text-gray-400 mr-1"></i>End: <span x-text="project.endDate"></span></span>
+											<!-- Timeline -->
+											<td class="px-6 py-4 text-xs text-slate-700 font-medium whitespace-nowrap">
+												<div class="flex items-center gap-1.5">
+													<i class="far fa-calendar-alt text-slate-400"></i>
+													<span><span x-text="project.startDate || 'N/A'"></span> to <span x-text="project.endDate || 'N/A'"></span></span>
 												</div>
 											</td>
 
@@ -926,12 +928,12 @@
 											<td class="px-6 py-4 whitespace-nowrap text-right text-xs">
 												<div class="flex gap-2 justify-end">
 													<button @click="viewProjectDetails(project.id)"
-														class="text-slate-600 hover:text-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition active:scale-95 text-xs font-bold inline-flex items-center gap-1 animate-hover"
+														class="text-slate-600 hover:text-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition active:scale-95 text-xs font-bold inline-flex items-center gap-1"
 														title="View Details">
 														<i class="fas fa-eye"></i> Details
 													</button>
 													<button @click="openReviewModal(project)"
-														class="text-white bg-blue-600 hover:bg-green-600 px-2.5 py-1.5 rounded-lg transition active:scale-95 text-xs font-bold inline-flex items-center gap-1 animate-hover"
+														class="text-white bg-blue-600 hover:bg-green-600 px-2.5 py-1.5 rounded-lg transition active:scale-95 text-xs font-bold inline-flex items-center gap-1"
 														title="Review Project">
 														<i class="fas fa-check-circle"></i> Review
 													</button>
@@ -980,19 +982,18 @@
 							</div>
 						</div>
 
-						<div class="overflow-x-auto shadow-lg rounded-xl border border-slate-200">
+						<div class="overflow-x-auto shadow-sm rounded-xl border border-slate-200/80">
 							<table id="project-table-pending" class="w-full min-w-[1000px] text-left border-collapse bg-white">
 								<thead>
 									<tr class="border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-										<th class="px-6 py-4 bg-slate-50 text-left">#</th>
-										<th class="px-6 py-4 bg-slate-50 text-left">Project Details</th>
-										<th class="px-6 py-4 bg-slate-50 text-left">Partner</th>
-										<th class="px-6 py-4 bg-slate-50 text-left">Thematic Areas</th>
-										<th class="px-6 py-4 bg-slate-50 text-left">Financial Budget</th>
-										<th class="px-6 py-4 bg-slate-50 text-left">Locations</th>
-										<th class="px-6 py-4 bg-slate-50 text-left">Dates</th>
-										<th class="px-6 py-4 bg-slate-50 text-left">Status</th>
-										<th class="px-6 py-4 bg-slate-50 text-right">Actions</th>
+										<th class="px-6 py-4 bg-slate-50 text-left w-[4%]">#</th>
+										<th class="px-6 py-4 bg-slate-50 text-left w-[38%]">Project Details</th>
+										<th class="px-6 py-4 bg-slate-50 text-left w-[12%]">Themes</th>
+										<th class="px-6 py-4 bg-slate-50 text-left w-[14%]">Budget (KES)</th>
+										<th class="px-6 py-4 bg-slate-50 text-left w-[12%]">Locations</th>
+										<th class="px-6 py-4 bg-slate-50 text-left w-[10%]">Timeline</th>
+										<th class="px-6 py-4 bg-slate-50 text-left w-[10%]">Status</th>
+										<th class="px-6 py-4 bg-slate-50 text-right w-[10%]">Actions</th>
 									</tr>
 								</thead>
 								<tbody id="table-body-pending" class="divide-y divide-slate-100 bg-white">
@@ -1003,7 +1004,7 @@
 											
 											<!-- Project Details -->
 											<td class="px-6 py-4">
-												<div class="flex flex-col gap-1">
+												<div class="flex flex-col gap-1.5">
 													<div class="flex items-center gap-1.5 flex-wrap">
 														<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 w-fit">
 															#<span x-text="project.projectNo || project.id"></span>
@@ -1013,18 +1014,21 @@
 														</span>
 													</div>
 													<span class="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors" x-text="project.title || 'Untitled Project'"></span>
-													<span class="text-xs text-slate-500" x-text="project.projectCategory || 'N/A'"></span>
+													<div class="flex flex-wrap gap-2 text-xs text-slate-500">
+														<span>Category: <span class="font-medium text-slate-700" x-text="project.projectCategory || 'N/A'"></span></span>
+														<span class="text-slate-300">|</span>
+														<span>Partner: <span class="font-medium text-slate-700" x-text="project.partner || 'N/A'"></span></span>
+													</div>
 												</div>
 											</td>
 
-											<!-- Partner -->
-											<td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700 font-medium" x-text="project.partner || 'N/A'"></td>
-
-											<!-- Themes -->
+											<!-- Themes (Compact Code badges) -->
 											<td class="px-6 py-4">
 												<div class="flex flex-wrap gap-1 max-w-full">
 													<template x-for="theme in (project.themes || [])" :key="theme.code">
-														<span class="px-2 py-0.5 bg-blue-50 border border-blue-100 text-blue-800 rounded-md text-[10px] font-medium" x-text="theme.name || theme.code"></span>
+														<span class="px-2 py-0.5 bg-blue-50 border border-blue-100 text-blue-800 rounded-md text-[10px] font-semibold cursor-help"
+															:title="theme.name || theme.displayName || theme.code"
+															x-text="theme.code || theme.name"></span>
 													</template>
 													<template x-if="!(project.themes && project.themes.length)">
 														<span class="text-xs text-slate-400 italic">N/A</span>
@@ -1052,11 +1056,11 @@
 												</div>
 											</td>
 
-											<!-- Dates -->
-											<td class="px-6 py-4 text-xs text-slate-600">
-												<div class="flex flex-col gap-0.5">
-													<span x-show="project.startDate"><i class="far fa-calendar-alt text-gray-400 mr-1"></i>Start: <span x-text="project.startDate"></span></span>
-													<span x-show="project.endDate"><i class="far fa-calendar-check text-gray-400 mr-1"></i>End: <span x-text="project.endDate"></span></span>
+											<!-- Timeline -->
+											<td class="px-6 py-4 text-xs text-slate-700 font-medium whitespace-nowrap">
+												<div class="flex items-center gap-1.5">
+													<i class="far fa-calendar-alt text-slate-400"></i>
+													<span><span x-text="project.startDate || 'N/A'"></span> to <span x-text="project.endDate || 'N/A'"></span></span>
 												</div>
 											</td>
 
@@ -1080,14 +1084,14 @@
 											<td class="px-6 py-4 whitespace-nowrap text-right text-xs">
 												<div class="flex gap-2 justify-end">
 													<button @click="viewProjectDetails(project.id)"
-														class="text-slate-600 hover:text-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition active:scale-95 text-xs font-bold inline-flex items-center gap-1 animate-hover"
+														class="text-slate-600 hover:text-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition active:scale-95 text-xs font-bold inline-flex items-center gap-1"
 														title="View Details">
 														<i class="fas fa-eye"></i> Details
 													</button>
 													<button
 														x-show="project.approvalWorkflowStatus?.includes('PENDING_FINAL')"
 														@click="openUnifiedApprovalModal(project)"
-														class="text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1.5 rounded-lg transition active:scale-95 text-xs font-bold inline-flex items-center gap-1 animate-hover"
+														class="text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1.5 rounded-lg transition active:scale-95 text-xs font-bold inline-flex items-center gap-1"
 														title="Review & Take Action">
 														<i class="fas fa-tasks text-[10px]"></i> Take Action
 													</button>
@@ -1135,17 +1139,16 @@
 								</div>
 							</div>
 
-							<div class="overflow-x-auto shadow-lg rounded-xl border border-slate-200">
+							<div class="overflow-x-auto shadow-sm rounded-xl border border-slate-200/80">
 								<table id="project-table-approval" class="w-full min-w-[1000px] text-left border-collapse bg-white">
 									<thead>
 										<tr class="border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-											<th class="px-6 py-4 bg-slate-50 text-left">#</th>
-											<th class="px-6 py-4 bg-slate-50 text-left">Project Details</th>
-											<th class="px-6 py-4 bg-slate-50 text-left">Partner</th>
-											<th class="px-6 py-4 bg-slate-50 text-left">Thematic Areas</th>
-											<th class="px-6 py-4 bg-slate-50 text-left">Review Status</th>
-											<th class="px-6 py-4 bg-slate-50 text-left">Workflow Status</th>
-											<th class="px-6 py-4 bg-slate-50 text-right">Actions</th>
+											<th class="px-6 py-4 bg-slate-50 text-left w-[4%]">#</th>
+											<th class="px-6 py-4 bg-slate-50 text-left w-[40%]">Project Details</th>
+											<th class="px-6 py-4 bg-slate-50 text-left w-[12%]">Themes</th>
+											<th class="px-6 py-4 bg-slate-50 text-left w-[16%]">Review Status</th>
+											<th class="px-6 py-4 bg-slate-50 text-left w-[18%]">Workflow Status</th>
+											<th class="px-6 py-4 bg-slate-50 text-right w-[10%]">Actions</th>
 										</tr>
 									</thead>
 									<tbody id="table-body-approval" class="divide-y divide-slate-100 bg-white">
@@ -1156,7 +1159,7 @@
 												
 												<!-- Project Details -->
 												<td class="px-6 py-4">
-													<div class="flex flex-col gap-1">
+													<div class="flex flex-col gap-1.5">
 														<div class="flex items-center gap-1.5 flex-wrap">
 															<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 w-fit">
 																#<span x-text="project.projectNo || project.id"></span>
@@ -1166,19 +1169,22 @@
 															</span>
 														</div>
 														<span class="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors" x-text="project.title || 'Untitled Project'"></span>
-														<span class="text-xs text-slate-500" x-text="project.projectCategory || 'N/A'"></span>
+														<div class="flex flex-wrap gap-2 text-xs text-slate-500">
+															<span>Category: <span class="font-medium text-slate-700" x-text="project.projectCategory || 'N/A'"></span></span>
+															<span class="text-slate-300">|</span>
+															<span>Partner: <span class="font-medium text-slate-700" x-text="project.partner || 'N/A'"></span></span>
+														</div>
 													</div>
 												</td>
 
-												<!-- Partner -->
-												<td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700 font-medium" x-text="project.partner || 'N/A'"></td>
-
-												<!-- Themes -->
+												<!-- Themes (Compact Code badges) -->
 												<td class="px-6 py-4">
 													<div class="flex flex-wrap gap-1 max-w-full">
 														<template x-if="project.themes && project.themes.length > 0">
 															<template x-for="theme in project.themes" :key="theme.code">
-																<span class="px-2 py-0.5 bg-blue-50 border border-blue-100 text-blue-800 rounded-md text-[10px] font-medium" x-text="theme.displayName || theme.name || theme"></span>
+																<span class="px-2 py-0.5 bg-blue-50 border border-blue-100 text-blue-800 rounded-md text-[10px] font-semibold cursor-help"
+																	:title="theme.displayName || theme.name || theme.code"
+																	x-text="theme.code || theme.displayName || theme.name"></span>
 															</template>
 														</template>
 														<template x-if="!project.themes || project.themes.length === 0">
@@ -1236,12 +1242,12 @@
 												<td class="px-6 py-4 whitespace-nowrap text-right text-xs">
 													<div class="flex gap-2 justify-end">
 														<button @click="viewProjectDetails(project.id)"
-															class="text-slate-600 hover:text-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition active:scale-95 text-xs font-bold inline-flex items-center gap-1 animate-hover"
+															class="text-slate-600 hover:text-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition active:scale-95 text-xs font-bold inline-flex items-center gap-1"
 															title="View Full Details">
 															<i class="fas fa-eye"></i> Details
 														</button>
 														<button @click="openUnifiedApprovalModal(project)"
-															class="text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1.5 rounded-lg transition active:scale-95 text-xs font-bold inline-flex items-center gap-1 animate-hover"
+															class="text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1.5 rounded-lg transition active:scale-95 text-xs font-bold inline-flex items-center gap-1"
 															title="Review & Take Action">
 															<i class="fas fa-tasks text-[10px]"></i> Take Action
 														</button>
