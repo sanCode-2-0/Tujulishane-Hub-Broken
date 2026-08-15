@@ -57,18 +57,20 @@ async function loadDashboardData() {
         }
 
         // Fetch current user details & populate header
-        const currentUser = window.authManager.getCurrentUser() || { name: "Braine Kapolon", role: "SUPER_ADMIN_APPROVER" };
+        const currentUser = window.authManager.getCurrentUser() || {};
+        const userName = currentUser.name || "Braine Kapolon";
+        const userRole = currentUser.role || "SUPER_ADMIN_APPROVER";
         const dashHello = document.getElementById('dash-hello');
         const dashRole = document.getElementById('dash-role');
         const dashTagline = document.getElementById('dash-tagline');
         const roleAvatar = document.getElementById('role-avatar');
 
-        if (dashHello) dashHello.textContent = `Welcome back, ${currentUser.name}`;
-        if (dashRole) dashRole.textContent = `Signed in as ${formatRoleDisplayName(currentUser.role)}`;
+        if (dashHello) dashHello.textContent = `Welcome back, ${userName}`;
+        if (dashRole) dashRole.textContent = `Signed in as ${formatRoleDisplayName(userRole)}`;
         if (dashTagline) {
-            if (currentUser.role.includes('APPROVER')) {
+            if (userRole.includes('APPROVER')) {
                 dashTagline.textContent = "You are the final approval authority. Sign-off on reviewed projects and keep the approval pipeline moving.";
-            } else if (currentUser.role.includes('REVIEWER')) {
+            } else if (userRole.includes('REVIEWER')) {
                 dashTagline.textContent = "You are a thematic reviewer. Inspect pending submissions under your focus areas.";
             } else {
                 dashTagline.textContent = "Coordinate reproductive, maternal, newborn, child, and adolescent health interventions.";
