@@ -387,10 +387,6 @@
           message.textContent = "";
         }
 
-        function getCode() {
-          return inputs.map((i) => i.value.trim()).join("");
-        }
-
         // Input events
         inputs.forEach((input, idx) => {
           input.addEventListener("input", (e) => {
@@ -497,6 +493,7 @@
           }, 1000);
         }
 
+        // Format time helper
         function formatTime(s) {
           const mm = String(Math.floor(s / 60)).padStart(2, "0");
           const ss = String(s % 60).padStart(2, "0");
