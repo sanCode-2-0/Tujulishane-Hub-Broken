@@ -913,7 +913,7 @@
 							required)
 						</p>
 
-						<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div id="themesGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
 							<label
 								class="theme-option flex items-center p-3 rounded-lg border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 cursor-pointer transition-all duration-200 group">
 								<input type="checkbox" name="themes" value="GBV"
@@ -1265,7 +1265,7 @@
 		};
 
 		// Initialize everything when DOM is loaded
-		document.addEventListener("DOMContentLoaded", function () {
+		document.addEventListener("DOMContentLoaded", async function () {
 			// Add global error handler
 			window.addEventListener('error', function (event) {
 				console.error('Global JavaScript error:', event.error);
@@ -1311,6 +1311,7 @@
 
 			initializeMap();
 			initializeMapSearch();
+			await loadThematicAreas();
 			initializeThemeSelection();
 			initializeFileUpload();
 			initializeFormProgress();
@@ -1833,6 +1834,52 @@
 				successMessage.remove();
 			}, 3000);
 		};
+
+		// Load thematic areas dynamically from the database
+		async function loadThematicAreas() {
+			const themesGrid = document.getElementById("themesGrid");
+			if (!themesGrid) return;
+
+			let areas = [];
+			try {
+				// Send the auth token if available (the endpoint may require it on some backends)
+				const token = localStorage.getItem("accessToken") || localStorage.getItem("token");
+				const headers = token ? { Authorization: `Bearer ${token}` } : {};
+				const response = await fetch(`${window.BASE_URL}/api/thematic-areas?t=${Date.now()}`, { headers });
+				if (response.ok) {
+					const data = await response.json();
+					if (data.status === 200 && Array.isArray(data.data) && data.data.length > 0) {
+						areas = data.data;
+					}
+				} else {
+					console.error("Failed to load thematic areas:", response.status);
+				}
+			} catch (error) {
+				console.error("Error loading thematic areas:", error);
+			}
+
+			// Keep the static HTML labels as fallback if the API fails or returns nothing
+			if (areas.length === 0) {
+				console.log("Using fallback thematic areas");
+				return;
+			}
+
+			themesGrid.innerHTML = areas.map(area => `
+				<label class="theme-option flex items-center p-3 rounded-lg border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 cursor-pointer transition-all duration-200 group">
+					<input type="checkbox" name="themes" value="${area.code}"
+						class="theme-checkbox rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 mr-3" />
+					<div class="flex-1">
+						<span class="font-medium text-gray-800 group-hover:text-blue-800">${area.title || area.code}</span>
+						${area.description ? `<p class="text-xs text-gray-500 mt-1">${area.description}</p>` : ""}
+					</div>
+					<div class="checkmark hidden text-green-500 ml-2">
+						<i class="fas fa-check"></i>
+					</div>
+				</label>
+			`).join("");
+
+			console.log("Loaded", areas.length, "thematic areas from database");
+		}
 
 		// Theme selection handling
 		function initializeThemeSelection() {

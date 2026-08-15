@@ -192,6 +192,9 @@
         const isLogin = localStorage.getItem("isLogin") !== "false";
         const code = otpHelpers.getCode(); // from your OTP script
 
+        // Get Remember Me preference from temporary storage (declared here so it is available before use below)
+        const rememberMe = localStorage.getItem("tempRememberMe") === "true";
+
         console.log("Email from localStorage:", email);
         console.log("isLogin flag:", isLogin);
         console.log("OTP code entered:", code);
@@ -299,8 +302,6 @@
             throw new Error(data.message || "OTP verification failed");
           }
 
-          // Get Remember Me preference from temporary storage
-          const rememberMe = localStorage.getItem("tempRememberMe") === "true";
           console.log("Remember Me preference:", rememberMe);
 
           // Store the real JWT with Remember Me preference
