@@ -151,7 +151,7 @@ async function loadDashboardData() {
                     <div>
                         <div class="flex items-center justify-between mb-3">
                             <div class="p-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600">
-                                <i class="fas fa-certificate text-lg"></i>
+                                <span class="material-symbols-outlined text-xl">verified</span>
                             </div>
                             <span class="text-sm font-extrabold text-amber-800 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-lg">${awaitingApprovalCount}</span>
                         </div>
@@ -170,7 +170,7 @@ async function loadDashboardData() {
                     <div>
                         <div class="flex items-center justify-between mb-3">
                             <div class="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600">
-                                <i class="fas fa-comment-dots text-lg"></i>
+                                <span class="material-symbols-outlined text-xl">rate_review</span>
                             </div>
                             <span class="text-sm font-extrabold text-blue-800 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-lg">${awaitingReviewCount}</span>
                         </div>
@@ -190,18 +190,18 @@ async function loadDashboardData() {
         const statsGrid = document.getElementById('stats-grid');
         if (statsGrid) {
             const statsItems = [
-                { title: "AWAITING YOUR APPROVAL", value: awaitingApprovalCount, icon: "fas fa-shield-halved text-blue-500 bg-blue-50 dark:bg-blue-950/20" },
-                { title: "APPROVED & LIVE", value: approvedLiveCount, icon: "fas fa-circle-check text-emerald-500 bg-emerald-50 dark:bg-emerald-950/20" },
-                { title: "TOTAL SUBMISSIONS", value: projects.length, icon: "far fa-folder text-blue-500 bg-blue-50 dark:bg-blue-950/20" },
-                { title: "TOTAL USERS", value: totalUsersCount, icon: "fas fa-user-group text-[#0047BA] bg-blue-50 dark:bg-blue-950/20" }
+                { title: "AWAITING YOUR APPROVAL", value: awaitingApprovalCount, icon: "verified", color: "text-blue-500 bg-blue-50 dark:bg-blue-950/20" },
+                { title: "APPROVED & LIVE", value: approvedLiveCount, icon: "task_alt", color: "text-emerald-500 bg-emerald-50 dark:bg-emerald-950/20" },
+                { title: "TOTAL SUBMISSIONS", value: projects.length, icon: "folder", color: "text-blue-500 bg-blue-50 dark:bg-blue-950/20" },
+                { title: "TOTAL USERS", value: totalUsersCount, icon: "group", color: "text-[#0047BA] bg-blue-50 dark:bg-blue-950/20" }
             ];
 
             statsGrid.innerHTML = statsItems.map(item => `
                 <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col justify-between">
                     <div class="flex items-center justify-between text-gray-400 dark:text-gray-500 mb-2">
                         <span class="text-[9px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-gray-500">${item.title}</span>
-                        <div class="p-1 rounded-lg ${item.icon.split(' ').slice(1).join(' ')}">
-                            <i class="${item.icon.split(' ')[0]} text-xs"></i>
+                        <div class="p-1 rounded-lg ${item.color.split(' ').slice(1).join(' ')} flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-sm">${item.icon}</span>
                         </div>
                     </div>
                     <p class="text-3xl font-black text-gray-900 dark:text-gray-100 mt-2">${item.value}</p>
@@ -213,16 +213,16 @@ async function loadDashboardData() {
         const linksGrid = document.getElementById('links-grid');
         if (linksGrid) {
             const shortcutItems = [
-                { title: "Two-Tier Approvals", description: "Grant final approval or reject reviewed projects.", icon: "fas fa-file-invoice", link: "admin-approvals.html", color: "emerald" },
-                { title: "Project Management", description: "Inspect any project and its full review history.", icon: "far fa-folder-open", link: "projects.html", color: "blue" },
-                { title: "Stakeholder Management", description: "Manage user roles and reviewer assignments.", icon: "fas fa-user-gear", link: "members.html", color: "amber" },
-                { title: "Donor Management", description: "Manage donor organizations and their funding records.", icon: "fas fa-hand-holding-heart", link: "organizations.html", color: "purple" }
+                { title: "Two-Tier Approvals", description: "Grant final approval or reject reviewed projects.", icon: "fact_check", link: "admin-approvals.html" },
+                { title: "Project Management", description: "Inspect any project and its full review history.", icon: "folder_open", link: "projects.html" },
+                { title: "Stakeholder Management", description: "Manage user roles and reviewer assignments.", icon: "manage_accounts", link: "members.html" },
+                { title: "Donor Management", description: "Manage donor organizations and their funding records.", icon: "volunteer_activism", link: "organizations.html" }
             ];
 
             linksGrid.innerHTML = shortcutItems.map(item => `
                 <a href="${item.link}" class="group bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition flex items-start gap-4">
-                    <div class="p-3 rounded-xl bg-slate-50 dark:bg-gray-700 text-gray-500 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 group-hover:text-[#0047BA] transition shrink-0">
-                        <i class="${item.icon} text-base"></i>
+                    <div class="p-3 rounded-xl bg-slate-50 dark:bg-gray-700 text-gray-500 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 group-hover:text-[#0047BA] transition shrink-0 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-lg">${item.icon}</span>
                     </div>
                     <div class="min-w-0">
                         <h3 class="text-xs font-bold text-gray-900 dark:text-gray-100 flex items-center gap-1.5 group-hover:text-[#0047BA] dark:group-hover:text-blue-400 transition">
