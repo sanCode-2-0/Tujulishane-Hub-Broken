@@ -44,7 +44,6 @@
 	<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 	<link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
-	<script src="styles/workflow-status-helper.js"></script>
 	<style>
 		[x-cloak] {
 			display: none !important;
@@ -52,7 +51,7 @@
 	</style>
 </head>
 
-<body x-data="adminApprovalsApp()" x-init="init()" class="bg-slate-50/50 text-slate-800 font-sans min-h-screen">
+<body x-data="adminApprovalsApp()" x-init="init()" class="text-gray-800">
 	<script>
 		window.adminApprovalsApp = function adminApprovalsApp() {
 			return {
@@ -714,106 +713,83 @@
 		<!-- Main Content -->
 		<div class=" mx-auto px-4 py-8">
 
-			<!-- Role-based tabs -->
-			<div class="mb-6 mt-12 pt-3">
-				<ul class="flex flex-wrap justify-between max-w-5xl mt-6 mx-auto" role="tablist">
-					<li x-show="userRole === 'SUPER_ADMIN_REVIEWER' || userRole === 'SUPER_ADMIN'" class="mr-2">
-						<button @click="activeTab = 'for-review'"
-							:class="activeTab === 'for-review' ? 'border-b-2 border-primary text-white bg-primary shadow-md rounded-md' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md'"
-							class="px-4 py-2 font-medium transition duration-200 ease-in-out">
-							Projects for Review
-							<span class="ml-2 px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs"
-								x-text="projectsForReview.length"></span>
-						</button>
-					</li>
+			<!-- Page Header -->
+			<div class="flex items-center justify-between border-b border-slate-200/80 pb-5 mb-8 flex-wrap gap-4 mt-6">
+				<div class="space-y-1">
+					<!-- Breadcrumbs -->
+					<nav class="flex items-center space-x-2 text-xs text-slate-500 font-medium mb-1">
+						<a href="dashboard.html" class="hover:text-blue-600 transition"><i class="fas fa-home mr-1"></i> Home</a>
+						<span class="text-slate-300">/</span>
+						<a href="#" class="hover:text-blue-600 transition">Approvals</a>
+						<span class="text-slate-300">/</span>
+						<span class="text-slate-700 font-semibold">Two-Tier Workspace</span>
+					</nav>
+					<!-- Title and Badge -->
+					<div class="flex items-center gap-3 flex-wrap">
+						<h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Two-Tier Approvals Workspace</h1>
+						<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 border border-blue-200 text-blue-700 uppercase tracking-wide">
+							<i class="fas fa-shield-alt mr-1"></i> Admin Console
+						</span>
+					</div>
+					<!-- Description -->
+					<p class="text-xs text-slate-500 font-medium">Review pending initiatives, assign subject matter experts, and manage platform thematic definitions.</p>
+				</div>
+			</div>
 
-					<li x-show="userRole === 'SUPER_ADMIN_APPROVER' || userRole === 'SUPER_ADMIN'" class="mr-2">
-						<button @click="activeTab = 'all-pending'"
-							:class="activeTab === 'all-pending' ? 'border-b-2 border-primary text-white bg-primary shadow-md rounded-md' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md'"
-							class="px-4 py-2 font-medium transition duration-200 ease-in-out">
-							All Pending Approvals
-							<span class="ml-2 px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs"
-								x-text="allPendingProjects.length"></span>
-						</button>
-					</li>
-
-					<li x-show="userRole === 'SUPER_ADMIN_APPROVER' || userRole === 'SUPER_ADMIN'" class="mr-2">
-						<button @click="activeTab = 'for-approval'"
-							:class="activeTab === 'for-approval' ? 'border-b-2 border-primary text-white bg-primary shadow-md rounded-md' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md'"
-							class="px-4 py-2 font-medium transition duration-200 ease-in-out">
-							Awaiting Final Approval
-							<span class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs"
-								x-text="projectsForApproval.length"></span>
-						</button>
-					</li>
-
-					<li x-show="userRole === 'SUPER_ADMIN_APPROVER' || userRole === 'SUPER_ADMIN'" class="mr-2">
-						<button @click="activeTab = 'reviewers'"
-							:class="activeTab === 'reviewers' ? 'border-b-2 border-primary text-white bg-primary shadow-md rounded-md' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md'"
-							class="px-4 py-2 font-medium transition duration-200 ease-in-out">
-							Manage Reviewers
-						</button>
-					</li>
-
-					<li x-show="userRole === 'SUPER_ADMIN_APPROVER' || userRole === 'SUPER_ADMIN'" class="mr-2">
-						<button @click="activeTab = 'thematic-areas'"
-							:class="activeTab === 'thematic-areas' ? 'border-b-2 border-primary text-white bg-primary shadow-md rounded-md' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md'"
-							class="px-4 py-2 font-medium transition duration-200 ease-in-out">
-							Thematic Areas
-						</button>
-					</li>
-				</ul>
+			<!-- Tab Pills Selector -->
+			<div class="flex gap-1.5 bg-slate-100 border border-slate-200/60 p-1.5 rounded-2xl self-start md:self-auto overflow-x-auto whitespace-nowrap max-w-full mb-8 scrollbar-none shadow-sm w-fit">
+				<button x-show="userRole === 'SUPER_ADMIN_REVIEWER' || userRole === 'SUPER_ADMIN'"
+					@click="activeTab = 'for-review'"
+					:class="activeTab === 'for-review' ? 'bg-white shadow-md text-blue-900 font-bold scale-[1.02]' : 'text-slate-600 hover:text-slate-950 hover:bg-slate-200/55 font-medium'"
+					class="px-5 py-2.5 text-xs rounded-xl transition duration-150 flex items-center gap-2">
+					<i class="fas fa-folder-open text-xs"></i>
+					<span>Projects for Review</span>
+					<span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold"
+						:class="activeTab === 'for-review' ? 'bg-blue-100 text-blue-800' : 'bg-slate-200 text-slate-700'"
+						x-text="projectsForReview.length">0</span>
+				</button>
+				
+				<button x-show="userRole === 'SUPER_ADMIN_APPROVER' || userRole === 'SUPER_ADMIN'"
+					@click="activeTab = 'all-pending'"
+					:class="activeTab === 'all-pending' ? 'bg-white shadow-md text-blue-900 font-bold scale-[1.02]' : 'text-slate-600 hover:text-slate-950 hover:bg-slate-200/55 font-medium'"
+					class="px-5 py-2.5 text-xs rounded-xl transition duration-150 flex items-center gap-2">
+					<i class="fas fa-list-ul text-xs"></i>
+					<span>All Pending Approvals</span>
+					<span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold"
+						:class="activeTab === 'all-pending' ? 'bg-blue-100 text-blue-800' : 'bg-slate-200 text-slate-700'"
+						x-text="allPendingProjects.length">0</span>
+				</button>
+				
+				<button x-show="userRole === 'SUPER_ADMIN_APPROVER' || userRole === 'SUPER_ADMIN'"
+					@click="activeTab = 'for-approval'"
+					:class="activeTab === 'for-approval' ? 'bg-white shadow-md text-blue-900 font-bold scale-[1.02]' : 'text-slate-600 hover:text-slate-950 hover:bg-slate-200/55 font-medium'"
+					class="px-5 py-2.5 text-xs rounded-xl transition duration-150 flex items-center gap-2">
+					<i class="fas fa-stamp text-xs"></i>
+					<span>Awaiting Final Approval</span>
+					<span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold"
+						:class="activeTab === 'for-approval' ? 'bg-blue-100 text-blue-800' : 'bg-slate-200 text-slate-700'"
+						x-text="projectsForApproval.length">0</span>
+				</button>
+				
+				<button x-show="userRole === 'SUPER_ADMIN_APPROVER' || userRole === 'SUPER_ADMIN'"
+					@click="activeTab = 'reviewers'"
+					:class="activeTab === 'reviewers' ? 'bg-white shadow-md text-blue-900 font-bold scale-[1.02]' : 'text-slate-600 hover:text-slate-950 hover:bg-slate-200/55 font-medium'"
+					class="px-5 py-2.5 text-xs rounded-xl transition duration-150 flex items-center gap-2">
+					<i class="fas fa-users-cog text-xs"></i>
+					<span>Manage Reviewers</span>
+				</button>
+				
+				<button x-show="userRole === 'SUPER_ADMIN_APPROVER' || userRole === 'SUPER_ADMIN'"
+					@click="activeTab = 'thematic-areas'"
+					:class="activeTab === 'thematic-areas' ? 'bg-white shadow-md text-blue-900 font-bold scale-[1.02]' : 'text-slate-600 hover:text-slate-950 hover:bg-slate-200/55 font-medium'"
+					class="px-5 py-2.5 text-xs rounded-xl transition duration-150 flex items-center gap-2">
+					<i class="fas fa-tags text-xs"></i>
+					<span>Thematic Areas</span>
+				</button>
 			</div>
 
 			<!-- Projects for Review (Reviewer View) -->
 			<div x-show="activeTab === 'for-review'" class="space-y-4">
-				<!-- KPI Stats Cards Row -->
-				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-					<!-- Card 1: Total Awaiting Review -->
-					<div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between min-h-[110px] relative overflow-hidden group hover:shadow-md transition duration-200">
-						<div class="text-slate-400 font-bold text-[10px] tracking-wider uppercase">Awaiting Review</div>
-						<div class="mt-2 flex items-baseline gap-2">
-							<span class="text-3xl font-extrabold text-slate-900" x-text="reviewStats.total">0</span>
-							<span class="text-xs text-slate-500 font-medium">Projects</span>
-						</div>
-						<div class="mt-3 text-[11px] font-bold text-blue-600 flex items-center gap-1">
-							<i class="fas fa-hourglass-half"></i> Action required
-						</div>
-					</div>
-					<!-- Card 2: Under Review -->
-					<div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between min-h-[110px] relative overflow-hidden group hover:shadow-md transition duration-200">
-						<div class="text-slate-400 font-bold text-[10px] tracking-wider uppercase">Under Review</div>
-						<div class="mt-2 flex items-baseline gap-2">
-							<span class="text-3xl font-extrabold text-blue-600" x-text="reviewStats.underReview">0</span>
-							<span class="text-xs text-slate-500 font-medium">Active reviews</span>
-						</div>
-						<div class="mt-3 text-[11px] font-bold text-blue-500 flex items-center gap-1">
-							<i class="fas fa-eye"></i> Compliance check
-						</div>
-					</div>
-					<!-- Card 3: Pending Review -->
-					<div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between min-h-[110px] relative overflow-hidden group hover:shadow-md transition duration-200">
-						<div class="text-slate-400 font-bold text-[10px] tracking-wider uppercase">Pending Queue</div>
-						<div class="mt-2 flex items-baseline gap-2">
-							<span class="text-3xl font-extrabold text-yellow-600" x-text="reviewStats.pendingReview">0</span>
-							<span class="text-xs text-slate-500 font-medium">Unopened</span>
-						</div>
-						<div class="mt-3 text-[11px] font-bold text-yellow-600 flex items-center gap-1">
-							<i class="fas fa-clock"></i> Awaiting initial look
-						</div>
-					</div>
-					<!-- Card 4: Total Budget -->
-					<div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between min-h-[110px] relative overflow-hidden group hover:shadow-md transition duration-200">
-						<div class="text-slate-400 font-bold text-[10px] tracking-wider uppercase">Total Budget Value</div>
-						<div class="mt-2 flex flex-col">
-							<span class="text-xl font-extrabold text-emerald-600">KES <span x-text="reviewStats.budget.toLocaleString()">0</span></span>
-						</div>
-						<div class="mt-3 text-[11px] font-bold text-emerald-600 flex items-center gap-1">
-							<i class="fas fa-wallet"></i> Total funding value
-						</div>
-					</div>
-				</div>
-
 				<div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
 					<h2 class="text-xl font-bold mb-4">
 						Projects in Your Thematic Area
@@ -932,7 +908,18 @@
 
 											<!-- Status -->
 											<td class="px-6 py-4 whitespace-nowrap">
-												<span x-html="createWorkflowStatusBadge(project.approvalWorkflowStatus || project.approvalStatus || project.status)"></span>
+												<span :class="{
+													'bg-yellow-50 border border-yellow-200 text-yellow-800': project.approvalWorkflowStatus?.includes('PENDING_REVIEW') || project.approvalStatus === 'PENDING',
+													'bg-blue-50 border border-blue-200 text-blue-800': project.approvalWorkflowStatus?.includes('PENDING_FINAL') || project.approvalStatus === 'SUBMITTED',
+													'bg-purple-50 border border-purple-200 text-purple-800': project.approvalWorkflowStatus && !project.approvalWorkflowStatus.includes('PENDING')
+												}" class="px-2.5 py-1 rounded-full text-xs font-semibold inline-flex items-center">
+													<i class="fas mr-1.5 text-[10px]" :class="{
+														'fa-clock': project.approvalWorkflowStatus?.includes('PENDING_REVIEW') || project.approvalStatus === 'PENDING',
+														'fa-hourglass-half': project.approvalWorkflowStatus?.includes('PENDING_FINAL') || project.approvalStatus === 'SUBMITTED',
+														'fa-check-circle': project.approvalWorkflowStatus && !project.approvalWorkflowStatus.includes('PENDING')
+													}"></i>
+													<span x-text="project.approvalWorkflowStatus ? project.approvalWorkflowStatus.replace(/_/g, ' ') : (project.approvalStatus || 'PENDING')"></span>
+												</span>
 											</td>
 
 											<!-- Actions -->
@@ -964,53 +951,6 @@
 
 			<!-- All Pending Approvals (Overview for Approvers) -->
 			<div x-show="activeTab === 'all-pending'" class="space-y-4">
-				<!-- KPI Stats Cards Row -->
-				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-					<!-- Card 1: Pipeline Count -->
-					<div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between min-h-[110px] relative overflow-hidden group hover:shadow-md transition duration-200">
-						<div class="text-slate-400 font-bold text-[10px] tracking-wider uppercase">Total Pipeline Projects</div>
-						<div class="mt-2 flex items-baseline gap-2">
-							<span class="text-3xl font-extrabold text-slate-900" x-text="pendingStats.total">0</span>
-							<span class="text-xs text-slate-500 font-medium">In workflow</span>
-						</div>
-						<div class="mt-3 text-[11px] font-bold text-blue-600 flex items-center gap-1">
-							<i class="fas fa-stream"></i> Active approvals pipeline
-						</div>
-					</div>
-					<!-- Card 2: Pending Technical Review -->
-					<div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between min-h-[110px] relative overflow-hidden group hover:shadow-md transition duration-200">
-						<div class="text-slate-400 font-bold text-[10px] tracking-wider uppercase">In Technical Review</div>
-						<div class="mt-2 flex items-baseline gap-2">
-							<span class="text-3xl font-extrabold text-yellow-600" x-text="pendingStats.pendingReview">0</span>
-							<span class="text-xs text-slate-500 font-medium">Reviewer tier</span>
-						</div>
-						<div class="mt-3 text-[11px] font-bold text-yellow-600 flex items-center gap-1">
-							<i class="fas fa-user-edit"></i> Awaiting review
-						</div>
-					</div>
-					<!-- Card 3: Pending Final Approval -->
-					<div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between min-h-[110px] relative overflow-hidden group hover:shadow-md transition duration-200">
-						<div class="text-slate-400 font-bold text-[10px] tracking-wider uppercase">Awaiting Final Action</div>
-						<div class="mt-2 flex items-baseline gap-2">
-							<span class="text-3xl font-extrabold text-indigo-600" x-text="pendingStats.pendingApproval">0</span>
-							<span class="text-xs text-slate-500 font-medium">Approver tier</span>
-						</div>
-						<div class="mt-3 text-[11px] font-bold text-indigo-600 flex items-center gap-1">
-							<i class="fas fa-stamp"></i> Awaiting final sign-off
-						</div>
-					</div>
-					<!-- Card 4: Total Pipeline Budget -->
-					<div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between min-h-[110px] relative overflow-hidden group hover:shadow-md transition duration-200">
-						<div class="text-slate-400 font-bold text-[10px] tracking-wider uppercase">Total Pipeline Budget</div>
-						<div class="mt-2 flex flex-col">
-							<span class="text-xl font-extrabold text-emerald-600">KES <span x-text="pendingStats.budget.toLocaleString()">0</span></span>
-						</div>
-						<div class="mt-3 text-[11px] font-bold text-emerald-600 flex items-center gap-1">
-							<i class="fas fa-wallet"></i> Total funding value
-						</div>
-					</div>
-				</div>
-
 				<div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
 					<h2 class="text-xl font-bold mb-4">
 						All Projects in Approval Pipeline
@@ -1122,7 +1062,18 @@
 
 											<!-- Status -->
 											<td class="px-6 py-4 whitespace-nowrap">
-												<span x-html="createWorkflowStatusBadge(project.approvalWorkflowStatus || project.approvalStatus || project.status)"></span>
+												<span :class="{
+													'bg-yellow-50 border border-yellow-200 text-yellow-800': project.approvalWorkflowStatus?.includes('PENDING_REVIEW') || project.approvalStatus === 'PENDING',
+													'bg-blue-50 border border-blue-200 text-blue-800': project.approvalWorkflowStatus?.includes('PENDING_FINAL') || project.approvalStatus === 'SUBMITTED',
+													'bg-purple-50 border border-purple-200 text-purple-800': project.approvalWorkflowStatus && !project.approvalWorkflowStatus.includes('PENDING')
+												}" class="px-2.5 py-1 rounded-full text-xs font-semibold inline-flex items-center">
+													<i class="fas mr-1.5 text-[10px]" :class="{
+														'fa-clock': project.approvalWorkflowStatus?.includes('PENDING_REVIEW') || project.approvalStatus === 'PENDING',
+														'fa-hourglass-half': project.approvalWorkflowStatus?.includes('PENDING_FINAL') || project.approvalStatus === 'SUBMITTED',
+														'fa-check-circle': project.approvalWorkflowStatus && !project.approvalWorkflowStatus.includes('PENDING')
+													}"></i>
+													<span x-text="project.approvalWorkflowStatus ? project.approvalWorkflowStatus.replace(/_/g, ' ') : (project.approvalStatus || 'PENDING')"></span>
+												</span>
 											</td>
 
 											<!-- Actions -->
@@ -1157,53 +1108,6 @@
 
 			<!-- Projects Awaiting Final Approval (Approver View) -->
 			<div x-show="activeTab === 'for-approval'" class="space-y-4">
-				<!-- KPI Stats Cards Row -->
-				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-					<!-- Card 1: Direct Queue -->
-					<div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between min-h-[110px] relative overflow-hidden group hover:shadow-md transition duration-200">
-						<div class="text-slate-400 font-bold text-[10px] tracking-wider uppercase">Awaiting Your Approval</div>
-						<div class="mt-2 flex items-baseline gap-2">
-							<span class="text-3xl font-extrabold text-slate-900" x-text="approvalStats.total">0</span>
-							<span class="text-xs text-slate-500 font-medium">Projects</span>
-						</div>
-						<div class="mt-3 text-[11px] font-bold text-indigo-600 flex items-center gap-1">
-							<i class="fas fa-inbox"></i> Action required
-						</div>
-					</div>
-					<!-- Card 2: Recommended by Reviewer -->
-					<div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between min-h-[110px] relative overflow-hidden group hover:shadow-md transition duration-200">
-						<div class="text-slate-400 font-bold text-[10px] tracking-wider uppercase">Recommended/Reviewed</div>
-						<div class="mt-2 flex items-baseline gap-2">
-							<span class="text-3xl font-extrabold text-green-600" x-text="approvalStats.recommended">0</span>
-							<span class="text-xs text-slate-500 font-medium">Passed review</span>
-						</div>
-						<div class="mt-3 text-[11px] font-bold text-green-600 flex items-center gap-1">
-							<i class="fas fa-check-double"></i> Ready for final sign-off
-						</div>
-					</div>
-					<!-- Card 3: Pending Reviewer Action -->
-					<div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between min-h-[110px] relative overflow-hidden group hover:shadow-md transition duration-200">
-						<div class="text-slate-400 font-bold text-[10px] tracking-wider uppercase">Not Recommended Yet</div>
-						<div class="mt-2 flex items-baseline gap-2">
-							<span class="text-3xl font-extrabold text-gray-500" x-text="approvalStats.pendingReview">0</span>
-							<span class="text-xs text-slate-500 font-medium">In review queue</span>
-						</div>
-						<div class="mt-3 text-[11px] font-bold text-gray-500 flex items-center gap-1">
-							<i class="fas fa-clock"></i> Awaiting tier 1 review
-						</div>
-					</div>
-					<!-- Card 4: Total Approval Budget -->
-					<div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between min-h-[110px] relative overflow-hidden group hover:shadow-md transition duration-200">
-						<div class="text-slate-400 font-bold text-[10px] tracking-wider uppercase">Total Approval Budget</div>
-						<div class="mt-2 flex flex-col">
-							<span class="text-xl font-extrabold text-emerald-600">KES <span x-text="approvalStats.budget.toLocaleString()">0</span></span>
-						</div>
-						<div class="mt-3 text-[11px] font-bold text-emerald-600 flex items-center gap-1">
-							<i class="fas fa-wallet"></i> Total funding value
-						</div>
-					</div>
-				</div>
-
 				<div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
 					<h2 class="text-xl font-bold mb-4">
 						Projects Awaiting Final Approval
@@ -1312,7 +1216,20 @@
 
 												<!-- Workflow Status -->
 												<td class="px-6 py-4 whitespace-nowrap text-sm">
-													<span x-html="createWorkflowStatusBadge(project.approvalWorkflowStatus || project.approvalStatus || project.status)"></span>
+													<span class="px-2.5 py-1 rounded-full text-xs font-semibold inline-flex items-center" :class="{
+														'bg-blue-50 border border-blue-200 text-blue-800': project.approvalWorkflowStatus?.includes('PENDING_FINAL'),
+														'bg-green-50 border border-green-200 text-green-800': project.approvalWorkflowStatus === 'REVIEWED',
+														'bg-red-50 border border-red-200 text-red-800': project.approvalWorkflowStatus === 'REJECTED_BY_REVIEWER',
+														'bg-gray-50 border border-gray-200 text-gray-600': !project.approvalWorkflowStatus
+													}">
+														<i class="fas mr-1.5 text-[10px]" :class="{
+															'fa-hourglass-half': project.approvalWorkflowStatus?.includes('PENDING_FINAL'),
+															'fa-check-circle': project.approvalWorkflowStatus === 'REVIEWED',
+															'fa-times-circle': project.approvalWorkflowStatus === 'REJECTED_BY_REVIEWER',
+															'fa-clock': !project.approvalWorkflowStatus
+														}"></i>
+														<span x-text="project.approvalWorkflowStatus ? project.approvalWorkflowStatus.replace(/_/g, ' ') : 'PENDING'"></span>
+													</span>
 												</td>
 
 												<!-- Actions -->
@@ -2650,31 +2567,6 @@
 					show: false,
 					message: "",
 					type: "success",
-				},
-
-				// Helper getters for dynamic KPI stats
-				get reviewStats() {
-					const total = this.projectsForReview.length;
-					const budget = this.projectsForReview.reduce((sum, p) => sum + (p.budget || 0), 0);
-					const underReview = this.projectsForReview.filter(p => p.approvalWorkflowStatus === 'UNDER_REVIEW').length;
-					const pendingReview = this.projectsForReview.filter(p => p.approvalWorkflowStatus === 'PENDING_REVIEW' || !p.approvalWorkflowStatus).length;
-					return { total, budget, underReview, pendingReview };
-				},
-
-				get pendingStats() {
-					const total = this.allPendingProjects.length;
-					const budget = this.allPendingProjects.reduce((sum, p) => sum + (p.budget || 0), 0);
-					const pendingReview = this.allPendingProjects.filter(p => (p.approvalWorkflowStatus || '').includes('PENDING_REVIEW') || p.approvalStatus === 'PENDING').length;
-					const pendingApproval = this.allPendingProjects.filter(p => (p.approvalWorkflowStatus || '').includes('PENDING_FINAL') || p.approvalStatus === 'SUBMITTED').length;
-					return { total, budget, pendingReview, pendingApproval };
-				},
-
-				get approvalStats() {
-					const total = this.projectsForApproval.length;
-					const budget = this.projectsForApproval.reduce((sum, p) => sum + (p.budget || 0), 0);
-					const recommended = this.projectsForApproval.filter(p => p.approvalWorkflowStatus === 'PENDING_FINAL_APPROVAL' || p.reviewedBy).length;
-					const pendingReview = this.projectsForApproval.filter(p => p.approvalWorkflowStatus !== 'PENDING_FINAL_APPROVAL' && !p.reviewedBy).length;
-					return { total, budget, recommended, pendingReview };
 				},
 
 				async init() {
