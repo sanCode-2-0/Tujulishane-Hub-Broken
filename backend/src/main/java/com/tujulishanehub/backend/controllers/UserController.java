@@ -215,9 +215,19 @@ public class UserController {
     }
 
     @PostMapping("/verify/login")
-    public ResponseEntity<ApiResponse<Object>> verifyLogin(@RequestBody Map<String, String> payload) {
-        String email = payload.get("email");
-        String otp = payload.get("otp");
+    public ResponseEntity<ApiResponse<Object>> verifyLogin(@RequestBody Map<String, Object> payload) {
+        String email = (String) payload.get("email");
+        String otp = (String) payload.get("otp");
+        boolean rememberMe = false;
+        if (payload.containsKey("rememberMe")) {
+            Object rm = payload.get("rememberMe");
+            if (rm instanceof Boolean) {
+                rememberMe = (Boolean) rm;
+            } else if (rm instanceof String) {
+                rememberMe = "true".equalsIgnoreCase((String) rm);
+            }
+        }
+
         if (email == null || email.isEmpty() || otp == null || otp.isEmpty()) {
             ApiResponse<Object> response = new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), "Email and OTP are required.", null);
             return ResponseEntity.badRequest().body(response);
@@ -241,10 +251,11 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
 
-        String token = jwtUtil.generateToken(email);
+        String token = jwtUtil.generateToken(email, rememberMe);
         HashMap<String, Object> data = new HashMap<>();
         data.put("token", token);
-        data.put("expiresIn", jwtExpiration);
+        long responseExpiration = rememberMe ? 30L * 24 * 60 * 60 : jwtExpiration;
+        data.put("expiresIn", responseExpiration);
 
         ApiResponse<Object> response = new ApiResponse<>(HttpStatus.OK.value(), "Login successful.", data);
         return ResponseEntity.ok(response);

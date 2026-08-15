@@ -101,28 +101,41 @@ public class JwtUtil {
     }
     
     public String generateToken(String email) {
+        return generateToken(email, false);
+    }
+
+    public String generateToken(String email, boolean rememberMe) {
+        long tokenExpiration = rememberMe ? 30L * 24 * 60 * 60 : this.expiration;
         try {
             User user = userService.getUserByEmail(email);
             Map<String, Object> claims = new HashMap<>();
             claims.put("role", user.getRole().name());
             claims.put("userId", user.getId());
             claims.put("approvalStatus", user.getApprovalStatus().name());
-            return doGenerateToken(claims, email);
+            return doGenerateToken(claims, email, tokenExpiration);
         } catch (Exception e) {
             // Fallback to basic token if user lookup fails
-            return doGenerateToken(email);
+            return doGenerateToken(email, tokenExpiration);
         }
     }
 
     private String doGenerateToken(String subject) {
-        return Jwts.builder().setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000))
-                .signWith(signingKey, SignatureAlgorithm.HS512).compact();
+        return doGenerateToken(subject, this.expiration);
     }
 
     private String doGenerateToken(Map<String, Object> claims, String subject) {
+        return doGenerateToken(claims, subject, this.expiration);
+    }
+
+    private String doGenerateToken(String subject, long expirationSeconds) {
+        return Jwts.builder().setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationSeconds * 1000))
+                .signWith(signingKey, SignatureAlgorithm.HS512).compact();
+    }
+
+    private String doGenerateToken(Map<String, Object> claims, String subject, long expirationSeconds) {
         return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationSeconds * 1000))
                 .signWith(signingKey, SignatureAlgorithm.HS512).compact();
     }
 

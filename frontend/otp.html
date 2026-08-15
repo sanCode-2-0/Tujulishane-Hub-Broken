@@ -208,7 +208,7 @@
           const baseUrl = window.BASE_URL || (window.authManager ? window.authManager.baseUrl : "");
           if (isLogin) {
             endpoint = `${baseUrl}/api/auth/verify/login`;
-            payload = { email, otp: code };
+            payload = { email, otp: code, rememberMe: rememberMe };
           } else {
             endpoint = `${baseUrl}/api/auth/verify`;
             payload = { email, otp: code };
