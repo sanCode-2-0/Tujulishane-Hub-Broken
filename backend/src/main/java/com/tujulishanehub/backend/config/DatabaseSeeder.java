@@ -17,6 +17,8 @@ import com.tujulishanehub.backend.repositories.ProjectRepository;
 import com.tujulishanehub.backend.repositories.ReviewerThematicAreaRepository;
 import com.tujulishanehub.backend.repositories.ThematicAreaDefinitionRepository;
 import com.tujulishanehub.backend.models.ThematicAreaDefinition;
+import com.tujulishanehub.backend.models.GeneralAnnouncement;
+import com.tujulishanehub.backend.repositories.GeneralAnnouncementRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -48,6 +50,9 @@ public class DatabaseSeeder {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private GeneralAnnouncementRepository generalAnnouncementRepository;
 
     @Bean
     public CommandLineRunner seedDatabase() {
@@ -169,6 +174,23 @@ public class DatabaseSeeder {
                         new LocationData("Nairobi", "Embakasi East", "Embakasi Health Centre", -1.3150, 36.8900)
                     }
                 );
+            }
+
+            // Seed general announcements matching the design mockup
+            if (generalAnnouncementRepository.count() == 0 && braineApprover != null) {
+                GeneralAnnouncement a1 = new GeneralAnnouncement();
+                a1.setTitle("RMNCAH Multi-Sectoral Alignment Meeting");
+                a1.setBody("Stakeholder meeting scheduled to align on reproductive and maternal health interventions.");
+                a1.setCreatedBy(braineApprover);
+                generalAnnouncementRepository.save(a1);
+
+                GeneralAnnouncement a2 = new GeneralAnnouncement();
+                a2.setTitle("Updated Project Reporting Guidelines");
+                a2.setBody("Quarterly progress and financial reporting templates have been updated for 2026.");
+                a2.setCreatedBy(braineApprover);
+                generalAnnouncementRepository.save(a2);
+
+                logger.info("Seeded 2 general announcements");
             }
 
             logger.info("Database seeding completed successfully!");

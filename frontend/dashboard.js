@@ -243,9 +243,81 @@ async function loadDashboardData() {
         // --- 9. Build ApexCharts ---
         renderDashboardCharts(projects);
 
+        // --- 10. Load Real General Announcements ---
+        await fetchGeneralAnnouncements();
+
     } catch (e) {
         console.error('Error loading dashboard statistics:', e);
     }
+}
+
+async function fetchGeneralAnnouncements() {
+    const container = document.getElementById('dash-announcements-container');
+    if (!container) return;
+
+    try {
+        const response = await apiFetch('/api/general-announcements');
+        if (response.ok) {
+            const resData = await response.json();
+            const announcements = resData.data || [];
+            
+            if (announcements.length > 0) {
+                container.innerHTML = announcements.slice(0, 4).map(ann => {
+                    const date = new Date(ann.createdAt);
+                    const formattedDate = !isNaN(date) ? date.toLocaleDateString('en-GB') : '';
+                    
+                    return `
+                        <div class="p-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm flex items-start gap-3">
+                            <div class="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-[#0047BA] dark:text-blue-400 shrink-0">
+                                <i class="fas fa-bullhorn text-lg"></i>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center justify-between gap-2 mb-1">
+                                    <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 uppercase">NOTICE</span>
+                                    <span class="text-[10px] text-gray-400 font-semibold">${formattedDate}</span>
+                                </div>
+                                <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">${ann.title}</h4>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-1">${ann.body}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                return;
+            }
+        }
+    } catch (e) {
+        console.warn('Failed to fetch real general announcements:', e);
+    }
+
+    // Default Fallback placeholders if API fails or array is empty
+    container.innerHTML = `
+        <div class="p-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm flex items-start gap-3">
+            <div class="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-[#0047BA] dark:text-blue-400 shrink-0">
+                <i class="fas fa-bullhorn text-lg"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+                <div class="flex items-center justify-between gap-2 mb-1">
+                    <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 uppercase">NOTICE</span>
+                    <span class="text-[10px] text-gray-400 font-semibold">15/08/2026</span>
+                </div>
+                <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">RMNCAH Multi-Sectoral Alignment Meeting</h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-1">Stakeholder meeting scheduled to align on reproductive and maternal health interventions.</p>
+            </div>
+        </div>
+        <div class="p-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm flex items-start gap-3">
+            <div class="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 shrink-0">
+                <i class="fas fa-file-contract text-lg"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+                <div class="flex items-center justify-between gap-2 mb-1">
+                    <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 uppercase">POLICY</span>
+                    <span class="text-[10px] text-gray-400 font-semibold">15/08/2026</span>
+                </div>
+                <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">Updated Project Reporting Guidelines</h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-1">Quarterly progress and financial reporting templates have been updated for 2026.</p>
+            </div>
+        </div>
+    `;
 }
 
 // Render recent submissions list
