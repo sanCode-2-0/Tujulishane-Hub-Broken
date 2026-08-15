@@ -766,7 +766,7 @@
 
 			<!-- Projects for Review (Reviewer View) -->
 			<div x-show="activeTab === 'for-review'" class="space-y-4">
-				<div class="bg-white rounded-lg shadow p-6">
+				<div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
 					<h2 class="text-xl font-bold mb-4">
 						Projects in Your Thematic Area
 					</h2>
@@ -802,116 +802,114 @@
 							</div>
 						</div>
 
-						<div class="overflow-x-auto shadow-lg rounded-lg">
-							<table id="project-table" class="min-w-full divide-y divide-gray-200">
-								<thead class="bg-gray-50">
-									<tr>
-										<th scope="col"
-											class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-											Project Title
-										</th>
-										<th scope="col"
-											class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-											Partner
-										</th>
-										<th scope="col"
-											class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-											Themes
-										</th>
-										<th scope="col"
-											class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-											Budget (KES)
-										</th>
-										<th scope="col"
-											class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-											Locations
-										</th>
-										<th scope="col"
-											class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-											Dates
-										</th>
-										<th scope="col"
-											class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-											Status
-										</th>
-										<th scope="col" class="relative px-6 py-3">
-											<span class="sr-only">Actions</span>
-										</th>
+						<div class="overflow-x-auto shadow-lg rounded-xl border border-slate-200">
+							<table id="project-table" class="w-full min-w-[1000px] text-left border-collapse bg-white">
+								<thead>
+									<tr class="border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+										<th class="px-6 py-4 bg-slate-50 text-left">#</th>
+										<th class="px-6 py-4 bg-slate-50 text-left">Project Details</th>
+										<th class="px-6 py-4 bg-slate-50 text-left">Partner</th>
+										<th class="px-6 py-4 bg-slate-50 text-left">Thematic Areas</th>
+										<th class="px-6 py-4 bg-slate-50 text-left">Financial Budget</th>
+										<th class="px-6 py-4 bg-slate-50 text-left">Locations</th>
+										<th class="px-6 py-4 bg-slate-50 text-left">Dates</th>
+										<th class="px-6 py-4 bg-slate-50 text-left">Status</th>
+										<th class="px-6 py-4 bg-slate-50 text-right">Actions</th>
 									</tr>
 								</thead>
-								<tbody id="table-body" class="bg-white divide-y divide-gray-200">
-									<template x-for="project in projectsForReview" :key="project.id">
-										<tr class="hover:bg-gray-50 transition items-center duration-150 ease-in-out">
-											<td class="px-6 py-4 gap-1 items-center text-sm text-gray-600">
-												<span class="bg-yellow-100 text-black text-xs px-2 py-1 rounded-lg ">
-													#<span class="whitespace-nowrap font-medium text-gray-900"
-														x-text="project.id">
-													</span>
-												</span><br class="my-1">
-												<span class="whitespace-nowrap text-sm font-medium text-gray-900"
-													x-text="project.title">
-												</span>
+								<tbody id="table-body" class="divide-y divide-slate-100 bg-white">
+									<template x-for="(project, index) in projectsForReview" :key="project.id">
+										<tr class="hover:bg-slate-50/70 transition duration-150 ease-in-out group">
+											<!-- Index -->
+											<td class="px-6 py-4 text-xs font-semibold text-slate-400" x-text="index + 1"></td>
+											
+											<!-- Project Details -->
+											<td class="px-6 py-4">
+												<div class="flex flex-col gap-1">
+													<div class="flex items-center gap-1.5 flex-wrap">
+														<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 w-fit">
+															#<span x-text="project.projectNo || project.id"></span>
+														</span>
+														<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-bold bg-teal-100 border border-teal-200 text-teal-800 uppercase tracking-wider w-fit" x-show="['SUPER_ADMIN', 'SUPER_ADMIN_APPROVER', 'SUPER_ADMIN_REVIEWER'].includes(project.createdByRole)">
+															<i class="fas fa-landmark mr-1"></i> MoH Initiative
+														</span>
+													</div>
+													<span class="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors" x-text="project.title || 'Untitled Project'"></span>
+													<span class="text-xs text-slate-500" x-text="project.projectCategory || 'N/A'"></span>
+												</div>
 											</td>
-											<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600"
-												x-text="project.partner"></td>
 
-											<td class="px-6 py-4 text-sm text-gray-600">
-												<div class="flex flex-wrap gap-1">
-													<template x-for="theme in project.themes" :key="theme.code">
-														<span
-															class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs whitespace-nowrap"
-															x-text="theme.name || theme.displayName"></span>
+											<!-- Partner -->
+											<td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700 font-medium" x-text="project.partner || 'N/A'"></td>
+
+											<!-- Themes -->
+											<td class="px-6 py-4">
+												<div class="flex flex-wrap gap-1 max-w-full">
+													<template x-for="theme in (project.themes || [])" :key="theme.code">
+														<span class="px-2 py-0.5 bg-blue-50 border border-blue-100 text-blue-800 rounded-md text-[10px] font-medium" x-text="theme.name || theme.code"></span>
+													</template>
+													<template x-if="!(project.themes && project.themes.length)">
+														<span class="text-xs text-slate-400 italic">N/A</span>
 													</template>
 												</div>
 											</td>
 
-											<td
-												class="px-6 py-4 whitespace-nowrap text-sm text-green-700 font-semibold">
-												KES <span x-text="(project.budget || 0).toLocaleString()"></span>
+											<!-- Budget -->
+											<td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900 font-bold">
+												KES <span x-text="project.budget ? project.budget.toLocaleString() : '0'"></span>
 											</td>
 
-											<td class="px-6 py-4 text-sm text-gray-600">
-												<div class="flex flex-wrap gap-1"
-													x-show="project.locations && project.locations.length > 0">
-													<template x-for="location in project.locations" :key="location.id">
-														<span
-															class="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs whitespace-nowrap">
+											<!-- Locations -->
+											<td class="px-6 py-4">
+												<div class="flex flex-wrap gap-1 max-w-full">
+													<template x-for="loc in (project.locations || [])" :key="loc.id">
+														<span class="inline-flex items-center px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-700 rounded-md text-[10px]">
 															<i class="fas fa-map-marker-alt text-red-500 mr-1"></i>
-															<span
-																x-text="location.county || location.mapsAddress || 'Unknown'"></span>
+															<span x-text="loc.county || loc.mapsAddress || 'Location'"></span>
 														</span>
 													</template>
+													<template x-if="!(project.locations && project.locations.length)">
+														<span class="text-xs text-slate-400 italic">N/A</span>
+													</template>
 												</div>
 											</td>
 
-											<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-												<div class="flex flex-col gap-1">
-													<span x-show="project.startDate">
-														Start: <span x-text="project.startDate"></span>
-													</span>
-													<span x-show="project.endDate">
-														End: <span x-text="project.endDate"></span>
-													</span>
+											<!-- Dates -->
+											<td class="px-6 py-4 text-xs text-slate-600">
+												<div class="flex flex-col gap-0.5">
+													<span x-show="project.startDate"><i class="far fa-calendar-alt text-gray-400 mr-1"></i>Start: <span x-text="project.startDate"></span></span>
+													<span x-show="project.endDate"><i class="far fa-calendar-check text-gray-400 mr-1"></i>End: <span x-text="project.endDate"></span></span>
 												</div>
 											</td>
 
-											<td class="px-6 py-4 whitespace-nowrap text-sm">
-												<span
-													class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium"
-													x-text="project.approvalWorkflowStatus || project.approvalStatus || 'PENDING_REVIEW'"></span>
+											<!-- Status -->
+											<td class="px-6 py-4 whitespace-nowrap">
+												<span :class="{
+													'bg-yellow-50 border border-yellow-200 text-yellow-800': project.approvalWorkflowStatus?.includes('PENDING_REVIEW') || project.approvalStatus === 'PENDING',
+													'bg-blue-50 border border-blue-200 text-blue-800': project.approvalWorkflowStatus?.includes('PENDING_FINAL') || project.approvalStatus === 'SUBMITTED',
+													'bg-purple-50 border border-purple-200 text-purple-800': project.approvalWorkflowStatus && !project.approvalWorkflowStatus.includes('PENDING')
+												}" class="px-2.5 py-1 rounded-full text-xs font-semibold inline-flex items-center">
+													<i class="fas mr-1.5 text-[10px]" :class="{
+														'fa-clock': project.approvalWorkflowStatus?.includes('PENDING_REVIEW') || project.approvalStatus === 'PENDING',
+														'fa-hourglass-half': project.approvalWorkflowStatus?.includes('PENDING_FINAL') || project.approvalStatus === 'SUBMITTED',
+														'fa-check-circle': project.approvalWorkflowStatus && !project.approvalWorkflowStatus.includes('PENDING')
+													}"></i>
+													<span x-text="project.approvalWorkflowStatus ? project.approvalWorkflowStatus.replace(/_/g, ' ') : (project.approvalStatus || 'PENDING')"></span>
+												</span>
 											</td>
 
-											<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+											<!-- Actions -->
+											<td class="px-6 py-4 whitespace-nowrap text-right text-xs">
 												<div class="flex gap-2 justify-end">
 													<button @click="viewProjectDetails(project.id)"
-														class="text-gray-600 hover:text-gray-900 px-2 py-1 rounded border border-gray-300 hover:bg-gray-100 transition"
+														class="text-slate-600 hover:text-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition active:scale-95 text-xs font-bold inline-flex items-center gap-1 animate-hover"
 														title="View Details">
-														<i class="fas fa-eye"></i>
+														<i class="fas fa-eye"></i> Details
 													</button>
 													<button @click="openReviewModal(project)"
-														class="text-white bg-blue-600 hover:bg-green-600 px-2 py-1 rounded transition"
+														class="text-white bg-blue-600 hover:bg-green-600 px-2.5 py-1.5 rounded-lg transition active:scale-95 text-xs font-bold inline-flex items-center gap-1 animate-hover"
 														title="Review Project">
-														<i class="fas fa-check-circle"></i>
+														<i class="fas fa-check-circle"></i> Review
 													</button>
 												</div>
 											</td>
@@ -929,7 +927,7 @@
 
 			<!-- All Pending Approvals (Overview for Approvers) -->
 			<div x-show="activeTab === 'all-pending'" class="space-y-4">
-				<div class="bg-white rounded-lg shadow p-6">
+				<div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
 					<h2 class="text-xl font-bold mb-4">
 						All Projects in Approval Pipeline
 					</h2>
@@ -958,111 +956,116 @@
 							</div>
 						</div>
 
-						<div class="overflow-x-auto shadow-lg rounded-lg">
-							<table id="project-table-pending" class="min-w-full divide-y divide-gray-200">
-								<thead class="bg-gray-50">
-									<tr>
-										<th scope="col"
-											class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-											Project Title</th>
-										<th scope="col"
-											class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-											Partner</th>
-										<th scope="col"
-											class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-											Themes</th>
-										<th scope="col"
-											class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-											Budget (KES)</th>
-										<th scope="col"
-											class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-											Locations</th>
-										<th scope="col"
-											class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-											Dates</th>
-										<th scope="col"
-											class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-											Status</th>
-										<th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span>
-										</th>
+						<div class="overflow-x-auto shadow-lg rounded-xl border border-slate-200">
+							<table id="project-table-pending" class="w-full min-w-[1000px] text-left border-collapse bg-white">
+								<thead>
+									<tr class="border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+										<th class="px-6 py-4 bg-slate-50 text-left">#</th>
+										<th class="px-6 py-4 bg-slate-50 text-left">Project Details</th>
+										<th class="px-6 py-4 bg-slate-50 text-left">Partner</th>
+										<th class="px-6 py-4 bg-slate-50 text-left">Thematic Areas</th>
+										<th class="px-6 py-4 bg-slate-50 text-left">Financial Budget</th>
+										<th class="px-6 py-4 bg-slate-50 text-left">Locations</th>
+										<th class="px-6 py-4 bg-slate-50 text-left">Dates</th>
+										<th class="px-6 py-4 bg-slate-50 text-left">Status</th>
+										<th class="px-6 py-4 bg-slate-50 text-right">Actions</th>
 									</tr>
 								</thead>
-								<tbody id="table-body-pending" class="bg-white divide-y divide-gray-200">
-									<template x-for="project in allPendingProjects" :key="project.id">
-										<tr class="hover:bg-gray-50 transition items-center duration-150 ease-in-out">
-											<td class="px-6 py-4 gap-1 items-center text-sm text-gray-600">
-												<span class="bg-purple-100 text-black text-xs px-2 py-1 rounded-lg">
-													#<span class="whitespace-nowrap font-medium text-gray-900"
-														x-text="project.id"></span>
-												</span><br class="my-1">
-												<span class="whitespace-nowrap text-sm font-medium text-gray-900"
-													x-text="project.title"></span>
+								<tbody id="table-body-pending" class="divide-y divide-slate-100 bg-white">
+									<template x-for="(project, index) in allPendingProjects" :key="project.id">
+										<tr class="hover:bg-slate-50/70 transition duration-150 ease-in-out group">
+											<!-- Index -->
+											<td class="px-6 py-4 text-xs font-semibold text-slate-400" x-text="index + 1"></td>
+											
+											<!-- Project Details -->
+											<td class="px-6 py-4">
+												<div class="flex flex-col gap-1">
+													<div class="flex items-center gap-1.5 flex-wrap">
+														<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 w-fit">
+															#<span x-text="project.projectNo || project.id"></span>
+														</span>
+														<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-bold bg-teal-100 border border-teal-200 text-teal-800 uppercase tracking-wider w-fit" x-show="['SUPER_ADMIN', 'SUPER_ADMIN_APPROVER', 'SUPER_ADMIN_REVIEWER'].includes(project.createdByRole)">
+															<i class="fas fa-landmark mr-1"></i> MoH Initiative
+														</span>
+													</div>
+													<span class="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors" x-text="project.title || 'Untitled Project'"></span>
+													<span class="text-xs text-slate-500" x-text="project.projectCategory || 'N/A'"></span>
+												</div>
 											</td>
 
-											<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600"
-												x-text="project.partner"></td>
+											<!-- Partner -->
+											<td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700 font-medium" x-text="project.partner || 'N/A'"></td>
 
-											<td class="px-6 py-4 text-sm text-gray-600">
-												<div class="flex flex-wrap gap-1">
-													<template x-for="theme in project.themes" :key="theme.code">
-														<span
-															class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs whitespace-nowrap"
-															x-text="theme.name || theme.displayName"></span>
+											<!-- Themes -->
+											<td class="px-6 py-4">
+												<div class="flex flex-wrap gap-1 max-w-full">
+													<template x-for="theme in (project.themes || [])" :key="theme.code">
+														<span class="px-2 py-0.5 bg-blue-50 border border-blue-100 text-blue-800 rounded-md text-[10px] font-medium" x-text="theme.name || theme.code"></span>
+													</template>
+													<template x-if="!(project.themes && project.themes.length)">
+														<span class="text-xs text-slate-400 italic">N/A</span>
 													</template>
 												</div>
 											</td>
 
-											<td
-												class="px-6 py-4 whitespace-nowrap text-sm text-green-700 font-semibold">
-												KES <span x-text="(project.budget || 0).toLocaleString()"></span>
+											<!-- Budget -->
+											<td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900 font-bold">
+												KES <span x-text="project.budget ? project.budget.toLocaleString() : '0'"></span>
 											</td>
 
-											<td class="px-6 py-4 text-sm text-gray-600">
-												<div class="flex flex-wrap gap-1"
-													x-show="project.locations && project.locations.length > 0">
-													<template x-for="location in project.locations" :key="location.id">
-														<span
-															class="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs whitespace-nowrap">
+											<!-- Locations -->
+											<td class="px-6 py-4">
+												<div class="flex flex-wrap gap-1 max-w-full">
+													<template x-for="loc in (project.locations || [])" :key="loc.id">
+														<span class="inline-flex items-center px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-700 rounded-md text-[10px]">
 															<i class="fas fa-map-marker-alt text-red-500 mr-1"></i>
-															<span
-																x-text="location.county || location.mapsAddress || 'Unknown'"></span>
+															<span x-text="loc.county || loc.mapsAddress || 'Location'"></span>
 														</span>
 													</template>
+													<template x-if="!(project.locations && project.locations.length)">
+														<span class="text-xs text-slate-400 italic">N/A</span>
+													</template>
 												</div>
 											</td>
 
-											<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-												<div class="flex flex-col gap-1">
-													<span x-show="project.startDate">Start: <span
-															x-text="project.startDate"></span></span>
-													<span x-show="project.endDate">End: <span
-															x-text="project.endDate"></span></span>
+											<!-- Dates -->
+											<td class="px-6 py-4 text-xs text-slate-600">
+												<div class="flex flex-col gap-0.5">
+													<span x-show="project.startDate"><i class="far fa-calendar-alt text-gray-400 mr-1"></i>Start: <span x-text="project.startDate"></span></span>
+													<span x-show="project.endDate"><i class="far fa-calendar-check text-gray-400 mr-1"></i>End: <span x-text="project.endDate"></span></span>
 												</div>
 											</td>
 
-											<td class="px-6 py-4 whitespace-nowrap text-sm">
+											<!-- Status -->
+											<td class="px-6 py-4 whitespace-nowrap">
 												<span :class="{
-                                'bg-yellow-100 text-yellow-800': project.approvalWorkflowStatus?.includes('PENDING_REVIEW') || project.approvalStatus === 'PENDING',
-                                'bg-blue-100 text-blue-800': project.approvalWorkflowStatus?.includes('PENDING_FINAL') || project.approvalStatus === 'SUBMITTED',
-                                'bg-purple-100 text-purple-800': project.approvalWorkflowStatus && !project.approvalWorkflowStatus.includes('PENDING')
-                            }" class="px-3 py-1 rounded-full text-xs font-medium"
-													x-text="project.approvalWorkflowStatus || project.approvalStatus || 'PENDING'"></span>
+													'bg-yellow-50 border border-yellow-200 text-yellow-800': project.approvalWorkflowStatus?.includes('PENDING_REVIEW') || project.approvalStatus === 'PENDING',
+													'bg-blue-50 border border-blue-200 text-blue-800': project.approvalWorkflowStatus?.includes('PENDING_FINAL') || project.approvalStatus === 'SUBMITTED',
+													'bg-purple-50 border border-purple-200 text-purple-800': project.approvalWorkflowStatus && !project.approvalWorkflowStatus.includes('PENDING')
+												}" class="px-2.5 py-1 rounded-full text-xs font-semibold inline-flex items-center">
+													<i class="fas mr-1.5 text-[10px]" :class="{
+														'fa-clock': project.approvalWorkflowStatus?.includes('PENDING_REVIEW') || project.approvalStatus === 'PENDING',
+														'fa-hourglass-half': project.approvalWorkflowStatus?.includes('PENDING_FINAL') || project.approvalStatus === 'SUBMITTED',
+														'fa-check-circle': project.approvalWorkflowStatus && !project.approvalWorkflowStatus.includes('PENDING')
+													}"></i>
+													<span x-text="project.approvalWorkflowStatus ? project.approvalWorkflowStatus.replace(/_/g, ' ') : (project.approvalStatus || 'PENDING')"></span>
+												</span>
 											</td>
 
-											<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+											<!-- Actions -->
+											<td class="px-6 py-4 whitespace-nowrap text-right text-xs">
 												<div class="flex gap-2 justify-end">
 													<button @click="viewProjectDetails(project.id)"
-														class="text-gray-600 hover:text-gray-900 px-2 py-1 rounded border border-gray-300 hover:bg-gray-100 transition"
+														class="text-slate-600 hover:text-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition active:scale-95 text-xs font-bold inline-flex items-center gap-1 animate-hover"
 														title="View Details">
-														<i class="fas fa-eye"></i>
+														<i class="fas fa-eye"></i> Details
 													</button>
 													<button
 														x-show="project.approvalWorkflowStatus?.includes('PENDING_FINAL')"
 														@click="openUnifiedApprovalModal(project)"
-														class="text-white bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded transition"
+														class="text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1.5 rounded-lg transition active:scale-95 text-xs font-bold inline-flex items-center gap-1 animate-hover"
 														title="Review & Take Action">
-														<i class="fas fa-tasks mr-1"></i>
-														Take Action
+														<i class="fas fa-tasks text-[10px]"></i> Take Action
 													</button>
 												</div>
 											</td>
@@ -1075,12 +1078,13 @@
 							</div>
 						</div>
 					</div>
+					</div>
 				</div>
 			</div>
 
 			<!-- Projects Awaiting Final Approval (Approver View) -->
 			<div x-show="activeTab === 'for-approval'" class="space-y-4">
-				<div class="bg-white rounded-lg shadow p-6">
+				<div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
 					<h2 class="text-xl font-bold mb-4">
 						Projects Awaiting Final Approval
 					</h2>
@@ -1107,105 +1111,115 @@
 								</div>
 							</div>
 
-							<div class="overflow-x-auto shadow-lg rounded-lg">
-								<table id="project-table-approval" class="min-w-full divide-y divide-gray-200">
-									<thead class="bg-gray-50">
-										<tr>
-											<th scope="col"
-												class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-												Project & Partner
-											</th>
-											<th scope="col"
-												class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-												Themes
-											</th>
-											<th scope="col"
-												class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-												Review Status
-											</th>
-											<th scope="col"
-												class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-												Workflow Status
-											</th>
-											<th scope="col" class="relative px-6 py-3">
-												<span class="sr-only">Actions</span>
-											</th>
+							<div class="overflow-x-auto shadow-lg rounded-xl border border-slate-200">
+								<table id="project-table-approval" class="w-full min-w-[1000px] text-left border-collapse bg-white">
+									<thead>
+										<tr class="border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+											<th class="px-6 py-4 bg-slate-50 text-left">#</th>
+											<th class="px-6 py-4 bg-slate-50 text-left">Project Details</th>
+											<th class="px-6 py-4 bg-slate-50 text-left">Partner</th>
+											<th class="px-6 py-4 bg-slate-50 text-left">Thematic Areas</th>
+											<th class="px-6 py-4 bg-slate-50 text-left">Review Status</th>
+											<th class="px-6 py-4 bg-slate-50 text-left">Workflow Status</th>
+											<th class="px-6 py-4 bg-slate-50 text-right">Actions</th>
 										</tr>
 									</thead>
-									<tbody id="table-body-approval" class="bg-white divide-y divide-gray-200">
-										<template x-for="project in projectsForApproval" :key="project.id">
-											<tr
-												class="hover:bg-gray-50 transition items-center duration-150 ease-in-out">
-												<td class="px-6 py-4 text-sm text-gray-600">
-													<span class="whitespace-nowrap font-semibold text-gray-900"
-														x-text="project.title"></span>
-													<p class="text-xs text-gray-500 mt-1">
-														Partner: <span class="whitespace-nowrap"
-															x-text="project.partner"></span>
-													</p>
+									<tbody id="table-body-approval" class="divide-y divide-slate-100 bg-white">
+										<template x-for="(project, index) in projectsForApproval" :key="project.id">
+											<tr class="hover:bg-slate-50/70 transition duration-150 ease-in-out group">
+												<!-- Index -->
+												<td class="px-6 py-4 text-xs font-semibold text-slate-400" x-text="index + 1"></td>
+												
+												<!-- Project Details -->
+												<td class="px-6 py-4">
+													<div class="flex flex-col gap-1">
+														<div class="flex items-center gap-1.5 flex-wrap">
+															<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 w-fit">
+																#<span x-text="project.projectNo || project.id"></span>
+															</span>
+															<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-bold bg-teal-100 border border-teal-200 text-teal-800 uppercase tracking-wider w-fit" x-show="['SUPER_ADMIN', 'SUPER_ADMIN_APPROVER', 'SUPER_ADMIN_REVIEWER'].includes(project.createdByRole)">
+																<i class="fas fa-landmark mr-1"></i> MoH Initiative
+															</span>
+														</div>
+														<span class="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors" x-text="project.title || 'Untitled Project'"></span>
+														<span class="text-xs text-slate-500" x-text="project.projectCategory || 'N/A'"></span>
+													</div>
 												</td>
 
-												<td class="px-6 py-4 text-sm text-gray-600">
-													<div class="flex flex-wrap gap-1">
+												<!-- Partner -->
+												<td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700 font-medium" x-text="project.partner || 'N/A'"></td>
+
+												<!-- Themes -->
+												<td class="px-6 py-4">
+													<div class="flex flex-wrap gap-1 max-w-full">
 														<template x-if="project.themes && project.themes.length > 0">
 															<template x-for="theme in project.themes" :key="theme.code">
-																<span
-																	class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs whitespace-nowrap"
-																	x-text="theme.displayName || theme.name || theme"></span>
+																<span class="px-2 py-0.5 bg-blue-50 border border-blue-100 text-blue-800 rounded-md text-[10px] font-medium" x-text="theme.displayName || theme.name || theme"></span>
 															</template>
 														</template>
 														<template x-if="!project.themes || project.themes.length === 0">
-															<span class="text-xs text-gray-400 italic">No themes</span>
+															<span class="text-xs text-slate-400 italic">No themes</span>
 														</template>
 													</div>
 												</td>
 
+												<!-- Review Status -->
 												<td class="px-6 py-4 whitespace-nowrap text-sm">
-													<!-- Review Status Badge -->
 													<div class="flex items-center gap-2">
-														<!-- Rejected by Reviewer -->
+														<!-- Rejected -->
 														<span
 															x-show="project.approvalWorkflowStatus === 'REJECTED_BY_REVIEWER' || project.approvalStatus === 'REJECTED' || project.status === 'rejected'"
-															class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium flex items-center gap-1">
-															<i class="fas fa-times-circle"></i>
+															class="px-2.5 py-1 bg-red-50 border border-red-200 text-red-800 rounded-full text-xs font-semibold inline-flex items-center gap-1">
+															<i class="fas fa-times-circle text-[10px]"></i>
 															Rejected
 														</span>
-														<!-- Approved by Reviewer -->
+														<!-- Approved -->
 														<span
 															x-show="project.approvalWorkflowStatus === 'PENDING_FINAL_APPROVAL' || (project.approvalWorkflowStatus?.includes('PENDING_FINAL') && project.reviewedBy) || project.approvalStatus === 'APPROVED'"
-															class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium flex items-center gap-1">
-															<i class="fas fa-check-circle"></i>
+															class="px-2.5 py-1 bg-green-50 border border-green-200 text-green-800 rounded-full text-xs font-semibold inline-flex items-center gap-1">
+															<i class="fas fa-check-circle text-[10px]"></i>
 															Approved
 														</span>
-														<!-- Not Yet Reviewed -->
+														<!-- Not Reviewed -->
 														<span
 															x-show="project.approvalWorkflowStatus !== 'REJECTED_BY_REVIEWER' && project.approvalWorkflowStatus !== 'PENDING_FINAL_APPROVAL' && !project.approvalWorkflowStatus?.includes('PENDING_FINAL') && project.approvalStatus !== 'REJECTED' && project.approvalStatus !== 'APPROVED' && project.status !== 'rejected' && !project.reviewedBy"
-															class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium flex items-center gap-1">
-															<i class="fas fa-clock"></i>
+															class="px-2.5 py-1 bg-gray-50 border border-gray-200 text-gray-600 rounded-full text-xs font-semibold inline-flex items-center gap-1">
+															<i class="fas fa-clock text-[10px]"></i>
 															Not Reviewed
 														</span>
 													</div>
 												</td>
+
+												<!-- Workflow Status -->
 												<td class="px-6 py-4 whitespace-nowrap text-sm">
-													<span class="px-3 py-1 rounded-full text-xs font-medium" :class="{
-														'bg-blue-100 text-blue-800': project.approvalWorkflowStatus?.includes('PENDING_FINAL'),
-														'bg-green-100 text-green-800': project.approvalWorkflowStatus === 'REVIEWED',
-														'bg-red-100 text-red-800': project.approvalWorkflowStatus === 'REJECTED_BY_REVIEWER',
-														'bg-gray-100 text-gray-600': !project.approvalWorkflowStatus
-													}" x-text="project.approvalWorkflowStatus || 'PENDING'"></span>
+													<span class="px-2.5 py-1 rounded-full text-xs font-semibold inline-flex items-center" :class="{
+														'bg-blue-50 border border-blue-200 text-blue-800': project.approvalWorkflowStatus?.includes('PENDING_FINAL'),
+														'bg-green-50 border border-green-200 text-green-800': project.approvalWorkflowStatus === 'REVIEWED',
+														'bg-red-50 border border-red-200 text-red-800': project.approvalWorkflowStatus === 'REJECTED_BY_REVIEWER',
+														'bg-gray-50 border border-gray-200 text-gray-600': !project.approvalWorkflowStatus
+													}">
+														<i class="fas mr-1.5 text-[10px]" :class="{
+															'fa-hourglass-half': project.approvalWorkflowStatus?.includes('PENDING_FINAL'),
+															'fa-check-circle': project.approvalWorkflowStatus === 'REVIEWED',
+															'fa-times-circle': project.approvalWorkflowStatus === 'REJECTED_BY_REVIEWER',
+															'fa-clock': !project.approvalWorkflowStatus
+														}"></i>
+														<span x-text="project.approvalWorkflowStatus ? project.approvalWorkflowStatus.replace(/_/g, ' ') : 'PENDING'"></span>
+													</span>
 												</td>
-												<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+
+												<!-- Actions -->
+												<td class="px-6 py-4 whitespace-nowrap text-right text-xs">
 													<div class="flex gap-2 justify-end">
 														<button @click="viewProjectDetails(project.id)"
-															class="text-gray-600 hover:text-gray-900 px-2 py-1 rounded border border-gray-300 hover:bg-gray-100 transition"
+															class="text-slate-600 hover:text-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 transition active:scale-95 text-xs font-bold inline-flex items-center gap-1 animate-hover"
 															title="View Full Details">
-															<i class="fas fa-eye"></i>
+															<i class="fas fa-eye"></i> Details
 														</button>
 														<button @click="openUnifiedApprovalModal(project)"
-															class="text-white bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded transition"
+															class="text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1.5 rounded-lg transition active:scale-95 text-xs font-bold inline-flex items-center gap-1 animate-hover"
 															title="Review & Take Action">
-															<i class="fas fa-tasks mr-1"></i>
-															Take Action
+															<i class="fas fa-tasks text-[10px]"></i> Take Action
 														</button>
 													</div>
 												</td>
@@ -1224,7 +1238,7 @@
 
 			<!-- Reviewer Management (Approver/SUPER_ADMIN Only) -->
 			<div x-show="activeTab === 'reviewers'" class="space-y-4">
-				<div class="bg-white rounded-lg shadow p-6">
+				<div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
 					<div class="flex justify-between items-center mb-4">
 						<h2 class="text-xl font-bold">Manage Reviewers</h2>
 						<button @click="openAddReviewerModal()"
@@ -1312,7 +1326,7 @@
 
 			<!-- Thematic Areas Management (Approver/SUPER_ADMIN Only) -->
 			<div x-show="activeTab === 'thematic-areas'" class="space-y-4" x-cloak>
-				<div class="bg-white rounded-lg shadow p-6">
+				<div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
 					<div class="flex justify-between items-center mb-4">
 						<h2 class="text-xl font-bold text-blue-900">Manage Thematic Areas</h2>
 						<button @click="openAddThematicAreaModal()"
