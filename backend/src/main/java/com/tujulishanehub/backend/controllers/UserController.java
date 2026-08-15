@@ -171,7 +171,7 @@ public class UserController {
 
         var userOpt = userService.findByEmail(email);
         if (userOpt.isEmpty()) {
-            ApiResponse<Object> response = new ApiResponse<>(HttpStatus.NOT_FOUND.value(), "User not found.", null);
+            ApiResponse<Object> response = new ApiResponse<>(HttpStatus.NOT_FOUND.value(), "User not found. Please sign up.", null);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
@@ -260,7 +260,7 @@ public class UserController {
 
         var userOpt = userService.findByEmail(email);
         if (userOpt.isEmpty()) {
-            ApiResponse<Object> response = new ApiResponse<>(HttpStatus.NOT_FOUND.value(), "User not found.", null);
+            ApiResponse<Object> response = new ApiResponse<>(HttpStatus.NOT_FOUND.value(), "User not found. Please sign up.", null);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
