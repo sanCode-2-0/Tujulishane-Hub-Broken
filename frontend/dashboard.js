@@ -1,5 +1,5 @@
 // dashboard.js
-// Handles dashboard metrics, charts, Mapbox project concentration map, and data tables
+// Handles dashboard metrics, charts, Mapbox project concentration map, and regional/thematic summaries
 
 let map;
 let mapMarkers = [];
@@ -22,246 +22,7 @@ async function apiFetch(endpoint, options = {}) {
     });
 }
 
-// --- 2. Table Rendering Utilities ---
-function renderTable(tabId, data, columns) {
-    const tbody = document.querySelector(`#${tabId} tbody`);
-    if (!tbody) return;
-    tbody.innerHTML = '';
-    
-    if (!Array.isArray(data) || data.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="${columns.length + 1}" class="px-6 py-8 text-center text-gray-400">
-                    <i class="mb-2 text-2xl fas fa-inbox text-gray-300"></i>
-                    <p>No records found</p>
-                </td>
-            </tr>
-        `;
-        return;
-    }
-    
-    data.forEach(item => {
-        const row = document.createElement('tr');
-        row.className = 'bg-white border-b hover:bg-gray-50';
-        
-        columns.forEach(col => {
-            const td = document.createElement('td');
-            td.className = 'px-6 py-4 text-xs font-medium text-gray-700';
-            let value = getNestedValue(item, col) || '';
-            
-            // Format dates
-            if ((col.toLowerCase().includes('date') || col.toLowerCase().includes('at')) && value) {
-                const date = new Date(value);
-                if (!isNaN(date)) {
-                    value = date.toLocaleDateString('en-GB') + ', ' + date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-                }
-            }
-            // Format file sizes
-            if (col === 'size' && value) {
-                value = formatFileSize(value);
-            }
-            td.textContent = value;
-            row.appendChild(td);
-        });
-        
-        // Empty action column for alignment
-        const actionTd = document.createElement('td');
-        actionTd.className = 'px-6 py-4 text-right';
-        row.appendChild(actionTd);
-        
-        tbody.appendChild(row);
-    });
-}
-
-function getNestedValue(obj, path) {
-    return path.split('.').reduce((current, key) => current && current[key], obj);
-}
-
-function formatFileSize(bytes) {
-    if (!bytes || bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
-
-// --- 3. Dynamic Tab Data Fetching ---
-async function fetchProjects() {
-    try {
-        const response = await apiFetch('/api/projects');
-        if (!response.ok) throw new Error('Failed to fetch projects');
-        const data = await response.json();
-        const projects = data.data?.projects || data.data?.content || data.data || data;
-        renderTable('tab-projects', projects, ['title', 'partner', 'projectNo', 'projectCategory', 'status', 'startDate', 'endDate', 'budget', 'createdAt']);
-        setupTableSearchAndExport('tab-projects', 'projects.csv', ['Title', 'Partner', 'Project No', 'Category', 'Status', 'Start Date', 'End Date', 'Budget', 'Created At']);
-    } catch (error) {
-        console.error('Error fetching projects:', error);
-    }
-}
-
-async function fetchUsers() {
-    try {
-        const response = await apiFetch('/api/auth/admin/users');
-        if (!response.ok) throw new Error('Failed to fetch users');
-        const data = await response.json();
-        const users = data.data?.users || data.data?.content || data.data || data;
-        renderTable('tab-users', users, ['name', 'email', 'role', 'status', 'organization.name', 'createdAt']);
-        setupTableSearchAndExport('tab-users', 'users.csv', ['Name', 'Email', 'Role', 'Status', 'Organization', 'Created At']);
-    } catch (error) {
-        console.error('Error fetching users:', error);
-    }
-}
-
-async function fetchOrganizations() {
-    try {
-        const response = await apiFetch('/api/organizations');
-        if (!response.ok) throw new Error('Failed to fetch organizations');
-        const data = await response.json();
-        const orgs = data.data?.organizations || data.data?.content || data.data || data;
-        renderTable('tab-organizations', orgs, ['name', 'organizationType', 'contactEmail', 'address', 'approvalStatus', 'createdAt']);
-        setupTableSearchAndExport('tab-organizations', 'organizations.csv', ['Name', 'Type', 'Email', 'Location', 'Status', 'Created At']);
-    } catch (error) {
-        console.error('Error fetching organizations:', error);
-    }
-}
-
-async function fetchAnnouncements() {
-    try {
-        const response = await apiFetch('/api/announcements');
-        if (!response.ok) throw new Error('Failed to fetch announcements');
-        const data = await response.json();
-        const announcements = data.data?.announcements || data.data?.content || data.data || data;
-        renderTable('tab-announcements', announcements, ['title', 'content', 'deadline', 'createdBy.name', 'status', 'collaborationType', 'createdAt']);
-        setupTableSearchAndExport('tab-announcements', 'announcements.csv', ['Title', 'Content', 'Date', 'Created By', 'Status', 'Priority', 'Created At']);
-    } catch (error) {
-        console.error('Error fetching announcements:', error);
-    }
-}
-
-async function fetchCollaborationRequests() {
-    try {
-        const response = await apiFetch('/api/collaboration-requests/admin/all');
-        if (!response.ok) throw new Error('Failed to fetch collaboration requests');
-        const data = await response.json();
-        const requests = data.data?.collaborationRequests || data.data?.content || data.data || data;
-        renderTable('tab-collaboration', requests, ['requestingUser.name', 'announcement.title', 'requestingOrganization.name', 'status', 'message', 'createdAt']);
-        setupTableSearchAndExport('tab-collaboration', 'collaborationrequests.csv', ['Requester', 'Project', 'Organization', 'Status', 'Message', 'Date']);
-    } catch (error) {
-        console.error('Error fetching collaboration requests:', error);
-    }
-}
-
-async function fetchPastProjects() {
-    try {
-        const response = await apiFetch('/api/past-projects');
-        if (!response.ok) throw new Error('Failed to fetch past projects');
-        const data = await response.json();
-        const projects = data.data?.pastProjects || data.data?.content || data.data || data;
-        renderTable('tab-pastprojects', projects, ['title', 'objectives', 'partner', 'projectCategory', 'finalStatus', 'budget', 'endDate', 'createdAt']);
-        setupTableSearchAndExport('tab-pastprojects', 'pastprojects.csv', ['Title', 'Objectives', 'Partner', 'Category', 'Status', 'Budget', 'End Date', 'Created At']);
-    } catch (error) {
-        console.error('Error fetching past projects:', error);
-    }
-}
-
-async function fetchProjectReports() {
-    try {
-        const response = await apiFetch('/api/project-reports');
-        if (!response.ok) throw new Error('Failed to fetch project reports');
-        const data = await response.json();
-        const reports = data.data?.projectReports || data.data?.content || data.data || data;
-        renderTable('tab-projectreports', reports, ['title', 'project', 'submittedBy', 'reportType', 'reportStatus', 'submittedAt', 'createdAt']);
-        setupTableSearchAndExport('tab-projectreports', 'projectreports.csv', ['Title', 'Project', 'Submitted By', 'Type', 'Status', 'Submitted At', 'Created At']);
-    } catch (error) {
-        console.error('Error fetching project reports:', error);
-    }
-}
-
-async function fetchProjectCollaborators() {
-    try {
-        const response = await apiFetch('/api/projects/admin/collaborators');
-        if (!response.ok) throw new Error('Failed to fetch project collaborators');
-        const data = await response.json();
-        const collaborators = data.data?.projectCollaborators || data.data?.content || data.data || data;
-        renderTable('tab-collaborators', collaborators, ['user.name', 'project.title', 'organization.name', 'role', 'isActive', 'addedAt']);
-        setupTableSearchAndExport('tab-collaborators', 'projectcollaborators.csv', ['User', 'Project', 'Organization', 'Role', 'Status', 'Date Added']);
-    } catch (error) {
-        console.error('Error fetching project collaborators:', error);
-    }
-}
-
-async function fetchProjectDocuments() {
-    try {
-        const response = await apiFetch('/api/project-documents');
-        if (!response.ok) throw new Error('Failed to fetch project documents');
-        const data = await response.json();
-        const documents = data.data?.projectDocuments || data.data?.content || data.data || data;
-        renderTable('tab-projectdocs', documents, ['fileName', 'project', 'uploadedBy', 'type', 'size', 'status', 'date', 'createdAt']);
-        setupTableSearchAndExport('tab-projectdocs', 'projectdocuments.csv', ['File Name', 'Project', 'Uploaded By', 'Type', 'Size', 'Status', 'Date', 'Created At']);
-    } catch (error) {
-        console.error('Error fetching project documents:', error);
-    }
-}
-
-async function fetchUserDocuments() {
-    try {
-        const response = await apiFetch('/api/user-documents');
-        if (!response.ok) throw new Error('Failed to fetch user documents');
-        const data = await response.json();
-        const documents = data.data?.userDocuments || data.data?.content || data.data || data;
-        renderTable('tab-userdocs', documents, ['fileName', 'user', 'uploadedBy', 'type', 'size', 'status', 'date', 'createdAt']);
-        setupTableSearchAndExport('tab-userdocs', 'userdocuments.csv', ['File Name', 'User', 'Uploaded By', 'Type', 'Size', 'Status', 'Date', 'Created At']);
-    } catch (error) {
-        console.error('Error fetching user documents:', error);
-    }
-}
-
-// --- Helper for Search & Export ---
-function setupTableSearchAndExport(tabId, csvName, headers) {
-    const filterInputs = document.querySelectorAll(`#${tabId} .filter-input`);
-    filterInputs.forEach(input => {
-        input.addEventListener('input', () => {
-            const rows = document.querySelectorAll(`#${tabId} tbody tr`);
-            const filters = Array.from(filterInputs).map(i => i.value.toLowerCase());
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                if (cells.length <= 1) return; // Skip "No records found"
-                let show = true;
-                filters.forEach((filter, index) => {
-                    if (filter && cells[index] && !cells[index].textContent.toLowerCase().includes(filter)) {
-                        show = false;
-                    }
-                });
-                row.style.display = show ? '' : 'none';
-            });
-        });
-    });
-
-    const exportBtn = document.querySelector(`#${tabId} button`);
-    if (exportBtn) {
-        exportBtn.replaceWith(exportBtn.cloneNode(true)); // Clean listeners
-        const newBtn = document.querySelector(`#${tabId} button`);
-        newBtn.addEventListener('click', () => {
-            const rows = document.querySelectorAll(`#${tabId} tbody tr:not([style*="display: none"])`);
-            let csv = headers.join(',') + '\n';
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                if (cells.length <= 1) return;
-                const rowData = Array.from(cells).slice(0, -1).map(cell => '"' + cell.textContent.replace(/"/g, '""') + '"');
-                csv += rowData.join(',') + '\n';
-            });
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = csvName;
-            a.click();
-            URL.revokeObjectURL(url);
-        });
-    }
-}
-
-// --- 4. Main Dashboard Statistics & Charts Integration ---
+// --- 2. Main Dashboard Statistics & Charts Integration ---
 const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 const formatNumber = (num) => num.toLocaleString();
 const formatCurrency = (num) => 'KES ' + num.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -398,7 +159,8 @@ async function loadDashboardOverview() {
                 { county: 'Kiambu', count: rand(8, 20), budget: rand(25, 60) * 1000000, share: 8.7 }
             ];
             
-            document.getElementById('county-table-count').textContent = `${mockCounties.length} Highlighted Counties`;
+            const countEl = document.getElementById('county-table-count');
+            if (countEl) countEl.textContent = `${mockCounties.length} Highlighted Counties`;
 
             countyTableBody.innerHTML = mockCounties.map(c => `
                 <tr class="hover:bg-slate-50/50 dark:hover:bg-gray-700/50 transition">
@@ -421,7 +183,8 @@ async function loadDashboardOverview() {
                 { theme: 'Child Health (CH)', count: rand(10, 25), budget: rand(30, 80) * 1000000, share: 12.1 }
             ];
 
-            document.getElementById('theme-table-count').textContent = `${mockThemes.length} Strategic Themes`;
+            const countEl = document.getElementById('theme-table-count');
+            if (countEl) countEl.textContent = `${mockThemes.length} Strategic Themes`;
 
             themeTableBody.innerHTML = mockThemes.map(t => `
                 <tr class="hover:bg-slate-50/50 dark:hover:bg-gray-700/50 transition">
@@ -441,7 +204,7 @@ async function loadDashboardOverview() {
     }
 }
 
-// --- 5. ApexCharts Initialization ---
+// --- 3. ApexCharts Initialization ---
 function initApexCharts(stats) {
     const chartArea1 = document.querySelector("#barChart");
     const chartArea2 = document.querySelector("#teamChart");
@@ -487,7 +250,7 @@ function initApexCharts(stats) {
     donutChart.render();
 }
 
-// --- 6. Mapbox Interactive Map Implementation ---
+// --- 4. Mapbox Interactive Map Implementation ---
 async function initDashboardMap() {
     const mapContainer = document.getElementById("localMap");
     if (!mapContainer) return;
@@ -628,28 +391,11 @@ window.filterDashboardMap = function() {
     }
 };
 
-// --- 7. Event Listeners & Bootstrapping ---
+// --- 5. Event Listeners & Bootstrapping ---
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Initial Overview Load
     loadDashboardOverview();
     
     // 2. Initial Map Load
     initDashboardMap();
-});
-
-// Listen for tab change dispatches from dashboard-tabs.js
-window.addEventListener('dashboardTabChange', (e) => {
-    const tab = e.detail.tab;
-    console.log('[dashboard.js] Switching and fetching tab data:', tab);
-    
-    if (tab === 'projects') fetchProjects();
-    else if (tab === 'users') fetchUsers();
-    else if (tab === 'organizations') fetchOrganizations();
-    else if (tab === 'announcements') fetchAnnouncements();
-    else if (tab === 'pastprojects') fetchPastProjects();
-    else if (tab === 'collaboration') fetchCollaborationRequests();
-    else if (tab === 'projectreports') fetchProjectReports();
-    else if (tab === 'collaborators') fetchProjectCollaborators();
-    else if (tab === 'projectdocs') fetchProjectDocuments();
-    else if (tab === 'userdocs') fetchUserDocuments();
 });
