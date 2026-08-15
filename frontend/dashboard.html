@@ -1,76 +1,63 @@
 <!doctype html>
-<html lang="en" class="h-full bg-slate-950">
+<html class="light" lang="en">
   <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>RMNCAH Command Portal</title>
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <title>Dashboard | RMNCAH Hub</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap"
       rel="stylesheet"
     />
     <link
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
       rel="stylesheet"
     />
-
-    <!-- Icons & External Libraries -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
     />
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-
-    <script id="tailwind-config">
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script>
       tailwind.config = {
         darkMode: "class",
         theme: {
           extend: {
             colors: {
-              brand: {
-                50: "#f0fdf4",
-                100: "#dcfce7",
-                500: "#22c55e",
-                600: "#16a34a",
-                700: "#15803d",
-              },
-              accent: {
-                blue: "#3b82f6",
-                indigo: "#6366f1",
-                amber: "#f59e0b",
-                rose: "#f43f5e",
-                emerald: "#10b981",
-              },
+              primary: "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+              "neutral-text": "#4A4A4A",
             },
-            fontFamily: {
-              sans: ['"Plus Jakarta Sans"', "sans-serif"],
-              mono: ['"JetBrains Mono"', "monospace"],
-            },
+            fontFamily: { display: ["Inter", "sans-serif"] },
           },
         },
       };
     </script>
-
-    <script src="app-config.js?v=5"></script>
-    <script src="set-base-url.js?v=3"></script>
-    <script src="session-config.js"></script>
-    <script src="auth.js"></script>
-    <script src="session-manager.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <script
       defer
       src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
     ></script>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <link rel="stylesheet" href="styles/main.css" />
-    <script defer src="styles/loadNav-v4.js"></script>
-    <script src="styles/authnav.js?v=4"></script>
+    <script defer src="styles/loadNav.js"></script>
+    <script src="styles/authnav.js"></script>
+    <script src="app-config.js?v=6"></script>
+    <script src="set-base-url.js?v=6"></script>
+    <script src="session-config.js"></script>
+    <script src="auth.js"></script>
+    <script src="session-manager.js"></script>
     <script src="dashboard-tabs.js"></script>
-    <script src="src/utils/counter-utils.js"></script>
-
+    <script src="dashboard.js?v=3"></script>
+    <!-- Mapbox CSS & JS -->
+    <link
+      href="https://api.tiles.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js"></script>
+    <script src="kenya-locations.js"></script>
     <style>
       .material-symbols-outlined {
         font-variation-settings:
@@ -79,576 +66,478 @@
           "GRAD" 0,
           "opsz" 24;
       }
-
-      /* Custom Dark/Light Hybrid Theme Styles */
-      :root {
-        --bg-surface: #ffffff;
-        --bg-app: #f8fafc;
-        --border-color: #e2e8f0;
+      [x-cloak] {
+        display: none !important;
       }
-
-      body {
-        background-color: var(--bg-app);
-        font-family: "Plus Jakarta Sans", sans-serif;
-        color: #1e293b;
+      .map-marker-wrapper {
+        width: 0;
+        height: 0;
+        overflow: visible;
+        cursor: pointer;
       }
-
-      /* Modern Scrollbars */
-      ::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
+      .map-marker-pin {
+        position: absolute;
+        left: -12px;
+        top: -34px;
+        font-size: 28px;
+        line-height: 1;
+        filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+        transition: transform 0.15s ease;
       }
-      ::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 9999px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
-      }
-
-      /* Component Cards */
-      .card-panel {
-        background: #ffffff;
-        border: 1px solid var(--border-color);
-        border-radius: 16px;
-        box-shadow:
-          0 1px 3px 0 rgba(0, 0, 0, 0.02),
-          0 1px 2px -1px rgba(0, 0, 0, 0.02);
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-      .card-panel:hover {
-        border-color: #cbd5e1;
-        box-shadow:
-          0 10px 25px -5px rgba(0, 0, 0, 0.05),
-          0 8px 10px -6px rgba(0, 0, 0, 0.01);
-      }
-
-      /* Form Styling */
-      .input-control {
-        border: 1px solid #cbd5e1;
-        border-radius: 10px;
-        background: #ffffff;
-        color: #0f172a;
-        padding: 0.5rem 0.85rem;
-        font-size: 0.875rem;
-        transition: all 0.15s ease;
-      }
-      .input-control:focus {
-        outline: none;
-        border-color: #16a34a;
-        box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
-      }
-
-      /* Status Badges */
-      .badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.375rem;
-        padding: 0.25rem 0.625rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        letter-spacing: 0.01em;
-      }
-      .badge-active {
-        background: #dcfce7;
-        color: #15803d;
-        border: 1px solid #bbf7d0;
-      }
-      .badge-pending {
-        background: #fef3c7;
-        color: #b45309;
-        border: 1px solid #fde68a;
-      }
-      .badge-completed {
-        background: #dbeafe;
-        color: #1d4ed8;
-        border: 1px solid #bfdbfe;
-      }
-      .badge-stalled,
-      .badge-abandoned {
-        background: #ffe4e6;
-        color: #be123c;
-        border: 1px solid #fecdd3;
-      }
-      .badge-neutral {
-        background: #f1f5f9;
-        color: #475467;
-        border: 1px solid #e2e8f0;
-      }
-
-      /* Data Table Restyling */
-      .table-wrapper {
-        overflow-x: auto;
-      }
-      .table-custom {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-      }
-      .table-custom thead th {
-        background: #f8fafc;
-        color: #64748b;
-        font-size: 0.7rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        padding: 0.875rem 1.25rem;
-        border-bottom: 1px solid #e2e8f0;
-      }
-      .table-custom td {
-        padding: 1rem 1.25rem;
-        font-size: 0.875rem;
-        border-bottom: 1px solid #f1f5f9;
-        color: #334155;
-      }
-      .table-custom tbody tr {
-        transition: background-color 0.15s ease;
-      }
-      .table-custom tbody tr:hover {
-        background-color: #f8fafc;
-      }
-
-      /* Micro Progress Bar */
-      .track {
-        height: 6px;
-        border-radius: 9999px;
-        background: #e2e8f0;
-        overflow: hidden;
-      }
-      .fill {
-        height: 100%;
-        border-radius: 9999px;
-        background: #16a34a;
-        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      /* Popups */
-      .popup {
-        position: fixed;
-        inset: 0;
-        z-index: 9999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(15, 23, 42, 0.6);
-        backdrop-filter: blur(4px);
-        visibility: hidden;
-        opacity: 0;
-        transition: all 0.2s ease;
-      }
-      .popup.show {
-        visibility: visible;
-        opacity: 1;
+      .map-marker-wrapper:hover .map-marker-pin {
+        transform: scale(1.2);
       }
     </style>
-
-    <script>
-      function isMobile() {
-        return window.innerWidth <= 768;
-      }
-      async function apiFetchWithErrorHandling(endpoint, options = {}) {
-        try {
-          return await apiFetch(endpoint, options);
-        } catch (error) {
-          return { ok: false, data: null };
-        }
-      }
-      function showDesktopPopup() {
-        const popup = document.getElementById("desktop-popup");
-        if (isMobile() && popup) popup.classList.add("show");
-      }
-      function closePopup() {
-        const popup = document.getElementById("desktop-popup");
-        if (popup) popup.classList.remove("show");
-      }
-      document.addEventListener("DOMContentLoaded", () => {
-        const closeBtn = document.getElementById("close-popup");
-        if (closeBtn) closeBtn.addEventListener("click", closePopup);
-        showDesktopPopup();
-      });
-    </script>
   </head>
-
   <body
-    class="min-h-screen antialiased selection:bg-brand-500 selection:text-white"
+    class="font-display bg-background-light dark:bg-background-dark text-neutral-text dark:text-gray-200"
   >
-    <!-- Main Global Header Insertion Placeholder -->
     <div id="nav-placeholder"></div>
 
-    <!-- Mobile View Notice Popup -->
-    <div id="desktop-popup" class="popup p-4">
-      <div
-        class="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl border border-slate-100"
-      >
-        <div
-          class="w-12 h-12 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center mx-auto mb-4"
-        >
-          <span class="material-symbols-outlined text-2xl"
-            >desktop_windows</span
-          >
-        </div>
-        <h3 class="text-base font-bold text-slate-900 mb-1">
-          Desktop Recommended
-        </h3>
-        <p class="text-xs text-slate-500 mb-5 leading-relaxed">
-          For optimal data visibility, complex matrix views, and analytics,
-          please use a larger screen context.
-        </p>
-        <button
-          id="close-popup"
-          class="w-full py-2.5 px-4 bg-slate-900 text-white text-xs font-semibold rounded-xl hover:bg-slate-800 transition"
-        >
-          Continue Anyway
-        </button>
-      </div>
-    </div>
-
-    <!-- Dynamic Sidebar Render Target -->
-    <aside
-      id="sidebar-tabs"
-      class="hidden md:flex md:flex-col fixed left-0 top-20 lg:top-24 h-[calc(100vh-5rem)] lg:h-[calc(100vh-6rem)] w-64 z-30 py-4 px-3 gap-1 overflow-y-auto bg-white border-r border-slate-200/80"
-    ></aside>
-
-    <!-- Mobile Bottom Docking Controls -->
-    <div
-      id="mobile-dashboard-tabs"
-      class="hidden lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white/90 backdrop-blur-md border-t border-slate-200/80 shadow-lg"
-    >
-      <div
-        id="mobile-sidebar-tabs"
-        class="flex overflow-x-auto gap-1 px-3 py-2"
-      ></div>
-    </div>
-
-    <!-- Main Workspace Viewport -->
-    <div class="relative flex min-h-screen w-full mt-20 lg:mt-24">
-      <main
-        class="flex-1 md:pl-64 px-4 md:px-8 py-6 w-full max-w-[1440px] mx-auto"
-      >
-        <div id="tab-content-container" class="flex flex-col gap-6">
-          <!-- ============================================================
-					 TAB 1: DASHBOARD / COMMAND CENTER
-					 ============================================================ -->
+    <main class="relative px-4 md:px-10 mt-20 lg:mt-24 min-h-screen">
+      <div class="mx-auto w-full max-w-7xl">
+        <!-- Header -->
+        <header class="mb-8">
           <div
-            id="tab-dashboard"
-            class="tab-section space-y-6"
-            style="display: none"
+            class="flex flex-col md:flex-row md:items-center justify-between gap-4"
           >
-            <!-- Header Control Toolbar -->
-            <div
-              class="card-panel p-6 bg-slate-900 text-white relative overflow-hidden"
-            >
+            <div class="flex items-center gap-4">
               <div
-                class="absolute -right-10 -top-10 w-64 h-64 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"
-              ></div>
-              <div
-                class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4"
+                id="role-avatar"
+                class="h-14 w-14 shrink-0 rounded-2xl bg-[#0047BA] text-white grid place-items-center shadow-sm"
               >
-                <div>
-                  <div
-                    class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/10 text-brand-500 text-[11px] font-semibold tracking-wide uppercase mb-2"
-                  >
-                    <span
-                      class="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse"
-                    ></span>
-                    Live Program Data
-                  </div>
-                  <h1
-                    class="text-2xl md:text-3xl font-extrabold tracking-tight"
-                  >
-                    Welcome,
-                    <span id="welcome-user-role" class="text-brand-500"
-                      >User</span
-                    >
-                  </h1>
-                  <p class="text-xs text-slate-400 mt-1 max-w-xl">
-                    Real-time health intelligence, program reach metrics, and
-                    budget tracking center.
-                  </p>
-                </div>
-
-                <!-- Inline Interactive Filters -->
-                <div
-                  class="flex flex-wrap items-center gap-2 bg-slate-800/80 p-2 rounded-xl border border-slate-700/50"
-                >
-                  <select
-                    id="dash-category-filter"
-                    class="bg-slate-900 text-xs font-medium text-slate-200 border-slate-700 rounded-lg px-2.5 py-1.5 focus:ring-brand-500"
-                  >
-                    <option value="">All Focus Areas</option>
-                    <option value="GBV">GBV</option>
-                    <option value="AYPSRH">Adolescent &amp; Youth SRH</option>
-                    <option value="MWH">Maternal &amp; Women's Health</option>
-                    <option value="FP">Family Planning</option>
-                    <option value="CH">Child Health</option>
-                    <option value="A">AIDS/HIV</option>
-                    <option value="AS">Adolescent Sexuality</option>
-                    <option value="MONITORING_EVALUATION">
-                      Monitoring &amp; Evaluation
-                    </option>
-                    <option value="RESEARCH_LEARNING">
-                      Research &amp; Learning
-                    </option>
-                  </select>
-
-                  <select
-                    id="dash-status-filter"
-                    class="bg-slate-900 text-xs font-medium text-slate-200 border-slate-700 rounded-lg px-2.5 py-1.5 focus:ring-brand-500"
-                  >
-                    <option value="">All Statuses</option>
-                    <option value="ACTIVE">Active</option>
-                    <option value="PENDING">Pending</option>
-                    <option value="STALLED">Stalled</option>
-                    <option value="COMPLETED">Completed</option>
-                    <option value="ABANDONED">Abandoned</option>
-                  </select>
-
-                  <button
-                    id="dash-clear-filters"
-                    class="p-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 transition"
-                    title="Clear Filters"
-                  >
-                    <span class="material-symbols-outlined text-sm"
-                      >filter_alt_off</span
-                    >
-                  </button>
-                </div>
+                <span class="material-symbols-outlined text-2xl">overview</span>
               </div>
-
-              <div
-                class="mt-4 pt-4 border-t border-slate-800 text-[11px] text-slate-400 font-mono flex items-center justify-between"
-                id="dashboard-last-updated"
-              >
-                <span>System Operational</span>
-                <span>Last Synced: --:--</span>
-              </div>
-            </div>
-
-            <!-- Metrics Command Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div class="card-panel p-5">
-                <div class="flex items-center justify-between">
-                  <span
-                    class="text-[11px] font-bold text-slate-400 uppercase tracking-wider"
-                    >Projects Active</span
-                  >
-                  <div
-                    class="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center"
-                  >
-                    <span class="material-symbols-outlined text-lg"
-                      >folder</span
-                    >
-                  </div>
-                </div>
-                <div class="mt-2 flex items-baseline gap-2">
-                  <span
-                    id="active-projects-main"
-                    class="text-2xl font-extrabold text-slate-900 font-mono"
-                    >0</span
-                  >
-                  <span class="text-xs text-slate-400 font-medium"
-                    >/ <span id="total-projects-sub">0</span> total</span
-                  >
-                </div>
+              <div class="min-w-0">
                 <p
-                  class="text-[11px] text-amber-600 font-medium mt-2 flex items-center gap-1"
+                  class="text-xs font-semibold uppercase tracking-widest text-[#0047BA]"
                 >
-                  <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                  <span id="pending-projects-sub">0</span> pending review
+                  RMNCAH Hub
                 </p>
-              </div>
-
-              <div class="card-panel p-5">
-                <div class="flex items-center justify-between">
-                  <span
-                    class="text-[11px] font-bold text-slate-400 uppercase tracking-wider"
-                    >Program Budget</span
-                  >
-                  <div
-                    class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"
-                  >
-                    <span class="material-symbols-outlined text-lg"
-                      >payments</span
-                    >
-                  </div>
-                </div>
-                <div
-                  id="total-budget-main"
-                  class="mt-2 text-2xl font-extrabold text-slate-900 font-mono"
+                <h1
+                  id="dash-hello"
+                  class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 truncate"
                 >
-                  <span class="text-xs text-slate-400 font-sans">KES</span> 0
-                </div>
-                <p class="text-[11px] text-slate-500 font-medium mt-2">
-                  Active financial allocations
-                </p>
-              </div>
-
-              <div class="card-panel p-5">
-                <div class="flex items-center justify-between">
-                  <span
-                    class="text-[11px] font-bold text-slate-400 uppercase tracking-wider"
-                    >County Coverage</span
-                  >
-                  <div
-                    class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center"
-                  >
-                    <span class="material-symbols-outlined text-lg">map</span>
-                  </div>
-                </div>
-                <div
-                  class="mt-2 text-2xl font-extrabold text-slate-900 font-mono"
-                >
-                  <span id="county-coverage-main">0</span>
-                </div>
-                <p class="text-[11px] text-slate-500 font-medium mt-2">
-                  Unique regions impacted
-                </p>
-              </div>
-
-              <div class="card-panel p-5">
-                <div class="flex items-center justify-between">
-                  <span
-                    class="text-[11px] font-bold text-slate-400 uppercase tracking-wider"
-                    >Network Partners</span
-                  >
-                  <div
-                    class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center"
-                  >
-                    <span class="material-symbols-outlined text-lg"
-                      >groups</span
-                    >
-                  </div>
-                </div>
-                <div class="mt-2 flex items-baseline gap-2">
-                  <span
-                    id="partners-count-main"
-                    class="text-2xl font-extrabold text-slate-900 font-mono"
-                    >0</span
-                  >
-                  <span class="text-xs text-slate-400 font-medium"
-                    >/ <span id="total-users-sub">0</span> accounts</span
-                  >
-                </div>
-                <p class="text-[11px] text-slate-500 font-medium mt-2">
-                  Registered stakeholders
-                </p>
+                  Welcome back
+                </h1>
+                <p
+                  id="dash-role"
+                  class="text-sm font-medium text-gray-500 mt-0.5"
+                ></p>
               </div>
             </div>
 
-            <!-- Visual Analytics Center -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div class="lg:col-span-2 space-y-6">
-                <div class="card-panel p-5">
-                  <div class="flex items-center justify-between mb-4">
-                    <div>
-                      <h3 class="text-sm font-bold text-slate-900">
-                        Project Status Distribution
-                      </h3>
-                      <p class="text-xs text-slate-400">
-                        Activity classification by focus category
-                      </p>
-                    </div>
-                  </div>
-                  <div id="barChart" class="w-full min-h-[320px]"></div>
-                </div>
-
-                <div class="card-panel p-5">
-                  <div class="flex items-center justify-between mb-4">
-                    <div>
-                      <h3 class="text-sm font-bold text-slate-900">
-                        Resource Allocations
-                      </h3>
-                      <p class="text-xs text-slate-400">
-                        Budget spread percentage across thematic areas
-                      </p>
-                    </div>
-                  </div>
-                  <div
-                    id="teamChart"
-                    class="w-full min-h-[280px] flex justify-center"
-                  ></div>
-                </div>
-              </div>
-
-              <div class="space-y-6">
-                <div class="card-panel flex flex-col h-[380px]">
-                  <div
-                    class="p-4 border-b border-slate-100 flex items-center justify-between"
-                  >
-                    <h3 class="text-sm font-bold text-slate-900">
-                      Regional Footprint
-                    </h3>
-                    <span class="text-[10px] text-slate-400 font-mono"
-                      >Density Index</span
-                    >
-                  </div>
-                  <div
-                    id="county-density-list"
-                    class="p-4 space-y-3 overflow-y-auto flex-1"
-                  >
-                    <div class="text-center py-8 text-slate-400 text-xs">
-                      Loading location insights...
-                    </div>
-                  </div>
-                </div>
-
-                <div class="card-panel p-5">
-                  <h3 class="text-sm font-bold text-slate-900 mb-3">
-                    Quick Actions
-                  </h3>
-                  <div
-                    id="quick-actions-container"
-                    class="flex flex-col gap-2"
-                  ></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Recent Activity Feed Table -->
-            <div class="card-panel overflow-hidden">
-              <div
-                class="p-4 border-b border-slate-100 flex items-center justify-between"
+            <!-- Header Action Bar (QoL) -->
+            <div class="flex items-center gap-2 flex-wrap">
+              <span
+                id="api-health-badge"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl"
               >
-                <div>
-                  <h3 class="text-sm font-bold text-slate-900">
-                    Recent Program Updates
-                  </h3>
-                  <p class="text-xs text-slate-400">
-                    Latest project modifications and proposals
-                  </p>
-                </div>
-                <button
-                  id="dash-btn-view-projects"
-                  class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition flex items-center gap-1"
+                <span
+                  class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
+                ></span>
+                Connected
+              </span>
+              <button
+                onclick="exportDashboardCSV()"
+                title="Export summary CSV"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-gray-700 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition shadow-sm"
+              >
+                <i class="fas fa-file-csv text-emerald-600"></i> Export CSV
+              </button>
+              <button
+                onclick="loadDashboard(true)"
+                title="Refresh dashboard data"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-gray-700 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition shadow-sm"
+              >
+                <i id="refresh-icon" class="fas fa-sync-alt text-gray-500"></i>
+                Refresh
+              </button>
+              <a
+                id="primary-cta-btn"
+                href="projects.html"
+                class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#0047BA] hover:bg-[#003da1] rounded-xl transition shadow-sm"
+              >
+                <i class="fas fa-plus"></i>
+                <span id="primary-cta-label">Quick Action</span>
+              </a>
+              <span
+                id="dash-last-updated"
+                class="text-[11px] text-gray-400 self-center ml-2 hidden sm:inline-block"
+              ></span>
+            </div>
+          </div>
+          <p
+            id="dash-tagline"
+            class="mt-4 max-w-3xl text-gray-600 dark:text-gray-300"
+          ></p>
+        </header>
+
+        <!-- Needs your attention -->
+        <section class="mb-10" id="attention-section">
+          <div class="flex items-center justify-between gap-3 mb-4">
+            <div>
+              <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">
+                Needs your attention
+              </h2>
+              <p class="text-sm text-gray-500">
+                Items that are waiting on you across the hub.
+              </p>
+            </div>
+            <span
+              id="attention-summary"
+              class="hidden text-xs font-semibold text-gray-400"
+            ></span>
+          </div>
+          <div
+            id="attention-grid"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+          ></div>
+        </section>
+
+        <!-- At a glance -->
+        <section class="mb-10">
+          <div class="mb-4">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">
+              At a glance
+            </h2>
+            <p class="text-sm text-gray-500">
+              A quick pulse on the numbers that matter to your account.
+            </p>
+          </div>
+          <div
+            id="stats-grid"
+            class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+          ></div>
+        </section>
+
+        <!-- Where to go next -->
+        <section class="mb-10">
+          <div class="mb-4">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">
+              Where to go next
+            </h2>
+            <p class="text-sm text-gray-500">
+              One-click shortcuts to the pages where you can do more with the
+              data.
+            </p>
+          </div>
+          <div
+            id="links-grid"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+          ></div>
+        </section>
+
+        <!-- Recent Activity & Quick Search Table (QoL) -->
+        <section class="mb-10">
+          <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4"
+          >
+            <div>
+              <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">
+                Recent Projects & Activity
+              </h2>
+              <p class="text-sm text-gray-500">
+                Quick access to your latest submissions and active records.
+              </p>
+            </div>
+            <div class="relative w-full sm:w-64">
+              <i
+                class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"
+              ></i>
+              <input
+                type="text"
+                id="dash-project-search"
+                oninput="filterRecentProjects()"
+                placeholder="Filter projects..."
+                class="w-full pl-9 pr-3 py-1.5 text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-1 focus:ring-[#0047BA] focus:outline-none text-gray-800 dark:text-gray-200"
+              />
+            </div>
+          </div>
+          <div
+            class="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden"
+          >
+            <div class="overflow-x-auto">
+              <table
+                class="w-full text-left text-xs text-gray-600 dark:text-gray-300"
+              >
+                <thead
+                  class="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 uppercase font-semibold text-[10px] tracking-wider border-b border-gray-100 dark:border-gray-700"
                 >
-                  View All
-                  <span class="material-symbols-outlined text-sm"
-                    >arrow_forward</span
-                  >
+                  <tr>
+                    <th class="px-5 py-3">Project Title</th>
+                    <th class="px-5 py-3">County / Location</th>
+                    <th class="px-5 py-3">Status</th>
+                    <th class="px-5 py-3">Budget</th>
+                    <th class="px-5 py-3 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody
+                  id="recent-projects-tbody"
+                  class="divide-y divide-gray-100 dark:divide-gray-700"
+                >
+                  <tr>
+                    <td
+                      colspan="5"
+                      class="px-5 py-6 text-center text-gray-400 font-medium"
+                    >
+                      Loading recent projects...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Analytics -->
+        <section class="mb-10">
+          <div class="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">
+                Analytics & Key Metrics
+              </h2>
+              <p class="text-sm text-gray-500">
+                Visual breakdown of status, county coverage, budgets, and
+                thematic focus.
+              </p>
+            </div>
+            <span
+              id="chart-coverage"
+              class="hidden text-xs font-semibold text-gray-400"
+            ></span>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+            <div
+              class="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5 shadow-sm"
+            >
+              <h3
+                class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 flex items-center justify-between"
+              >
+                <span>Projects by status</span>
+                <span class="text-xs text-gray-400 font-normal"
+                  >Lifecycle view</span
+                >
+              </h3>
+              <div id="statusChart"></div>
+            </div>
+            <div
+              class="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5 shadow-sm"
+            >
+              <h3
+                class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 flex items-center justify-between"
+              >
+                <span>Projects by county</span>
+                <span class="text-xs text-gray-400 font-normal"
+                  >Geographic spread</span
+                >
+              </h3>
+              <div id="countyChart"></div>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+            <div
+              class="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5 shadow-sm"
+            >
+              <h3
+                class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 flex items-center justify-between"
+              >
+                <span>Investment by Thematic Area (KES)</span>
+                <span class="text-xs text-gray-400 font-normal"
+                  >Financial breakdown</span
+                >
+              </h3>
+              <div id="themeChart"></div>
+            </div>
+            <div
+              class="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5 shadow-sm"
+            >
+              <h3
+                class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 flex items-center justify-between"
+              >
+                <span>Funding per County (KES)</span>
+                <span class="text-xs text-gray-400 font-normal"
+                  >County budget distribution</span
+                >
+              </h3>
+              <div id="countyFundingChart"></div>
+            </div>
+          </div>
+          <div
+            class="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5 shadow-sm"
+          >
+            <h3
+              class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 flex items-center justify-between"
+            >
+              <span>Intervention Categories</span>
+              <span class="text-xs text-gray-400 font-normal"
+                >Implementing, Research & Priority</span
+              >
+            </h3>
+            <div id="categoryChart"></div>
+          </div>
+        </section>
+
+        <!-- Project Concentration Map (same as index-post-login) -->
+        <section class="mb-10">
+          <div class="mb-4">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">
+              Project Concentration Map
+            </h2>
+            <p class="text-sm text-gray-500">
+              Interactive map showing concentration of active projects and
+              geographic location spread across Kenya counties.
+            </p>
+          </div>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-4"
+          >
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+              <div>
+                <label
+                  class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1"
+                  >Search Project</label
+                >
+                <input
+                  type="text"
+                  id="dashMapSearch"
+                  placeholder="Search project name..."
+                  class="w-full px-3 py-1.5 text-xs bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-1 focus:ring-[#0047BA] text-gray-800 dark:text-gray-100"
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1"
+                  >Filter County</label
+                >
+                <select
+                  id="dashMapCounty"
+                  class="w-full px-3 py-1.5 text-xs bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-1 focus:ring-[#0047BA] text-gray-800 dark:text-gray-100"
+                >
+                  <option value="">All Counties</option>
+                </select>
+              </div>
+              <div class="flex items-end">
+                <button
+                  onclick="filterDashboardMap()"
+                  class="w-full py-1.5 px-4 text-xs font-semibold text-white bg-[#0047BA] hover:bg-[#003da1] rounded-xl transition shadow-sm"
+                >
+                  <i class="fas fa-search mr-1"></i> Filter Map
                 </button>
               </div>
-              <div class="table-wrapper">
-                <table class="table-custom">
-                  <thead>
+            </div>
+            <div
+              id="localMap"
+              class="h-[450px] sm:h-[500px] w-full border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-inner"
+            ></div>
+          </div>
+        </section>
+
+        <!-- Comprehensive Data Tables (QoL) -->
+        <section class="mb-10">
+          <div class="mb-4">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">
+              Regional & Thematic Data Breakdown
+            </h2>
+            <p class="text-sm text-gray-500">
+              Detailed tabular metrics by county coverage and health thematic
+              area.
+            </p>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Table 1: County Breakdown -->
+            <div
+              class="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden flex flex-col"
+            >
+              <div
+                class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/30 flex items-center justify-between"
+              >
+                <h3
+                  class="text-xs font-bold uppercase tracking-wider text-gray-800 dark:text-gray-200 flex items-center gap-2"
+                >
+                  <i class="fas fa-map-marker-alt text-rose-500"></i> County
+                  Coverage Summary
+                </h3>
+                <span
+                  id="county-table-count"
+                  class="text-[11px] font-semibold text-gray-500"
+                  >0 Counties</span
+                >
+              </div>
+              <div class="overflow-x-auto flex-1">
+                <table
+                  class="w-full text-left text-xs text-gray-600 dark:text-gray-300"
+                >
+                  <thead
+                    class="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 uppercase font-semibold text-[10px] tracking-wider border-b border-gray-100 dark:border-gray-700"
+                  >
                     <tr>
-                      <th>Project Title</th>
-                      <th>Partner</th>
-                      <th class="text-right">Budget</th>
-                      <th>Status</th>
-                      <th class="text-right">Action</th>
+                      <th class="px-4 py-3">County</th>
+                      <th class="px-4 py-3">Projects</th>
+                      <th class="px-4 py-3">Total Investment</th>
+                      <th class="px-4 py-3 text-right">Coverage %</th>
                     </tr>
                   </thead>
-                  <tbody id="recent-projects-tbody">
+                  <tbody
+                    id="county-breakdown-tbody"
+                    class="divide-y divide-gray-100 dark:divide-gray-700"
+                  >
                     <tr>
                       <td
-                        colspan="5"
-                        class="text-center py-8 text-slate-400 text-xs"
+                        colspan="4"
+                        class="px-4 py-6 text-center text-gray-400 font-medium"
                       >
-                        Loading records...
+                        Loading county metrics...
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Table 2: Thematic Area Breakdown -->
+            <div
+              class="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden flex flex-col"
+            >
+              <div
+                class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/30 flex items-center justify-between"
+              >
+                <h3
+                  class="text-xs font-bold uppercase tracking-wider text-gray-800 dark:text-gray-200 flex items-center gap-2"
+                >
+                  <i class="fas fa-layer-group text-blue-500"></i> Thematic Area
+                  Distribution
+                </h3>
+                <span
+                  id="theme-table-count"
+                  class="text-[11px] font-semibold text-gray-500"
+                  >0 Themes</span
+                >
+              </div>
+              <div class="overflow-x-auto flex-1">
+                <table
+                  class="w-full text-left text-xs text-gray-600 dark:text-gray-300"
+                >
+                  <thead
+                    class="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 uppercase font-semibold text-[10px] tracking-wider border-b border-gray-100 dark:border-gray-700"
+                  >
+                    <tr>
+                      <th class="px-4 py-3">Thematic Area</th>
+                      <th class="px-4 py-3">Active Projects</th>
+                      <th class="px-4 py-3">Budget Allocated</th>
+                      <th class="px-4 py-3 text-right">Share %</th>
+                    </tr>
+                  </thead>
+                  <tbody
+                    id="thematic-breakdown-tbody"
+                    class="divide-y divide-gray-100 dark:divide-gray-700"
+                  >
+                    <tr>
+                      <td
+                        colspan="4"
+                        class="px-4 py-6 text-center text-gray-400 font-medium"
+                      >
+                        Loading thematic metrics...
                       </td>
                     </tr>
                   </tbody>
@@ -656,1371 +545,84 @@
               </div>
             </div>
           </div>
+        </section>
 
-          <!-- ============================================================
-					 TAB 2: PROJECTS
-					 ============================================================ -->
+        <!-- Official Hub Announcements (QoL) -->
+        <section class="mb-10">
+          <div class="flex items-center justify-between gap-3 mb-4">
+            <div>
+              <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">
+                Hub Notices & Bulletins
+              </h2>
+              <p class="text-sm text-gray-500">
+                Official Ministry updates and coordination notices.
+              </p>
+            </div>
+            <a
+              href="general-announcements.html"
+              class="text-xs font-semibold text-[#0047BA] hover:underline flex items-center gap-1"
+            >
+              View All <i class="fas fa-arrow-right text-[10px]"></i>
+            </a>
+          </div>
           <div
-            id="tab-projects"
-            class="tab-section space-y-4"
-            style="display: none"
+            id="dash-announcements-container"
+            class="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="text-xl font-extrabold text-slate-900">
-                  Projects Directory
-                </h2>
-                <p class="text-xs text-slate-500">
-                  <span id="tab-projects-count" class="font-bold">0</span>
-                  projects registered
-                </p>
+            <div
+              class="p-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm flex items-start gap-3"
+            >
+              <div class="p-2.5 rounded-xl bg-blue-50 text-[#0047BA] shrink-0">
+                <i class="fas fa-bullhorn text-lg"></i>
               </div>
-              <button
-                class="px-3 py-2 bg-slate-900 text-white rounded-xl text-xs font-semibold hover:bg-slate-800 transition flex items-center gap-1"
-              >
-                <span class="material-symbols-outlined text-base"
-                  >download</span
+              <div class="min-w-0">
+                <span
+                  class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 uppercase mb-1"
+                  >Notice</span
                 >
-                Export Matrix
-              </button>
-            </div>
-
-            <div class="card-panel p-3 flex flex-wrap items-center gap-2">
-              <input
-                type="text"
-                data-column="0"
-                placeholder="Title..."
-                class="input-control text-xs w-40"
-              />
-              <input
-                type="text"
-                data-column="1"
-                placeholder="Partner..."
-                class="input-control text-xs w-36"
-              />
-              <select data-column="2" class="input-control text-xs">
-                <option value="">Category</option>
-                <option value="Implementing">Implementing</option>
-                <option value="Funding">Funding</option>
-                <option value="Research">Research</option>
-              </select>
-              <select
-                id="thematic-area-filter"
-                class="input-control text-xs max-w-[180px]"
-              >
-                <option value="">Thematic Area</option>
-              </select>
-              <select data-column="5" class="input-control text-xs">
-                <option value="">Status</option>
-                <option value="Active">Active</option>
-                <option value="Pending">Pending</option>
-                <option value="Stalled">Stalled</option>
-                <option value="Completed">Completed</option>
-              </select>
-              <button
-                id="clear-theme-filter"
-                class="ml-auto text-xs font-semibold text-slate-500 hover:text-slate-900 px-2 py-1"
-              >
-                Clear Filters
-              </button>
-              <div
-                id="selected-themes-container"
-                class="w-full flex flex-wrap gap-1.5 mt-2"
-                style="display: none"
-              ></div>
-            </div>
-
-            <div class="card-panel overflow-hidden">
-              <div class="table-wrapper">
-                <table class="table-custom">
-                  <thead>
-                    <tr>
-                      <th>Project Details</th>
-                      <th>Partner</th>
-                      <th>Category</th>
-                      <th>Themes</th>
-                      <th class="text-right">Budget</th>
-                      <th class="text-center">Status</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <!-- ============================================================
-					 TAB 3: USERS
-					 ============================================================ -->
-          <div
-            id="tab-users"
-            class="tab-section space-y-4"
-            style="display: none"
-          >
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="text-xl font-extrabold text-slate-900">
-                  User Management
-                </h2>
-                <p class="text-xs text-slate-500">
-                  <span id="tab-users-count" class="font-bold">0</span> portal
-                  profiles
-                </p>
-              </div>
-              <button
-                class="px-3 py-2 bg-slate-950 text-white rounded-xl text-xs font-semibold hover:bg-slate-800 transition flex items-center gap-1"
-              >
-                <span class="material-symbols-outlined text-base"
-                  >download</span
+                <h4
+                  class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate"
                 >
-                Export Users
-              </button>
-            </div>
-
-            <div
-              class="card-panel p-3 flex flex-wrap gap-2 items-center bg-slate-50"
-            >
-              <input
-                type="text"
-                data-column="0"
-                placeholder="Filter Name/Email"
-                class="input-control text-xs w-48"
-              />
-              <select data-column="1" class="input-control text-xs">
-                <option value="">All Roles</option>
-                <option value="SUPER_ADMIN">Super Admin</option>
-                <option value="PARTNER">Partner</option>
-                <option value="DONOR">Donor</option>
-              </select>
-              <input
-                type="text"
-                data-column="2"
-                placeholder="Organization"
-                class="input-control text-xs w-36"
-              />
-              <select data-column="3" class="input-control text-xs">
-                <option value="">All Statuses</option>
-                <option value="Active">Active</option>
-                <option value="Pending">Pending</option>
-                <option value="Inactive">Inactive</option>
-              </select>
-            </div>
-
-            <div class="card-panel overflow-hidden">
-              <div class="table-wrapper">
-                <table class="table-custom">
-                  <thead>
-                    <tr>
-                      <th>User Information</th>
-                      <th>Role</th>
-                      <th>Organization</th>
-                      <th class="text-center">Status</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <!-- ============================================================
-					 TAB 4: ORGANIZATIONS
-					 ============================================================ -->
-          <div
-            id="tab-organizations"
-            class="tab-section space-y-4"
-            style="display: none"
-          >
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="text-xl font-extrabold text-slate-900">
-                  Organizations Registry
-                </h2>
-                <p class="text-xs text-slate-500">
-                  <span id="tab-organizations-count" class="font-bold">0</span>
-                  partner entities
+                  RMNCAH Multi-Sectoral Alignment Meeting
+                </h4>
+                <p class="text-xs text-gray-500 line-clamp-2 mt-0.5">
+                  Stakeholder meeting scheduled to align on reproductive and
+                  maternal health interventions.
                 </p>
               </div>
-              <button
-                class="px-3 py-2 bg-slate-900 text-white rounded-xl text-xs font-semibold hover:bg-slate-800 transition flex items-center gap-1"
-              >
-                <span class="material-symbols-outlined text-base"
-                  >download</span
+            </div>
+            <div
+              class="p-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm flex items-start gap-3"
+            >
+              <div class="p-2.5 rounded-xl bg-amber-50 text-amber-600 shrink-0">
+                <i class="fas fa-file-contract text-lg"></i>
+              </div>
+              <div class="min-w-0">
+                <span
+                  class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 uppercase mb-1"
+                  >Policy</span
                 >
-                Export List
-              </button>
-            </div>
-
-            <div
-              class="card-panel p-3 flex flex-wrap gap-2 items-center bg-slate-50"
-            >
-              <input
-                type="text"
-                data-column="0"
-                placeholder="Org Name"
-                class="input-control text-xs w-44"
-              />
-              <input
-                type="text"
-                data-column="1"
-                placeholder="Type"
-                class="input-control text-xs w-36"
-              />
-              <input
-                type="text"
-                data-column="2"
-                placeholder="Location"
-                class="input-control text-xs w-36"
-              />
-              <select data-column="3" class="input-control text-xs">
-                <option value="">Status</option>
-                <option value="Approved">Approved</option>
-                <option value="Pending">Pending</option>
-                <option value="Rejected">Rejected</option>
-              </select>
-            </div>
-
-            <div class="card-panel overflow-hidden">
-              <div class="table-wrapper">
-                <table class="table-custom">
-                  <thead>
-                    <tr>
-                      <th>Organization</th>
-                      <th>Type</th>
-                      <th>Location</th>
-                      <th class="text-center">Status</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <!-- ============================================================
-					 TAB 5: ANNOUNCEMENTS
-					 ============================================================ -->
-          <div
-            id="tab-announcements"
-            class="tab-section space-y-4"
-            style="display: none"
-          >
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="text-xl font-extrabold text-slate-900">
-                  Announcements &amp; Broadcasts
-                </h2>
-                <p class="text-xs text-slate-500">
-                  System-wide updates and requests for partnerships
-                </p>
-              </div>
-              <div class="flex items-center gap-2">
-                <button
-                  class="px-3 py-2 border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50 transition"
+                <h4
+                  class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate"
                 >
-                  Export
-                </button>
-                <button
-                  id="create-announcement-btn"
-                  class="px-3 py-2 bg-brand-600 text-white rounded-xl text-xs font-semibold hover:bg-brand-700 transition flex items-center gap-1"
-                >
-                  <span class="material-symbols-outlined text-base">add</span>
-                  Create Broadcast
-                </button>
-              </div>
-            </div>
-
-            <div class="card-panel overflow-hidden">
-              <div class="table-wrapper">
-                <table class="table-custom">
-                  <thead>
-                    <tr>
-                      <th>Title</th>
-                      <th>Content Summary</th>
-                      <th>Deadline</th>
-                      <th>Created By</th>
-                      <th>Status</th>
-                      <th>Type</th>
-                      <th>Date</th>
-                      <th></th>
-                    </tr>
-                    <tr class="bg-slate-50">
-                      <th class="py-1.5">
-                        <input
-                          data-column="0"
-                          placeholder="Filter..."
-                          class="input-control w-full text-xs"
-                        />
-                      </th>
-                      <th class="py-1.5">
-                        <input
-                          data-column="1"
-                          placeholder="Filter..."
-                          class="input-control w-full text-xs"
-                        />
-                      </th>
-                      <th class="py-1.5">
-                        <input
-                          data-column="2"
-                          placeholder="Filter..."
-                          class="input-control w-full text-xs"
-                        />
-                      </th>
-                      <th class="py-1.5">
-                        <input
-                          data-column="3"
-                          placeholder="Filter..."
-                          class="input-control w-full text-xs"
-                        />
-                      </th>
-                      <th class="py-1.5">
-                        <input
-                          data-column="4"
-                          placeholder="Filter..."
-                          class="input-control w-full text-xs"
-                        />
-                      </th>
-                      <th class="py-1.5">
-                        <input
-                          data-column="5"
-                          placeholder="Filter..."
-                          class="input-control w-full text-xs"
-                        />
-                      </th>
-                      <th class="py-1.5">
-                        <input
-                          data-column="6"
-                          placeholder="Filter..."
-                          class="input-control w-full text-xs"
-                        />
-                      </th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-            </div>
-
-            <!-- Announcement Creation Modal -->
-            <div
-              id="create-announcement-modal"
-              class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4"
-            >
-              <div class="card-panel w-full max-w-md p-6 bg-white shadow-2xl">
-                <div class="flex items-center justify-between mb-4">
-                  <h3 class="text-base font-bold text-slate-900">
-                    New Announcement
-                  </h3>
-                  <button
-                    type="button"
-                    id="cancel-announcement-btn"
-                    class="text-slate-400 hover:text-slate-600"
-                  >
-                    <span class="material-symbols-outlined">close</span>
-                  </button>
-                </div>
-
-                <form id="create-announcement-form" class="space-y-3">
-                  <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1"
-                      >Title</label
-                    >
-                    <input
-                      id="announcement-title"
-                      required
-                      type="text"
-                      class="input-control w-full text-xs"
-                      placeholder="Broadcast Headline"
-                    />
-                  </div>
-                  <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1"
-                      >Message Content</label
-                    >
-                    <textarea
-                      id="announcement-content"
-                      rows="3"
-                      class="input-control w-full text-xs"
-                      placeholder="Specific details..."
-                      required
-                    ></textarea>
-                  </div>
-                  <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1"
-                      >Deadline (Optional)</label
-                    >
-                    <input
-                      type="date"
-                      id="announcement-deadline"
-                      class="input-control w-full text-xs"
-                    />
-                  </div>
-                  <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1"
-                      >Collaboration Access</label
-                    >
-                    <select
-                      id="announcement-collaboration-type"
-                      class="input-control w-full text-xs"
-                    >
-                      <option value="OPEN">Open Access</option>
-                      <option value="INVITATION_ONLY">Invitation Only</option>
-                    </select>
-                  </div>
-                  <div class="flex justify-end gap-2 pt-3">
-                    <button
-                      type="button"
-                      id="cancel-announcement-btn-2"
-                      class="px-3 py-2 border rounded-xl text-xs font-semibold"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      class="px-3 py-2 bg-brand-600 text-white rounded-xl text-xs font-semibold hover:bg-brand-700"
-                    >
-                      Submit
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-
-          <!-- ============================================================
-					 TAB 6: COLLABORATION REQUESTS
-					 ============================================================ -->
-          <div
-            id="tab-collaboration"
-            class="tab-section space-y-4"
-            style="display: none"
-          >
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="text-xl font-extrabold text-slate-900">
-                  Collaboration Requests
-                </h2>
-                <p class="text-xs text-slate-500">
-                  Incoming network synergy requests
+                  Updated Project Reporting Guidelines
+                </h4>
+                <p class="text-xs text-gray-500 line-clamp-2 mt-0.5">
+                  Quarterly progress and financial reporting templates have been
+                  updated for 2026.
                 </p>
               </div>
-              <button
-                class="px-3 py-2 border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50"
-              >
-                Export
-              </button>
-            </div>
-
-            <div class="card-panel overflow-hidden">
-              <div class="table-wrapper">
-                <table class="table-custom">
-                  <thead>
-                    <tr>
-                      <th>Requester</th>
-                      <th>Project</th>
-                      <th>Organization</th>
-                      <th>Status</th>
-                      <th>Message</th>
-                      <th>Submitted</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
             </div>
           </div>
-
-          <!-- ============================================================
-					 TAB 7: PAST PROJECTS
-					 ============================================================ -->
-          <div
-            id="tab-pastprojects"
-            class="tab-section space-y-4"
-            style="display: none"
-          >
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="text-xl font-extrabold text-slate-900">
-                  Historical Records
-                </h2>
-                <p class="text-xs text-slate-500">
-                  <span id="tab-past-projects-count" class="font-bold">0</span>
-                  archived operations
-                </p>
-              </div>
-              <button
-                class="px-3 py-2 border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50"
-              >
-                Export
-              </button>
-            </div>
-
-            <div
-              class="card-panel p-3 flex flex-wrap gap-2 items-center bg-slate-50"
-            >
-              <input
-                type="text"
-                data-column="0"
-                placeholder="Title/Description"
-                class="input-control text-xs w-48"
-              />
-              <input
-                type="text"
-                data-column="1"
-                placeholder="Partner"
-                class="input-control text-xs w-36"
-              />
-              <select data-column="2" class="input-control text-xs">
-                <option value="">Category</option>
-                <option value="Implementing">Implementing</option>
-                <option value="Funding">Funding</option>
-                <option value="Research">Research</option>
-              </select>
-              <select data-column="4" class="input-control text-xs">
-                <option value="">Status</option>
-                <option value="Active">Active</option>
-                <option value="Completed">Completed</option>
-              </select>
-            </div>
-
-            <div class="card-panel overflow-hidden">
-              <div class="table-wrapper">
-                <table class="table-custom">
-                  <thead>
-                    <tr>
-                      <th>Project Reference</th>
-                      <th>Partner</th>
-                      <th>Category</th>
-                      <th class="text-right">Final Budget</th>
-                      <th class="text-center">Status</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <!-- ============================================================
-					 TAB 8: PROJECT DOCUMENTS
-					 ============================================================ -->
-          <div
-            id="tab-projectdocs"
-            class="tab-section space-y-4"
-            style="display: none"
-          >
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="text-xl font-extrabold text-slate-900">
-                  Project Documents Repository
-                </h2>
-                <p class="text-xs text-slate-500">
-                  Programmatic collateral files and media
-                </p>
-              </div>
-              <button
-                class="px-3 py-2 border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50"
-              >
-                Export
-              </button>
-            </div>
-
-            <div
-              class="card-panel p-3 flex flex-wrap gap-2 items-center bg-slate-50"
-            >
-              <input
-                type="text"
-                data-column="0"
-                placeholder="Name/Project"
-                class="input-control text-xs w-48"
-              />
-              <input
-                type="text"
-                data-column="1"
-                placeholder="Uploader"
-                class="input-control text-xs w-36"
-              />
-              <select data-column="3" class="input-control text-xs">
-                <option value="">Status</option>
-                <option value="Approved">Approved</option>
-                <option value="Pending">Pending</option>
-                <option value="Rejected">Rejected</option>
-              </select>
-            </div>
-
-            <div class="card-panel overflow-hidden">
-              <div class="table-wrapper">
-                <table class="table-custom">
-                  <thead>
-                    <tr>
-                      <th>Document Name</th>
-                      <th>Uploader</th>
-                      <th>Size</th>
-                      <th class="text-center">Status</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <!-- ============================================================
-					 TAB 9: PROJECT REPORTS
-					 ============================================================ -->
-          <div
-            id="tab-projectreports"
-            class="tab-section space-y-4"
-            style="display: none"
-          >
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="text-xl font-extrabold text-slate-900">
-                  Project Reports
-                </h2>
-                <p class="text-xs text-slate-500">
-                  Milestone, annual, and closeout submissions
-                </p>
-              </div>
-              <button
-                class="px-3 py-2 border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50"
-              >
-                Export
-              </button>
-            </div>
-
-            <div
-              class="card-panel p-3 flex flex-wrap gap-2 items-center bg-slate-50"
-            >
-              <input
-                type="text"
-                data-column="0"
-                placeholder="Title/Project"
-                class="input-control text-xs w-48"
-              />
-              <input
-                type="text"
-                data-column="1"
-                placeholder="Author"
-                class="input-control text-xs w-36"
-              />
-              <select data-column="2" class="input-control text-xs">
-                <option value="">Report Type</option>
-                <option value="PROGRESS">Progress</option>
-                <option value="ANNUAL">Annual</option>
-                <option value="FINAL">Final</option>
-              </select>
-              <select data-column="3" class="input-control text-xs">
-                <option value="">Status</option>
-                <option value="Approved">Approved</option>
-                <option value="Pending">Pending</option>
-                <option value="Rejected">Rejected</option>
-              </select>
-            </div>
-
-            <div class="card-panel overflow-hidden">
-              <div class="table-wrapper">
-                <table class="table-custom">
-                  <thead>
-                    <tr>
-                      <th>Report Title</th>
-                      <th>Author</th>
-                      <th>Type</th>
-                      <th class="text-center">Status</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <!-- ============================================================
-					 TAB 10: USER DOCUMENTS
-					 ============================================================ -->
-          <div
-            id="tab-userdocs"
-            class="tab-section space-y-4"
-            style="display: none"
-          >
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="text-xl font-extrabold text-slate-900">
-                  User Verified Documents
-                </h2>
-                <p class="text-xs text-slate-500">
-                  Identity verification and compliance documents
-                </p>
-              </div>
-              <button
-                class="px-3 py-2 border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50"
-              >
-                Export
-              </button>
-            </div>
-
-            <div
-              class="card-panel p-3 flex flex-wrap gap-2 items-center bg-slate-50"
-            >
-              <input
-                type="text"
-                data-column="0"
-                placeholder="Filename/User"
-                class="input-control text-xs w-48"
-              />
-              <input
-                type="text"
-                data-column="1"
-                placeholder="Uploader"
-                class="input-control text-xs w-36"
-              />
-              <select data-column="3" class="input-control text-xs">
-                <option value="">Status</option>
-                <option value="Approved">Approved</option>
-                <option value="Pending">Pending</option>
-                <option value="Rejected">Rejected</option>
-              </select>
-            </div>
-
-            <div class="card-panel overflow-hidden">
-              <div class="table-wrapper">
-                <table class="table-custom">
-                  <thead>
-                    <tr>
-                      <th>File Name</th>
-                      <th>Uploader</th>
-                      <th>Size</th>
-                      <th class="text-center">Status</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <!-- ============================================================
-					 TAB 11: PROJECT COLLABORATORS
-					 ============================================================ -->
-          <div
-            id="tab-collaborators"
-            class="tab-section space-y-4"
-            style="display: none"
-          >
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="text-xl font-extrabold text-slate-900">
-                  Project Collaborators
-                </h2>
-                <p class="text-xs text-slate-500">
-                  <span id="tab-collaborators-count" class="font-bold">0</span>
-                  team mappings
-                </p>
-              </div>
-              <button
-                class="px-3 py-2 border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50"
-              >
-                Export
-              </button>
-            </div>
-
-            <div
-              class="card-panel p-3 flex flex-wrap gap-2 items-center bg-slate-50"
-            >
-              <input
-                type="text"
-                data-column="0"
-                placeholder="Collaborator/Email"
-                class="input-control text-xs w-48"
-              />
-              <input
-                type="text"
-                data-column="1"
-                placeholder="Project"
-                class="input-control text-xs w-36"
-              />
-              <select data-column="2" class="input-control text-xs">
-                <option value="">Role</option>
-                <option value="VIEWER">Viewer</option>
-                <option value="EDITOR">Editor</option>
-                <option value="CO_OWNER">Co-Owner</option>
-              </select>
-              <select data-column="3" class="input-control text-xs">
-                <option value="">Status</option>
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-              </select>
-            </div>
-
-            <div class="card-panel overflow-hidden">
-              <div class="table-wrapper">
-                <table class="table-custom">
-                  <thead>
-                    <tr>
-                      <th>Collaborator Profile</th>
-                      <th>Target Project</th>
-                      <th>Permission Level</th>
-                      <th class="text-center">Status</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr id="collaborators-empty-state" style="display: none">
-                      <td
-                        colspan="5"
-                        class="px-6 py-12 text-center text-slate-400 text-sm"
-                      >
-                        No active collaborator mappings discovered.
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
-
-    <!-- Logic Controllers -->
-    <script>
-      /* Global Chart Trackers */
-      let dashboardBarChart = null;
-      let dashboardDonutChart = null;
-
-      const themeMeta = {
-        GBV: { name: "Gender-Based Violence", color: "#6366f1" },
-        AYPSRH: { name: "Adolescent & Youth SRH", color: "#3b82f6" },
-        MWH: { name: "Maternal & Women's Health", color: "#ec4899" },
-        FP: { name: "Family Planning", color: "#8b5cf6" },
-        CH: { name: "Child Health", color: "#10b981" },
-        A: { name: "AIDS/HIV", color: "#f43f5e" },
-        AS: { name: "Adolescent Sexuality", color: "#d946ef" },
-        MONITORING_EVALUATION: {
-          name: "Monitoring & Evaluation",
-          color: "#14b8a6",
-        },
-        RESEARCH_LEARNING: { name: "Research & Learning", color: "#06b6d4" },
-      };
-
-      function formatBudgetKES(amount) {
-        if (amount === undefined || amount === null || isNaN(amount))
-          return "KES 0";
-        const num = Number(amount);
-        if (num >= 1e9) return "KES " + (num / 1e9).toFixed(2) + " Bn";
-        if (num >= 1e6) return "KES " + (num / 1e6).toFixed(2) + " Mn";
-        if (num >= 1e3) return "KES " + (num / 1e3).toFixed(0) + "k";
-        return "KES " + num.toLocaleString();
-      }
-
-      function renderEnhancedDashboard() {
-        let projects = originalData.projects || [];
-        let pastProjects = originalData.pastProjects || [];
-        let users = originalData.users || [];
-
-        const selectedTheme = document.getElementById(
-          "dash-category-filter",
-        )?.value;
-        const selectedStatus =
-          document.getElementById("dash-status-filter")?.value;
-
-        if (selectedTheme) {
-          projects = projects.filter((p) =>
-            p.themes?.some((t) => t.code === selectedTheme),
-          );
-          pastProjects = pastProjects.filter((p) =>
-            p.themes?.some((t) => t.code === selectedTheme),
-          );
-        }
-        if (selectedStatus) {
-          projects = projects.filter((p) => p.status === selectedStatus);
-          pastProjects = pastProjects.filter(
-            (p) => p.status === selectedStatus,
-          );
-        }
-
-        const totalProjectsCount = projects.length + pastProjects.length;
-        const activeProjectsCount = projects.filter(
-          (p) => p.status === "ACTIVE",
-        ).length;
-        const pendingProjectsCount = projects.filter(
-          (p) => p.status === "PENDING",
-        ).length;
-
-        let totalBudget = 0;
-        [...projects, ...pastProjects].forEach((p) => {
-          if (p.budget) totalBudget += parseFloat(p.budget) || 0;
-        });
-
-        const countiesSet = new Set();
-        [...projects, ...pastProjects].forEach((p) => {
-          if (p.locations && Array.isArray(p.locations)) {
-            p.locations.forEach((loc) => {
-              if (loc.county) countiesSet.add(loc.county.trim());
-            });
-          }
-        });
-
-        const partnersSet = new Set();
-        projects.forEach((p) => {
-          if (p.partnerName) partnersSet.add(p.partnerName.trim());
-        });
-        const partnersCount =
-          partnersSet.size || users.filter((u) => u.role === "PARTNER").length;
-
-        const userRole = localStorage.getItem("userRole") || "PARTNER";
-        const formattedRole = userRole
-          .replace(/_/g, " ")
-          .replace(/\b\w/g, (c) => c.toUpperCase());
-
-        const roleEl = document.getElementById("welcome-user-role");
-        if (roleEl) roleEl.textContent = formattedRole;
-
-        const lastUpdatedEl = document.getElementById("dashboard-last-updated");
-        if (lastUpdatedEl)
-          lastUpdatedEl.innerHTML = `<span>System Operational</span><span>Last Synced: ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>`;
-
-        updateValueWithAnimation("active-projects-main", activeProjectsCount);
-        updateValueWithAnimation("total-projects-sub", totalProjectsCount);
-        updateValueWithAnimation("pending-projects-sub", pendingProjectsCount);
-
-        const budgetEl = document.getElementById("total-budget-main");
-        if (budgetEl)
-          budgetEl.innerHTML = `<span class="text-xs text-slate-400 font-sans">KES</span> ${formatBudgetKES(totalBudget).replace("KES ", "")}`;
-
-        updateValueWithAnimation("county-coverage-main", countiesSet.size);
-        updateValueWithAnimation("partners-count-main", partnersCount);
-        updateValueWithAnimation("total-users-sub", users.length || 0);
-
-        renderThematicBarChart(projects, pastProjects);
-        renderResourceDonutChart(projects, pastProjects);
-        renderCountyReachDensity(projects, pastProjects);
-        renderRecentProjectsTable(projects, pastProjects);
-        renderQuickActions(userRole);
-      }
-
-      function updateValueWithAnimation(elementId, newValue) {
-        const element = document.getElementById(elementId);
-        if (!element) return;
-        element.textContent = newValue;
-      }
-
-      function renderThematicBarChart(projects, pastProjects) {
-        const themeCodes = Object.keys(themeMeta);
-        const allProjects = [...projects, ...pastProjects];
-
-        const activeCounts = [],
-          pendingCounts = [],
-          stalledCounts = [],
-          completedCounts = [];
-
-        themeCodes.forEach((code) => {
-          let active = 0,
-            pending = 0,
-            stalled = 0,
-            completed = 0;
-          allProjects.forEach((p) => {
-            const hasTheme = p.themes?.some((t) => t.code === code);
-            if (hasTheme) {
-              if (p.status === "ACTIVE") active++;
-              else if (p.status === "PENDING") pending++;
-              else if (p.status === "STALLED") stalled++;
-              else if (p.status === "COMPLETED") completed++;
-            }
-          });
-          activeCounts.push(active);
-          pendingCounts.push(pending);
-          stalledCounts.push(stalled);
-          completedCounts.push(completed);
-        });
-
-        const barCategories = themeCodes.map((code) => themeMeta[code].name);
-
-        const barOptions = {
-          chart: {
-            type: "bar",
-            height: 320,
-            stacked: true,
-            toolbar: { show: false },
-            fontFamily: "Plus Jakarta Sans, sans-serif",
-          },
-          plotOptions: {
-            bar: { horizontal: false, columnWidth: "35%", borderRadius: 6 },
-          },
-          dataLabels: { enabled: false },
-          series: [
-            { name: "Active", data: activeCounts },
-            { name: "Pending", data: pendingCounts },
-            { name: "Stalled", data: stalledCounts },
-            { name: "Completed", data: completedCounts },
-          ],
-          xaxis: { categories: barCategories, labels: { show: false } },
-          yaxis: { labels: { style: { colors: "#94a3b8", fontSize: "10px" } } },
-          legend: {
-            position: "top",
-            horizontalAlign: "right",
-            fontSize: "11px",
-            labels: { colors: "#64748b" },
-          },
-          colors: ["#22c55e", "#f59e0b", "#f43f5e", "#3b82f6"],
-          grid: { borderColor: "#f1f5f9" },
-        };
-
-        const barEl = document.querySelector("#barChart");
-        if (!barEl) return;
-
-        if (dashboardBarChart) {
-          dashboardBarChart.updateSeries([
-            { name: "Active", data: activeCounts },
-            { name: "Pending", data: pendingCounts },
-            { name: "Stalled", data: stalledCounts },
-            { name: "Completed", data: completedCounts },
-          ]);
-        } else {
-          dashboardBarChart = new ApexCharts(barEl, barOptions);
-          dashboardBarChart.render();
-        }
-      }
-
-      function renderResourceDonutChart(projects, pastProjects) {
-        const themeCodes = Object.keys(themeMeta);
-        const allProjects = [...projects, ...pastProjects];
-
-        let totalInvestments = 0;
-        const themeBudgets = themeCodes.map((code) => {
-          let sum = 0;
-          allProjects.forEach((p) => {
-            if (p.themes?.some((t) => t.code === code) && p.budget)
-              sum += parseFloat(p.budget) || 0;
-          });
-          totalInvestments += sum;
-          return sum;
-        });
-
-        const seriesData =
-          totalInvestments > 0
-            ? themeBudgets.map((b) =>
-                parseFloat(((b / totalInvestments) * 100).toFixed(1)),
-              )
-            : themeBudgets.map(() => 0);
-
-        const donutLabels = themeCodes.map((code) => themeMeta[code].name);
-        const donutColors = themeCodes.map((code) => themeMeta[code].color);
-
-        const donutOptions = {
-          chart: {
-            type: "donut",
-            height: 280,
-            fontFamily: "Plus Jakarta Sans, sans-serif",
-          },
-          series: seriesData,
-          labels: donutLabels,
-          colors: donutColors,
-          legend: { show: false },
-          dataLabels: { enabled: false },
-          stroke: { width: 2 },
-          plotOptions: {
-            pie: {
-              donut: {
-                size: "75%",
-                labels: {
-                  show: true,
-                  total: {
-                    show: true,
-                    label: "Funding Allocations",
-                    fontSize: "11px",
-                    color: "#64748b",
-                    formatter: () => formatBudgetKES(totalInvestments),
-                  },
-                },
-              },
-            },
-          },
-        };
-
-        const donutEl = document.querySelector("#teamChart");
-        if (!donutEl) return;
-
-        if (dashboardDonutChart) {
-          dashboardDonutChart.updateSeries(seriesData);
-        } else {
-          dashboardDonutChart = new ApexCharts(donutEl, donutOptions);
-          dashboardDonutChart.render();
-        }
-      }
-
-      function renderCountyReachDensity(projects, pastProjects) {
-        const container = document.getElementById("county-density-list");
-        if (!container) return;
-
-        const countyCounts = {};
-        [...projects, ...pastProjects].forEach((p) => {
-          if (p.locations && Array.isArray(p.locations)) {
-            p.locations.forEach((loc) => {
-              if (loc.county) {
-                const name = loc.county.trim();
-                countyCounts[name] = (countyCounts[name] || 0) + 1;
-              }
-            });
-          }
-        });
-
-        const sortedCounties = Object.entries(countyCounts).sort(
-          (a, b) => b[1] - a[1],
-        );
-
-        if (sortedCounties.length === 0) {
-          container.innerHTML = `<div class="text-center py-10 text-slate-400 text-xs">No registered locations</div>`;
-          return;
-        }
-
-        const maxCount = sortedCounties[0][1];
-
-        container.innerHTML = sortedCounties
-          .map(([name, count]) => {
-            const percentage = ((count / maxCount) * 100).toFixed(0);
-            return `
-					<div class="space-y-1">
-						<div class="flex justify-between text-xs font-semibold text-slate-700">
-							<span>${name}</span>
-							<span class="text-brand-600 font-mono">${count} Projects</span>
-						</div>
-						<div class="track">
-							<div class="fill" style="width: ${percentage}%"></div>
-						</div>
-					</div>
-				`;
-          })
-          .join("");
-      }
-
-      function renderRecentProjectsTable(projects, pastProjects) {
-        const tbody = document.getElementById("recent-projects-tbody");
-        if (!tbody) return;
-
-        const allProjects = [...projects, ...pastProjects]
-          .sort(
-            (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0),
-          )
-          .slice(0, 5);
-
-        if (allProjects.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400 text-xs">No projects found</td></tr>`;
-          return;
-        }
-
-        tbody.innerHTML = allProjects
-          .map((p) => {
-            const formattedBudget = p.budget
-              ? formatBudgetKES(p.budget)
-              : "N/A";
-            return `
-					<tr>
-						<td class="font-semibold text-slate-900">${p.title || "Untitled"}</td>
-						<td class="text-slate-600">${p.partnerName || "Unknown"}</td>
-						<td class="text-right font-mono font-bold text-slate-800">${formattedBudget}</td>
-						<td><span class="badge badge-active">${p.status || "Active"}</span></td>
-						<td class="text-right">
-							<a href="project-details.html?project_number=${encodeURIComponent(p.projectNo || "")}" class="px-2.5 py-1 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg text-xs font-semibold">View</a>
-						</td>
-					</tr>
-				`;
-          })
-          .join("");
-      }
-
-      function renderQuickActions(role) {
-        const container = document.getElementById("quick-actions-container");
-        if (!container) return;
-
-        let actions = [
-          {
-            label: "Propose New Project",
-            icon: "add_circle",
-            url: "new-project.html",
-          },
-          {
-            label: "Upload Documents",
-            icon: "upload_file",
-            action: "document.querySelector('[data-tab=projectdocs]').click()",
-          },
-          {
-            label: "Submit Reports",
-            icon: "assessment",
-            action:
-              "document.querySelector('[data-tab=projectreports]').click()",
-          },
-        ];
-
-        container.innerHTML = actions
-          .map((act) => {
-            const linkAttr = act.url
-              ? `href="${act.url}"`
-              : `href="#" onclick="event.preventDefault(); ${act.action};"`;
-            return `
-					<a ${linkAttr} class="p-2.5 rounded-xl border border-slate-200 hover:border-brand-500 hover:bg-brand-50/50 flex items-center justify-between text-xs font-semibold text-slate-700 transition">
-						<span class="flex items-center gap-2">
-							<span class="material-symbols-outlined text-base text-slate-500">${act.icon}</span>
-							${act.label}
-						</span>
-						<span class="material-symbols-outlined text-sm text-slate-400">chevron_right</span>
-					</a>
-				`;
-          })
-          .join("");
-      }
-
-      /* ---------------- Global State & Data Operations ---------------- */
-      let originalData = {
-        projects: [],
-        users: [],
-        organizations: [],
-        pastProjects: [],
-        projectDocuments: [],
-        userDocuments: [],
-        projectReports: [],
-        collaborators: [],
-      };
-
-      async function apiFetch(endpoint, options = {}) {
-        const token = window.authManager ? window.authManager.getToken() : null;
-        return fetch(`${window.BASE_URL}${endpoint}`, {
-          ...options,
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-            ...options.headers,
-          },
-        });
-      }
-
-      function renderTable(tabId, data, columns) {
-        const tbody = document.querySelector(`#${tabId} tbody`);
-        if (!tbody) return;
-        tbody.innerHTML = "";
-        if (!Array.isArray(data)) return;
-
-        data.forEach((item) => {
-          const row = document.createElement("tr");
-          columns.forEach((col) => {
-            const td = document.createElement("td");
-            let value = getNestedValue(item, col) || "";
-            if (col === "budget" && value) value = formatBudgetKES(value);
-            td.textContent = value;
-            row.appendChild(td);
-          });
-          const actionTd = document.createElement("td");
-          actionTd.className = "text-right";
-          actionTd.innerHTML = `<button class="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs font-medium hover:bg-slate-200">Inspect</button>`;
-          row.appendChild(actionTd);
-          tbody.appendChild(row);
-        });
-      }
-
-      function getNestedValue(obj, path) {
-        return path
-          .split(".")
-          .reduce((current, key) => current && current[key], obj);
-      }
-
-      function updateTabCounters() {
-        ["projects", "users", "organizations", "past-projects"].forEach(
-          (key) => {
-            const el = document.getElementById(`tab-${key}-count`);
-            if (el)
-              el.textContent = originalData[key.replace("-", "")]?.length || 0;
-          },
-        );
-      }
-
-      async function fetchProjects() {
-        try {
-          const response = await apiFetch("/api/projects");
-          if (response.ok) {
-            const data = await response.json();
-            originalData.projects = data.data?.projects || data.data || [];
-            renderTable("tab-projects", originalData.projects, [
-              "title",
-              "partnerName",
-              "projectCategory",
-              "themes",
-              "budget",
-              "status",
-            ]);
-            updateTabCounters();
-          }
-        } catch (e) {
-          console.warn("Projects endpoint unreachable", e);
-        }
-      }
-
-      async function fetchDashboardStats() {
-        await fetchProjects();
-        renderEnhancedDashboard();
-      }
-
-      /* ---------------- Initialization ---------------- */
-      document.addEventListener("DOMContentLoaded", function () {
-        const categoryFilter = document.getElementById("dash-category-filter");
-        const statusFilter = document.getElementById("dash-status-filter");
-        const clearBtn = document.getElementById("dash-clear-filters");
-
-        if (categoryFilter)
-          categoryFilter.addEventListener("change", renderEnhancedDashboard);
-        if (statusFilter)
-          statusFilter.addEventListener("change", renderEnhancedDashboard);
-        if (clearBtn) {
-          clearBtn.addEventListener("click", () => {
-            if (categoryFilter) categoryFilter.value = "";
-            if (statusFilter) statusFilter.value = "";
-            renderEnhancedDashboard();
-          });
-        }
-
-        const sidebarTabs = document.querySelectorAll(".sidebar-tab");
-        const tabSections = {
-          dashboard: document.getElementById("tab-dashboard"),
-          projects: document.getElementById("tab-projects"),
-          users: document.getElementById("tab-users"),
-          organizations: document.getElementById("tab-organizations"),
-          announcements: document.getElementById("tab-announcements"),
-          collaboration: document.getElementById("tab-collaboration"),
-          pastprojects: document.getElementById("tab-pastprojects"),
-          projectdocs: document.getElementById("tab-projectdocs"),
-          projectreports: document.getElementById("tab-projectreports"),
-          userdocs: document.getElementById("tab-userdocs"),
-          collaborators: document.getElementById("tab-collaborators"),
-        };
-
-        function showTab(tab) {
-          Object.values(tabSections).forEach((section) => {
-            if (section) section.style.display = "none";
-          });
-          if (tabSections[tab]) {
-            tabSections[tab].style.display = "";
-            if (tab === "dashboard") fetchDashboardStats();
-            else if (tab === "projects") fetchProjects();
-          }
-        }
-
-        sidebarTabs.forEach((btn) => {
-          btn.addEventListener("click", function (e) {
-            e.preventDefault();
-            showTab(btn.getAttribute("data-tab"));
-          });
-        });
-
-        showTab("dashboard");
-      });
-    </script>
+        </section>
+      </div>
+    </main>
+    <script
+      type="module"
+      src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496"
+      integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ=="
+      data-cf-beacon='{"version":"2024.11.0","token":"8679eea07dfc4322bcb1b30bceaed4ff","r":1}'
+      crossorigin="anonymous"
+    ></script>
   </body>
 </html>
