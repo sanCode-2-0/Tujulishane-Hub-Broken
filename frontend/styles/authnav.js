@@ -49,6 +49,12 @@ function populateUserNav() {
   else if (user.role === "DONOR") {
     document.querySelectorAll("#donorNav").forEach(nav => nav.classList.remove("hidden"));
     
+    // Show top-level Donor Management links
+    const topNavDM = document.getElementById("topNavDonorManagement");
+    if (topNavDM) topNavDM.classList.remove("hidden");
+    const mTopNavDM = document.getElementById("mTopNavDonorManagement");
+    if (mTopNavDM) mTopNavDM.classList.remove("hidden");
+    
     // Restrict navigation options for Donor role
     document.querySelectorAll('a[href="new-project.html"]').forEach(el => el.parentElement.style.display = "none");
     document.querySelectorAll('a[href="my-projects.html"]').forEach(el => el.parentElement.style.display = "none");
