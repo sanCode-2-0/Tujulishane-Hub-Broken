@@ -112,10 +112,10 @@ public class ProjectController {
     }
 
     /**
-     * Create a new project (Partners/Donors/Admins)
+     * Create a new project (Partners/Admins)
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyRole('PARTNER', 'DONOR', 'ADMIN', 'SUPER_ADMIN', 'SUPER_ADMIN_REVIEWER', 'SUPER_ADMIN_APPROVER')")
+    @PreAuthorize("hasAnyRole('PARTNER', 'ADMIN', 'SUPER_ADMIN', 'SUPER_ADMIN_REVIEWER', 'SUPER_ADMIN_APPROVER')")
     public ResponseEntity<ApiResponse<ProjectResponse>> createProject(
         @RequestPart("project") String projectJson,
         @RequestPart(value = "supporting_documents", required = false) List<MultipartFile> files
