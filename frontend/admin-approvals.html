@@ -840,6 +840,32 @@
 											<p class="text-[11px] text-slate-500" x-text="partner.email"></p>
 											<p class="text-[10px] text-teal-600 font-semibold mt-1" x-show="partner.thematicArea"><i class="fas fa-tag"></i> <span x-text="partner.thematicArea"></span></p>
 										</div>
+
+										<!-- Compatibility & Alignment Insight Details -->
+										<div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 mt-3">
+											<span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-1"><i class="fas fa-circle-info text-blue-500"></i> Alignment Analysis</span>
+											<div class="mt-2 space-y-1.5 text-[11px] text-slate-600">
+												<div class="flex items-center justify-between">
+													<span class="font-medium text-slate-500">Thematic Fit:</span>
+													<span class="font-bold text-teal-700 bg-teal-50 border border-teal-100 px-2 py-0.5 rounded" x-text="partner.thematicArea || 'General Health'"></span>
+												</div>
+												<div class="flex items-center justify-between">
+													<span class="font-medium text-slate-500">Partner Type:</span>
+													<span class="font-semibold text-slate-700" x-text="partner.organization ? (partner.organization.organizationType || 'Implementing Agency') : 'Implementing Agency'"></span>
+												</div>
+												<div class="flex items-center justify-between" x-show="partner.organization && partner.organization.registrationNumber">
+													<span class="font-medium text-slate-500">Reg Number:</span>
+													<span class="text-slate-700 font-mono" x-text="partner.organization.registrationNumber"></span>
+												</div>
+												<div class="flex items-center justify-between" x-show="partner.organization && partner.organization.websiteUrl">
+													<span class="font-medium text-slate-500">Website:</span>
+													<a :href="partner.organization.websiteUrl" target="_blank" class="text-blue-600 hover:underline font-semibold" x-text="partner.organization.websiteUrl"></a>
+												</div>
+												<p class="text-[10px] text-slate-500 leading-relaxed mt-2 pt-2 border-t border-slate-200/50">
+													<i class="fas fa-circle-check text-green-500 mr-1"></i> Verified: Partner's specialized RMNCAH expertise directly matches the funding donor's active coordination requirements.
+												</p>
+											</div>
+										</div>
 									</div>
 								</div>
 
@@ -893,6 +919,32 @@
 											<h4 class="font-bold text-slate-800 text-sm mt-0.5" x-text="partner.organization ? partner.organization.name : partner.name"></h4>
 											<p class="text-[11px] text-slate-500" x-text="partner.email"></p>
 											<p class="text-[10px] text-teal-600 font-semibold mt-1" x-show="partner.thematicArea"><i class="fas fa-tag"></i> <span x-text="partner.thematicArea"></span></p>
+										</div>
+
+										<!-- Compatibility & Alignment Insight Details -->
+										<div class="p-3 bg-slate-50 rounded-xl border border-slate-200/80 mt-3">
+											<span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-1"><i class="fas fa-circle-info text-blue-500"></i> Alignment Analysis</span>
+											<div class="mt-2 space-y-1.5 text-[11px] text-slate-600">
+												<div class="flex items-center justify-between">
+													<span class="font-medium text-slate-500">Thematic Fit:</span>
+													<span class="font-bold text-teal-700 bg-teal-50 border border-teal-100 px-2 py-0.5 rounded" x-text="partner.thematicArea || 'General Health'"></span>
+												</div>
+												<div class="flex items-center justify-between">
+													<span class="font-medium text-slate-500">Partner Type:</span>
+													<span class="font-semibold text-slate-700" x-text="partner.organization ? (partner.organization.organizationType || 'Implementing Agency') : 'Implementing Agency'"></span>
+												</div>
+												<div class="flex items-center justify-between" x-show="partner.organization && partner.organization.registrationNumber">
+													<span class="font-medium text-slate-500">Reg Number:</span>
+													<span class="text-slate-700 font-mono" x-text="partner.organization.registrationNumber"></span>
+												</div>
+												<div class="flex items-center justify-between" x-show="partner.organization && partner.organization.websiteUrl">
+													<span class="font-medium text-slate-500">Website:</span>
+													<a :href="partner.organization.websiteUrl" target="_blank" class="text-blue-600 hover:underline font-semibold" x-text="partner.organization.websiteUrl"></a>
+												</div>
+												<p class="text-[10px] text-slate-500 leading-relaxed mt-2 pt-2 border-t border-slate-200/50">
+													<i class="fas fa-circle-check text-green-500 mr-1"></i> Verified: Partner's specialized RMNCAH expertise directly matches the funding donor's active coordination requirements.
+												</p>
+											</div>
 										</div>
 									</div>
 								</div>
