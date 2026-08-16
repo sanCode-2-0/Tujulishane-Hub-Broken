@@ -57,7 +57,15 @@ async function loadDashboardData() {
         }
 
         // Fetch current user details & populate header
-        const currentUser = window.authManager.getCurrentUser() || {};
+        let currentUser = window.authManager.getCachedUser();
+        if (!currentUser) {
+            try {
+                currentUser = await window.authManager.getCurrentUser();
+            } catch (e) {
+                currentUser = {};
+            }
+        }
+        if (!currentUser) currentUser = {};
         const userName = currentUser.name || "Braine Kapolon";
         const userRole = currentUser.role || "SUPER_ADMIN_APPROVER";
         const dashHello = document.getElementById('dash-hello');
@@ -78,6 +86,26 @@ async function loadDashboardData() {
                 dashTagline.textContent = "Coordinate reproductive, maternal, newborn, child, and adolescent health interventions.";
             }
         }
+        
+        const primaryCtaBtn = document.getElementById('primary-cta-btn');
+        if (primaryCtaBtn) {
+            if (userRole === 'PARTNER') {
+                primaryCtaBtn.style.display = 'inline-flex';
+                primaryCtaBtn.href = 'new-project.html';
+                primaryCtaBtn.innerHTML = `<i class="fas fa-plus"></i> <span>New Project</span>`;
+            } else if (userRole === 'DONOR') {
+                primaryCtaBtn.style.display = 'inline-flex';
+                primaryCtaBtn.href = 'donor-management.html';
+                primaryCtaBtn.innerHTML = `<span class="material-symbols-outlined text-xs mr-1">volunteer_activism</span> <span>Donor Management</span>`;
+            } else if (["ADMIN", "SUPER_ADMIN", "SUPER_ADMIN_REVIEWER", "SUPER_ADMIN_APPROVER"].includes(userRole)) {
+                primaryCtaBtn.style.display = 'inline-flex';
+                primaryCtaBtn.href = 'admin-approvals.html';
+                primaryCtaBtn.innerHTML = `<i class="fas fa-plus"></i> <span>Two-Tier Approvals</span>`;
+            } else {
+                primaryCtaBtn.style.display = 'none';
+            }
+        }
+
         if (roleAvatar) {
             roleAvatar.innerHTML = `<span class="material-symbols-outlined text-2xl">how_to_reg</span>`;
         }
