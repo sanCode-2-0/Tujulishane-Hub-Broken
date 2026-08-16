@@ -361,7 +361,7 @@ public class OrganizationController {
      * Get all pending organizations (Admin only)
      */
     @GetMapping("/admin/pending")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'SUPER_ADMIN_REVIEWER', 'SUPER_ADMIN_APPROVER')")
     public ResponseEntity<ApiResponse<List<Organization>>> getPendingOrganizations() {
         try {
             List<Organization> pendingOrganizations = organizationService.getPendingOrganizations();
@@ -388,7 +388,7 @@ public class OrganizationController {
      * Get organizations by approval status (Admin only)
      */
     @GetMapping("/admin/status/{status}")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'SUPER_ADMIN_REVIEWER', 'SUPER_ADMIN_APPROVER')")
     public ResponseEntity<ApiResponse<List<Organization>>> getOrganizationsByStatus(@PathVariable String status) {
         try {
             ApprovalStatus approvalStatus = ApprovalStatus.valueOf(status.toUpperCase());
@@ -423,7 +423,7 @@ public class OrganizationController {
      * Approve organization (Admin only)
      */
     @PostMapping("/admin/approve/{id}")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'SUPER_ADMIN_REVIEWER', 'SUPER_ADMIN_APPROVER')")
     public ResponseEntity<ApiResponse<Object>> approveOrganization(@PathVariable Long id) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -463,7 +463,7 @@ public class OrganizationController {
      * Reject organization (Admin only)
      */
     @PostMapping("/admin/reject/{id}")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'SUPER_ADMIN_REVIEWER', 'SUPER_ADMIN_APPROVER')")
     public ResponseEntity<ApiResponse<Object>> rejectOrganization(
             @PathVariable Long id, 
             @RequestBody Map<String, String> payload) {
@@ -507,7 +507,7 @@ public class OrganizationController {
      * Get organization statistics (Admin only)
      */
     @GetMapping("/admin/stats")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'SUPER_ADMIN_REVIEWER', 'SUPER_ADMIN_APPROVER')")
     public ResponseEntity<ApiResponse<OrganizationService.OrganizationStats>> getOrganizationStats() {
         try {
             OrganizationService.OrganizationStats stats = organizationService.getOrganizationStats();
@@ -534,7 +534,7 @@ public class OrganizationController {
      * Delete organization (Admin only)
      */
     @DeleteMapping("/admin/{id}")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'SUPER_ADMIN_REVIEWER', 'SUPER_ADMIN_APPROVER')")
     public ResponseEntity<ApiResponse<Object>> deleteOrganization(@PathVariable Long id) {
         try {
             boolean success = organizationService.deleteOrganization(id);
