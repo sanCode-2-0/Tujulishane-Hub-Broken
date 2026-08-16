@@ -382,6 +382,24 @@ class AuthManager {
     return user && user.approvalStatus === "APPROVED";
   }
 
+  checkPageRestrictions() {
+    const user = this.getCachedUser();
+    if (user && user.role === "DONOR") {
+      const restrictedPages = ["new-project.html", "my-projects.html", "past-projects.html", "projects.html"];
+      const pathname = window.location.pathname;
+      const currentPage = pathname.substring(pathname.lastIndexOf("/") + 1);
+      if (restrictedPages.includes(currentPage)) {
+        console.warn("[Security] Donors are restricted from accessing: " + currentPage);
+        alert("Access Denied: Donors are not allowed to access this workspace.");
+        if (document.referrer && document.referrer !== window.location.href) {
+          window.location.href = document.referrer;
+        } else {
+          window.location.href = "dashboard.html";
+        }
+      }
+    }
+  }
+
   /**
    * Redirect to login if not authenticated
    */
@@ -409,14 +427,15 @@ class AuthManager {
    * Checks if user is authenticated and loads user data
    */
   async init() {
+    this.checkPageRestrictions();
     if (this.isAuthenticated()) {
       try {
         const user = await this.getCurrentUser();
         console.log("[auth.js] init: user loaded", user);
+        this.checkPageRestrictions();
       } catch (error) {
         console.error("Failed to load user data:", error);
-        // Only clear token on auth errors, not network failures
-        // The apiCall method already handles 401 by calling logout()
+        this.checkPageRestrictions();
       }
     } else {
       console.log("[auth.js] init: not authenticated, skipping getCurrentUser");

@@ -55,6 +55,12 @@ function populateUserNav() {
     const mTopNavDM = document.getElementById("mTopNavDonorManagement");
     if (mTopNavDM) mTopNavDM.classList.remove("hidden");
     
+    // Hide Projects dropdown completely
+    const navProjectsDropdown = document.getElementById("navProjectsDropdown");
+    if (navProjectsDropdown) navProjectsDropdown.style.display = "none";
+    const mNavProjectsDropdown = document.getElementById("mNavProjectsDropdown");
+    if (mNavProjectsDropdown) mNavProjectsDropdown.style.display = "none";
+    
     // Restrict navigation options for Donor role
     document.querySelectorAll('a[href="new-project.html"]').forEach(el => el.parentElement.style.display = "none");
     document.querySelectorAll('a[href="my-projects.html"]').forEach(el => el.parentElement.style.display = "none");
