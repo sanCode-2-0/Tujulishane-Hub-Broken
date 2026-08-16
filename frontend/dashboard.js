@@ -72,6 +72,8 @@ async function loadDashboardData() {
                 dashTagline.textContent = "You are the final approval authority. Sign-off on reviewed projects and keep the approval pipeline moving.";
             } else if (userRole.includes('REVIEWER')) {
                 dashTagline.textContent = "You are a thematic reviewer. Inspect pending submissions under your focus areas.";
+            } else if (userRole === 'DONOR') {
+                dashTagline.textContent = "Monitor your funded project portfolios, track financial allocations, and check progress reports uploaded by your linked partners.";
             } else {
                 dashTagline.textContent = "Coordinate reproductive, maternal, newborn, child, and adolescent health interventions.";
             }
@@ -83,12 +85,12 @@ async function loadDashboardData() {
         // Fetch all projects (large limit to calculate aggregate metrics locally)
         let projects = [];
         try {
-            const response = await apiFetch('/api/projects?size=1000');
+            const endpoint = userRole === 'DONOR' ? '/api/projects/my-projects' : '/api/projects?size=1000';
+            const response = await apiFetch(endpoint);
             if (response.ok) {
                 const resData = await response.json();
-                if (resData.data && Array.isArray(resData.data.projects)) {
-                    projects = resData.data.projects;
-                }
+                const projectsArr = Array.isArray(resData.data) ? resData.data : (resData.data?.projects || []);
+                projects = projectsArr;
             }
         } catch (e) {
             console.warn('Could not fetch real projects, falling back to mock dataset.', e);
@@ -145,43 +147,80 @@ async function loadDashboardData() {
         if (attentionGrid) {
             let cardsHtml = '';
             
-            // Card 1: Final Approvals
-            cardsHtml += `
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm relative flex flex-col justify-between min-h-[170px]">
-                    <div>
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="p-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600">
-                                <span class="material-symbols-outlined text-xl">verified</span>
+            if (userRole === 'DONOR') {
+                // Donor customized attention cards
+                cardsHtml += `
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm relative flex flex-col justify-between min-h-[170px]">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="p-2 rounded-xl bg-teal-50 dark:bg-teal-900/20 text-teal-600 flex items-center justify-center w-10 h-10">
+                                    <span class="material-symbols-outlined text-xl">payments</span>
+                                </div>
                             </div>
-                            <span class="text-sm font-extrabold text-amber-800 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-lg">${awaitingApprovalCount}</span>
+                            <h3 class="text-sm font-extrabold text-gray-900 dark:text-gray-100">Project Funding Overview</h3>
+                            <p class="text-[11px] text-gray-500 mt-1">Review funding records and track allocations of your linked partner projects.</p>
                         </div>
-                        <h3 class="text-sm font-extrabold text-gray-900 dark:text-gray-100">Projects waiting for your final approval</h3>
-                        <p class="text-[11px] text-gray-500 mt-1">Reviewed submissions that need your sign-off. Once approved they go live for every user.</p>
+                        <a href="donor-management.html" class="text-xs font-bold text-[#0047BA] hover:underline flex items-center gap-1.5 mt-4">
+                            Track Funding <i class="fas fa-arrow-right text-[10px]"></i>
+                        </a>
                     </div>
-                    <a href="admin-approvals.html" class="text-xs font-bold text-[#0047BA] hover:underline flex items-center gap-1.5 mt-4">
-                        Approve projects <i class="fas fa-arrow-right text-[10px]"></i>
-                    </a>
-                </div>
-            `;
+                `;
 
-            // Card 2: Review Pipeline
-            cardsHtml += `
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm relative flex flex-col justify-between min-h-[170px]">
-                    <div>
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600">
-                                <span class="material-symbols-outlined text-xl">rate_review</span>
+                cardsHtml += `
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm relative flex flex-col justify-between min-h-[170px]">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="p-2 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 flex items-center justify-center w-10 h-10">
+                                    <span class="material-symbols-outlined text-xl">folder_shared</span>
+                                </div>
                             </div>
-                            <span class="text-sm font-extrabold text-blue-800 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-lg">${awaitingReviewCount}</span>
+                            <h3 class="text-sm font-extrabold text-gray-900 dark:text-gray-100">Linked Partner Activity</h3>
+                            <p class="text-[11px] text-gray-500 mt-1">Check progress updates and reports uploaded by your linked partner organizations.</p>
                         </div>
-                        <h3 class="text-sm font-extrabold text-gray-900 dark:text-gray-100">Projects in the review pipeline</h3>
-                        <p class="text-[11px] text-gray-500 mt-1">Submissions still being handled upstream by thematic reviewers.</p>
+                        <a href="donor-management.html" class="text-xs font-bold text-[#0047BA] hover:underline flex items-center gap-1.5 mt-4">
+                            Monitor Partners <i class="fas fa-arrow-right text-[10px]"></i>
+                        </a>
                     </div>
-                    <a href="admin-approvals.html" class="text-xs font-bold text-[#0047BA] hover:underline flex items-center gap-1.5 mt-4">
-                        Track the pipeline <i class="fas fa-arrow-right text-[10px]"></i>
-                    </a>
-                </div>
-            `;
+                `;
+            } else {
+                // Card 1: Final Approvals
+                cardsHtml += `
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm relative flex flex-col justify-between min-h-[170px]">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="p-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600">
+                                    <span class="material-symbols-outlined text-xl">verified</span>
+                                </div>
+                                <span class="text-sm font-extrabold text-amber-800 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-lg">${awaitingApprovalCount}</span>
+                            </div>
+                            <h3 class="text-sm font-extrabold text-gray-900 dark:text-gray-100">Projects waiting for your final approval</h3>
+                            <p class="text-[11px] text-gray-500 mt-1">Reviewed submissions that need your sign-off. Once approved they go live for every user.</p>
+                        </div>
+                        <a href="admin-approvals.html" class="text-xs font-bold text-[#0047BA] hover:underline flex items-center gap-1.5 mt-4">
+                            Approve projects <i class="fas fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                `;
+
+                // Card 2: Review Pipeline
+                cardsHtml += `
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm relative flex flex-col justify-between min-h-[170px]">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600">
+                                    <span class="material-symbols-outlined text-xl">rate_review</span>
+                                </div>
+                                <span class="text-sm font-extrabold text-blue-800 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-lg">${awaitingReviewCount}</span>
+                            </div>
+                            <h3 class="text-sm font-extrabold text-gray-900 dark:text-gray-100">Projects in the review pipeline</h3>
+                            <p class="text-[11px] text-gray-500 mt-1">Submissions still being handled upstream by thematic reviewers.</p>
+                        </div>
+                        <a href="admin-approvals.html" class="text-xs font-bold text-[#0047BA] hover:underline flex items-center gap-1.5 mt-4">
+                            Track the pipeline <i class="fas fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                `;
+            }
 
             attentionGrid.innerHTML = cardsHtml;
         }
@@ -189,12 +228,46 @@ async function loadDashboardData() {
         // --- 5. Render "At a glance" Metrics ---
         const statsGrid = document.getElementById('stats-grid');
         if (statsGrid) {
-            const statsItems = [
-                { title: "AWAITING YOUR APPROVAL", value: awaitingApprovalCount, icon: "verified", color: "text-blue-500 bg-blue-50 dark:bg-blue-950/20" },
-                { title: "APPROVED & LIVE", value: approvedLiveCount, icon: "task_alt", color: "text-emerald-500 bg-emerald-50 dark:bg-emerald-950/20" },
-                { title: "TOTAL SUBMISSIONS", value: projects.length, icon: "folder", color: "text-blue-500 bg-blue-50 dark:bg-blue-950/20" },
-                { title: "TOTAL USERS", value: totalUsersCount, icon: "group", color: "text-[#0047BA] bg-blue-50 dark:bg-blue-950/20" }
-            ];
+            let statsItems = [];
+            
+            if (userRole === 'DONOR') {
+                const totalFundingAllocated = projects.reduce((sum, p) => sum + (Number(p.budget) || 0), 0);
+                
+                let linkedPartnersCount = 1; // default seeder fallback
+                try {
+                    const pResponse = await apiFetch(`/api/auth/donor/${currentUser.id}/partners`);
+                    if (pResponse.ok) {
+                        const pData = await pResponse.json();
+                        const partners = pData.data || pData;
+                        if (Array.isArray(partners)) {
+                            linkedPartnersCount = partners.length;
+                        }
+                    }
+                } catch (e) {
+                    console.log('Skipped linked partners fetch', e);
+                }
+                
+                let projectsWithReportsCount = 0;
+                projects.forEach(p => {
+                    if (p.hasReports) {
+                        projectsWithReportsCount++;
+                    }
+                });
+
+                statsItems = [
+                    { title: "TOTAL PROJECTS FUNDED", value: projects.length, icon: "folder", color: "text-blue-500 bg-blue-50 dark:bg-blue-950/20" },
+                    { title: "TOTAL FUNDING ALLOCATION", value: formatBudget(totalFundingAllocated), icon: "payments", color: "text-emerald-500 bg-emerald-50 dark:bg-emerald-950/20" },
+                    { title: "ACTIVE LINKED PARTNERS", value: linkedPartnersCount, icon: "group", color: "text-blue-500 bg-blue-50 dark:bg-blue-950/20" },
+                    { title: "SUBMITTED REPORTS", value: projectsWithReportsCount, icon: "folder_shared", color: "text-[#0047BA] bg-blue-50 dark:bg-blue-950/20" }
+                ];
+            } else {
+                statsItems = [
+                    { title: "AWAITING YOUR APPROVAL", value: awaitingApprovalCount, icon: "verified", color: "text-blue-500 bg-blue-50 dark:bg-blue-950/20" },
+                    { title: "APPROVED & LIVE", value: approvedLiveCount, icon: "task_alt", color: "text-emerald-500 bg-emerald-50 dark:bg-emerald-950/20" },
+                    { title: "TOTAL SUBMISSIONS", value: projects.length, icon: "folder", color: "text-blue-500 bg-blue-50 dark:bg-blue-950/20" },
+                    { title: "TOTAL USERS", value: totalUsersCount, icon: "group", color: "text-[#0047BA] bg-blue-50 dark:bg-blue-950/20" }
+                ];
+            }
 
             statsGrid.innerHTML = statsItems.map(item => `
                 <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col justify-between">
@@ -204,7 +277,7 @@ async function loadDashboardData() {
                             <span class="material-symbols-outlined text-sm">${item.icon}</span>
                         </div>
                     </div>
-                    <p class="text-3xl font-black text-gray-900 dark:text-gray-100 mt-2">${item.value}</p>
+                    <p class="${typeof item.value === 'string' && item.value.length > 8 ? 'text-lg md:text-xl' : 'text-3xl'} font-black text-gray-900 dark:text-gray-100 mt-2 truncate">${item.value}</p>
                 </div>
             `).join('');
         }
@@ -212,12 +285,22 @@ async function loadDashboardData() {
         // --- 6. Render "Where to go next" Shortcuts ---
         const linksGrid = document.getElementById('links-grid');
         if (linksGrid) {
-            const shortcutItems = [
-                { title: "Two-Tier Approvals", description: "Grant final approval or reject reviewed projects.", icon: "fact_check", link: "admin-approvals.html" },
-                { title: "Project Management", description: "Inspect any project and its full review history.", icon: "folder_open", link: "projects.html" },
-                { title: "Stakeholder Management", description: "Manage user roles and reviewer assignments.", icon: "manage_accounts", link: "members.html" },
-                { title: "Donor Management", description: "Manage donor organizations and their funding records.", icon: "volunteer_activism", link: "organizations.html" }
-            ];
+            let shortcutItems = [];
+            
+            if (userRole === 'DONOR') {
+                shortcutItems = [
+                    { title: "Donor Management", description: "Monitor linked partner organizations and check funding allocations.", icon: "volunteer_activism", link: "donor-management.html" },
+                    { title: "Project Portfolios", description: "Inspect all active and approved projects funded by your organization.", icon: "folder_open", link: "projects.html" },
+                    { title: "Ministry Notices", description: "Browse general notices, announcements, and policy documents.", icon: "campaign", link: "general-announcements.html" }
+                ];
+            } else {
+                shortcutItems = [
+                    { title: "Two-Tier Approvals", description: "Grant final approval or reject reviewed projects.", icon: "fact_check", link: "admin-approvals.html" },
+                    { title: "Project Management", description: "Inspect any project and its full review history.", icon: "folder_open", link: "projects.html" },
+                    { title: "Stakeholder Management", description: "Manage user roles and reviewer assignments.", icon: "manage_accounts", link: "members.html" },
+                    { title: "Donor Management", description: "Manage donor organizations and their funding records.", icon: "volunteer_activism", link: "organizations.html" }
+                ];
+            }
 
             linksGrid.innerHTML = shortcutItems.map(item => `
                 <a href="${item.link}" class="group bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition flex items-start gap-4">
