@@ -19,6 +19,8 @@ import com.tujulishanehub.backend.repositories.ThematicAreaDefinitionRepository;
 import com.tujulishanehub.backend.models.ThematicAreaDefinition;
 import com.tujulishanehub.backend.models.GeneralAnnouncement;
 import com.tujulishanehub.backend.repositories.GeneralAnnouncementRepository;
+import com.tujulishanehub.backend.models.ProjectReportDocument;
+import com.tujulishanehub.backend.repositories.ProjectReportDocumentRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -53,6 +55,9 @@ public class DatabaseSeeder {
 
     @Autowired
     private GeneralAnnouncementRepository generalAnnouncementRepository;
+
+    @Autowired
+    private ProjectReportDocumentRepository projectReportDocumentRepository;
 
     @Bean
     public CommandLineRunner seedDatabase() {
@@ -155,8 +160,9 @@ public class DatabaseSeeder {
                 );
             }
 
-            // Seed a project owned by the donor-linked partner (visible to the donor in My Projects)
+            // Seed projects owned by the donor-linked partner (visible to the donor in My Projects)
             if (donorLinkedPartner != null) {
+                // Project 1: Approved & Active
                 seedProject(
                     "partner.donorlinked@gmail.com",
                     "Donor Funded Child Health Program",
@@ -174,6 +180,86 @@ public class DatabaseSeeder {
                         new LocationData("Nairobi", "Embakasi East", "Embakasi Health Centre", -1.3150, 36.8900)
                     }
                 );
+
+                // Project 2: Pending
+                seedProject(
+                    "partner.donorlinked@gmail.com",
+                    "Donor Funded Maternal Nutrition Research",
+                    "PRJ-005",
+                    ProjectCategory.RESEARCH,
+                    LocalDate.of(2026, 5, 1),
+                    LocalDate.of(2026, 12, 31),
+                    "Maternal nutrition studies, evidence generation",
+                    new BigDecimal("4200000.00"),
+                    "pending",
+                    ApprovalStatus.PENDING,
+                    ApprovalWorkflowStatus.PENDING_REVIEW,
+                    ProjectTheme.MNH,
+                    new LocationData[] {
+                        new LocationData("Kilifi", "Kilifi North", "Kilifi County Hospital", -3.6300, 39.8500)
+                    }
+                );
+
+                // Project 3: Stalled
+                seedProject(
+                    "partner.donorlinked@gmail.com",
+                    "Donor Funded Adolescent Wellness Initiative",
+                    "PRJ-006",
+                    ProjectCategory.IMPLEMENTING,
+                    LocalDate.of(2026, 3, 1),
+                    LocalDate.of(2026, 9, 30),
+                    "Adolescent mental wellness workshops",
+                    new BigDecimal("1500000.00"),
+                    "stalled",
+                    ApprovalStatus.APPROVED,
+                    ApprovalWorkflowStatus.APPROVED,
+                    ProjectTheme.AYPSRH,
+                    new LocationData[] {
+                        new LocationData("Mombasa", "Mvita", "Mombasa Community Hall", -4.0500, 39.6700)
+                    }
+                );
+
+                // Project 4: Completed
+                seedProject(
+                    "partner.donorlinked@gmail.com",
+                    "Donor Funded Family Planning Campaign",
+                    "PRJ-008",
+                    ProjectCategory.IMPLEMENTING,
+                    LocalDate.of(2026, 1, 15),
+                    LocalDate.of(2026, 6, 15),
+                    "Contraception awareness and service provision",
+                    new BigDecimal("6000000.00"),
+                    "completed",
+                    ApprovalStatus.APPROVED,
+                    ApprovalWorkflowStatus.APPROVED,
+                    ProjectTheme.FP,
+                    new LocationData[] {
+                        new LocationData("Kisumu", "Kisumu Central", "Kisumu Health Clinic", -0.1000, 34.7500)
+                    }
+                );
+
+                // Seed report document for the completed project (PRJ-008)
+                java.util.Optional<Project> completedProjOpt = projectRepository.findByProjectNo("PRJ-008");
+                if (completedProjOpt.isPresent()) {
+                    Project completedProj = completedProjOpt.get();
+                    boolean reportExists = projectReportDocumentRepository.findByProjectId(completedProj.getId()).stream()
+                        .anyMatch(doc -> "Quarterly_Progress_Report_Q2.pdf".equals(doc.getFileName()));
+                    if (!reportExists) {
+                        ProjectReportDocument reportDoc = new ProjectReportDocument();
+                        reportDoc.setFileName("Quarterly_Progress_Report_Q2.pdf");
+                        reportDoc.setFileType("application/pdf");
+                        reportDoc.setFileSize(153600L); // 150 KB
+                        reportDoc.setData(new byte[100]); // dummy data
+                        reportDoc.setProject(completedProj);
+                        reportDoc.setUploadedBy("partner.donorlinked@gmail.com");
+                        reportDoc.setUploadedAt(LocalDateTime.now());
+                        projectReportDocumentRepository.save(reportDoc);
+                        
+                        completedProj.setHasReports(true);
+                        projectRepository.save(completedProj);
+                        logger.info("Seeded progress report document for project: {}", completedProj.getTitle());
+                    }
+                }
             }
 
             // Seed general announcements matching the design mockup
