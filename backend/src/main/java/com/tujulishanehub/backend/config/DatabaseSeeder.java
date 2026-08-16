@@ -94,6 +94,27 @@ public class DatabaseSeeder {
                 logger.info("Linked partner {} to donor: {} as APPROVED", donorLinkedPartner.getEmail(), testDonor.getEmail());
             }
 
+            // Seed a pending partnership link request for review (awaiting MoH Reviewer)
+            if (brainePartner != null && testDonor != null && brainePartner.getParentDonor() == null) {
+                brainePartner.setParentDonor(testDonor);
+                brainePartner.setThematicArea(ProjectTheme.MNH);
+                brainePartner.setPartnershipApprovalStatus(ApprovalStatus.PENDING);
+                brainePartner.setPartnershipWorkflowStatus(ApprovalWorkflowStatus.PENDING_REVIEW);
+                userRepository.save(brainePartner);
+                logger.info("Linked partner {} to donor: {} as PENDING_REVIEW", brainePartner.getEmail(), testDonor.getEmail());
+            }
+
+            // Seed a pending partnership link request awaiting final approval (awaiting MoH Approver)
+            User pendingApprovalPartner = seedUser("partner.pendingapproval@gmail.com", "Adolescent Health Initiative", User.Role.PARTNER, defaultPassword);
+            if (pendingApprovalPartner != null && testDonor != null && pendingApprovalPartner.getParentDonor() == null) {
+                pendingApprovalPartner.setParentDonor(testDonor);
+                pendingApprovalPartner.setThematicArea(ProjectTheme.AYPSRH);
+                pendingApprovalPartner.setPartnershipApprovalStatus(ApprovalStatus.PENDING);
+                pendingApprovalPartner.setPartnershipWorkflowStatus(ApprovalWorkflowStatus.PENDING_FINAL_APPROVAL);
+                userRepository.save(pendingApprovalPartner);
+                logger.info("Linked partner {} to donor: {} as PENDING_FINAL_APPROVAL", pendingApprovalPartner.getEmail(), testDonor.getEmail());
+            }
+
             // Seed reviewer thematic area assignments
             if (lomoganReviewer != null) {
                 seedReviewerTheme(lomoganReviewer, ProjectTheme.MNH);
