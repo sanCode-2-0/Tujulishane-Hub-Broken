@@ -1,9 +1,11 @@
 package com.tujulishanehub.backend.controllers;
 
 import com.tujulishanehub.backend.models.ApprovalStatus;
+import com.tujulishanehub.backend.models.ApprovalWorkflowStatus;
 import com.tujulishanehub.backend.models.User;
 import com.tujulishanehub.backend.models.UserDocument;
 import com.tujulishanehub.backend.payload.ApiResponse;
+import java.util.Arrays;
 import com.tujulishanehub.backend.payload.UserProfileDTO;
 import com.tujulishanehub.backend.repositories.UserDocumentRepository;
 import com.tujulishanehub.backend.services.OrganizationService;
@@ -1270,6 +1272,141 @@ public class UserController {
         }
     }
     
+    @GetMapping("/admin/partnerships-for-review")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('SUPER_ADMIN_REVIEWER')")
+    public ResponseEntity<ApiResponse<List<User>>> getPartnershipsForReview() {
+        try {
+            List<User> partners = userService.getPartnershipsByWorkflowStatus(
+                Arrays.asList(ApprovalWorkflowStatus.PENDING_REVIEW, ApprovalWorkflowStatus.UNDER_REVIEW)
+            );
+            ApiResponse<List<User>> response = new ApiResponse<>(HttpStatus.OK.value(), "Partnerships for review retrieved successfully", partners);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error retrieving partnerships for review", e);
+            ApiResponse<List<User>> response = new ApiResponse<>(500, "Error: " + e.getMessage(), null);
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @GetMapping("/admin/partnerships-awaiting-final-approval")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('SUPER_ADMIN_APPROVER')")
+    public ResponseEntity<ApiResponse<List<User>>> getPartnershipsAwaitingFinalApproval() {
+        try {
+            List<User> partners = userService.getPartnershipsByWorkflowStatus(
+                Arrays.asList(ApprovalWorkflowStatus.PENDING_FINAL_APPROVAL)
+            );
+            ApiResponse<List<User>> response = new ApiResponse<>(HttpStatus.OK.value(), "Partnerships awaiting final approval retrieved successfully", partners);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error retrieving partnerships awaiting final approval", e);
+            ApiResponse<List<User>> response = new ApiResponse<>(500, "Error: " + e.getMessage(), null);
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @PostMapping("/admin/partner/{partnerId}/recommend-partnership")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('SUPER_ADMIN_REVIEWER')")
+    public ResponseEntity<ApiResponse<String>> recommendPartnership(@PathVariable Long partnerId) {
+        try {
+            boolean success = userService.updatePartnershipStatus(
+                partnerId, 
+                ApprovalStatus.PENDING, 
+                ApprovalWorkflowStatus.PENDING_FINAL_APPROVAL
+            );
+            if (success) {
+                return ResponseEntity.ok(new ApiResponse<>(200, "Partnership recommended to approver successfully", null));
+            }
+            return ResponseEntity.badRequest().body(new ApiResponse<>(400, "Failed to recommend partnership", null));
+        } catch (Exception e) {
+            logger.error("Error recommending partnership", e);
+            return ResponseEntity.status(500).body(new ApiResponse<>(500, "Error: " + e.getMessage(), null));
+        }
+    }
+
+    @PostMapping("/admin/partner/{partnerId}/approve-partnership")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('SUPER_ADMIN_APPROVER')")
+    public ResponseEntity<ApiResponse<String>> approvePartnership(@PathVariable Long partnerId) {
+        try {
+            boolean success = userService.updatePartnershipStatus(
+                partnerId, 
+                ApprovalStatus.APPROVED, 
+                ApprovalWorkflowStatus.APPROVED
+            );
+            if (success) {
+                User partner = userService.getUserById(partnerId);
+                if (partner != null && partner.getParentDonor() != null) {
+                    User donor = partner.getParentDonor();
+                    try {
+                        String partnerMsg = String.format(
+                            "Hello %s,\n\n" +
+                            "We are pleased to inform you that your request to link with the following donor organisation has been APPROVED:\n\n" +
+                            "Donor Organisation: %s\n\n" +
+                            "You can now manage projects under this donor funding stream on the platform.\n\n" +
+                            "Best regards,\n" +
+                            "RMNCAH Coordination Hub Team",
+                            partner.getName(),
+                            donor.getOrganization() != null ? donor.getOrganization().getName() : donor.getName()
+                        );
+                        userService.getEmailService().sendEmail(partner.getEmail(), "RMNCAH Hub - Partnership Link APPROVED", partnerMsg);
+
+                        String donorMsg = String.format(
+                            "Hello %s,\n\n" +
+                            "We are pleased to inform you that your partnership request with the following partner has been APPROVED:\n\n" +
+                            "Partner Organisation: %s\n\n" +
+                            "You can now track their reports and project metrics under your Donor Dashboard.\n\n" +
+                            "Best regards,\n" +
+                            "RMNCAH Coordination Hub Team",
+                            donor.getName(),
+                            partner.getName()
+                        );
+                        userService.getEmailService().sendEmail(donor.getEmail(), "RMNCAH Hub - Partnership Link APPROVED", donorMsg);
+                    } catch (Exception ex) {
+                        logger.error("Error sending approved partnership emails", ex);
+                    }
+                }
+                return ResponseEntity.ok(new ApiResponse<>(200, "Partnership approved successfully", null));
+            }
+            return ResponseEntity.badRequest().body(new ApiResponse<>(400, "Failed to approve partnership", null));
+        } catch (Exception e) {
+            logger.error("Error approving partnership", e);
+            return ResponseEntity.status(500).body(new ApiResponse<>(500, "Error: " + e.getMessage(), null));
+        }
+    }
+
+    @PostMapping("/admin/partner/{partnerId}/reject-partnership")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('SUPER_ADMIN_APPROVER') or hasRole('SUPER_ADMIN_REVIEWER')")
+    public ResponseEntity<ApiResponse<String>> rejectPartnership(@PathVariable Long partnerId) {
+        try {
+            User partner = userService.getUserById(partnerId);
+            if (partner != null && partner.getParentDonor() != null) {
+                User donor = partner.getParentDonor();
+                try {
+                    String partnerMsg = String.format(
+                        "Hello %s,\n\n" +
+                        "We regret to inform you that your request to link with the following donor organisation has been REJECTED:\n\n" +
+                        "Donor Organisation: %s\n\n" +
+                        "For details, please contact platform administrators.\n\n" +
+                        "Best regards,\n" +
+                        "RMNCAH Coordination Hub Team",
+                        partner.getName(),
+                        donor.getOrganization() != null ? donor.getOrganization().getName() : donor.getName()
+                    );
+                    userService.getEmailService().sendEmail(partner.getEmail(), "RMNCAH Hub - Partnership Link REJECTED", partnerMsg);
+                } catch (Exception ex) {
+                    logger.error("Error sending rejection partnership email", ex);
+                }
+            }
+            boolean success = userService.unlinkPartnerFromDonor(partnerId);
+            if (success) {
+                return ResponseEntity.ok(new ApiResponse<>(200, "Partnership rejected and cleared successfully", null));
+            }
+            return ResponseEntity.badRequest().body(new ApiResponse<>(400, "Failed to reject partnership", null));
+        } catch (Exception e) {
+            logger.error("Error rejecting partnership", e);
+            return ResponseEntity.status(500).body(new ApiResponse<>(500, "Error: " + e.getMessage(), null));
+        }
+    }
+
     @GetMapping("/me/donor")
     @PreAuthorize("hasRole('PARTNER')")
     public ResponseEntity<ApiResponse<User>> getMyDonor() {

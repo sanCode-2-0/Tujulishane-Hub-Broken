@@ -1904,14 +1904,17 @@
               : ""
             }
                             <div class="mt-3 flex flex-wrap gap-2 items-center">
-                              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${partner.approvalStatus === "APPROVED"
+                              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${partner.partnershipApprovalStatus === "APPROVED"
                                 ? "bg-green-100 text-green-800"
-                                : partner.approvalStatus === "PENDING"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-red-100 text-red-800"
+                                : "bg-yellow-100 text-yellow-800"
                               }">
-                                <i class="fas fa-circle text-[8px] mr-1.5 ${partner.approvalStatus === 'APPROVED' ? 'text-green-500' : 'text-amber-500'} animate-pulse"></i>
-                                ${partner.approvalStatus || "PENDING"}
+                                <i class="fas fa-circle text-[8px] mr-1.5 ${partner.partnershipApprovalStatus === 'APPROVED' ? 'text-green-500' : 'text-amber-500'} animate-pulse"></i>
+                                ${partner.partnershipApprovalStatus === "APPROVED" 
+                                  ? "APPROVED" 
+                                  : (partner.partnershipWorkflowStatus === "PENDING_FINAL_APPROVAL" 
+                                    ? "Awaiting MoH Approver" 
+                                    : "Awaiting MoH Review")
+                                }
                               </span>
                               
                               <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-150">

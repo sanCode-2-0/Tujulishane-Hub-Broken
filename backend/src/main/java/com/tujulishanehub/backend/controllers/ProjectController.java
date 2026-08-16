@@ -1472,7 +1472,9 @@ public class ProjectController {
                 );
                 List<User> linkedPartners = userService.getUsersByParentDonorId(currentUser.getId());
                 for (User partner : linkedPartners) {
-                    donorProjects.addAll(projectService.getProjectsByPartnerEmail(partner.getEmail()));
+                    if (partner.getPartnershipApprovalStatus() == ApprovalStatus.APPROVED) {
+                        donorProjects.addAll(projectService.getProjectsByPartnerEmail(partner.getEmail()));
+                    }
                 }
                 projects = new java.util.ArrayList<>(donorProjects);
             } else {

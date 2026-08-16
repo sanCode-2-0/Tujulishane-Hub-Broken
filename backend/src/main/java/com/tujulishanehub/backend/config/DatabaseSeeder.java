@@ -88,8 +88,10 @@ public class DatabaseSeeder {
             User donorLinkedPartner = seedUser("partner.donorlinked@gmail.com", "Donor Linked Partner", User.Role.PARTNER, defaultPassword);
             if (donorLinkedPartner != null && testDonor != null && donorLinkedPartner.getParentDonor() == null) {
                 donorLinkedPartner.setParentDonor(testDonor);
+                donorLinkedPartner.setPartnershipApprovalStatus(ApprovalStatus.APPROVED);
+                donorLinkedPartner.setPartnershipWorkflowStatus(ApprovalWorkflowStatus.APPROVED);
                 userRepository.save(donorLinkedPartner);
-                logger.info("Linked partner {} to donor: {}", donorLinkedPartner.getEmail(), testDonor.getEmail());
+                logger.info("Linked partner {} to donor: {} as APPROVED", donorLinkedPartner.getEmail(), testDonor.getEmail());
             }
 
             // Seed reviewer thematic area assignments

@@ -1,6 +1,7 @@
 package com.tujulishanehub.backend.services;
 
 import com.tujulishanehub.backend.models.ApprovalStatus;
+import com.tujulishanehub.backend.models.ApprovalWorkflowStatus;
 import com.tujulishanehub.backend.models.Organization;
 import com.tujulishanehub.backend.models.User;
 import com.tujulishanehub.backend.models.UserDocument;
@@ -697,6 +698,8 @@ public class UserService {
             
             if (partner.getRole() == User.Role.PARTNER && donor.getRole() == User.Role.DONOR) {
                 partner.setParentDonor(donor);
+                partner.setPartnershipApprovalStatus(ApprovalStatus.PENDING);
+                partner.setPartnershipWorkflowStatus(ApprovalWorkflowStatus.PENDING_REVIEW);
                 userRepository.save(partner);
                 
                 // Send email notifications
@@ -704,13 +707,11 @@ public class UserService {
                     // Notify the partner
                     String partnerMessage = String.format(
                         "Hello %s,\n\n" +
-                        "We’re pleased to let you know that your organisation has been successfully linked to the following donor organisation:\n\n" +
+                        "A request to link your organisation to the following donor organisation has been submitted to the Ministry of Health for review:\n\n" +
                         "Donor Organisation: %s\n" +
                         "Donor Contact: %s\n" +
                         "Email: %s\n\n" +
-                        "This partnership will support collaboration and improve coordination of projects through the RMNCAH Coordination Hub.\n\n" +
-                        "You can view the partnership details through the Donor Management section of the platform.\n\n" +
-                        "If you have any questions about this partnership, please contact the platform support team.\n\n" +
+                        "This link requires a two-tier MoH administrator approval. You will receive another notification once the request is finalized.\n\n" +
                         "Best regards,\n" +
                         "RMNCAH Coordination Hub Team",
                         partner.getName(),
@@ -721,32 +722,29 @@ public class UserService {
                     
                     emailService.sendEmail(
                         partner.getEmail(),
-                        "RMNCAH Hub - Partnership Successfully Linked",
+                        "RMNCAH Hub - Partnership Link Request Submitted",
                         partnerMessage
                     );
                     
                     // Notify the donor
                     String donorMessage = String.format(
                         "Hello %s,\n\n" +
-                        "We’re pleased to let you know that a new partner organisation has been successfully linked to your account.\n\n" +
+                        "Your request to link with the following partner organisation has been submitted to the Ministry of Health for review:\n\n" +
                         "Partner Organisation: %s\n" +
                         "Partner Contact: %s\n" +
-                        "Email: %s\n" +
-                        "Thematic Area: %s\n\n" +
-                        "You can now view and manage this partnership through the Donor Management section of the RMNCAH Coordination Hub.\n\n" +
-                        "We look forward to supporting continued collaboration through the platform.\n\n" +
+                        "Email: %s\n\n" +
+                        "The request is now pending two-tier MoH administrator review and approval. You will be notified once the review is complete.\n\n" +
                         "Best regards,\n" +
                         "RMNCAH Coordination Hub Team",
                         donor.getName(),
                         partner.getOrganization() != null ? partner.getOrganization().getName() : "N/A",
                         partner.getName(),
-                        partner.getEmail(),
-                        partner.getThematicArea() != null ? partner.getThematicArea().getDisplayName() : "N/A"
+                        partner.getEmail()
                     );
                     
                     emailService.sendEmail(
                         donor.getEmail(),
-                        "RMNCAH Hub - New Partner Organisation Linked",
+                        "RMNCAH Hub - Partnership Link Request Submitted",
                         donorMessage
                     );
                 } catch (Exception e) {
@@ -771,6 +769,8 @@ public class UserService {
             if (partner.getRole() == User.Role.PARTNER) {
                 User donor = partner.getParentDonor();
                 partner.setParentDonor(null);
+                partner.setPartnershipApprovalStatus(null);
+                partner.setPartnershipWorkflowStatus(null);
                 userRepository.save(partner);
                 
                 // Send email notifications if donor existed
@@ -1072,6 +1072,33 @@ public class UserService {
         logger.info("Reviewer created: {} with thematic areas: {}", email, areasString);
 
         return savedReviewer;
+    }
+
+    public EmailService getEmailService() {
+        return this.emailService;
+    }
+
+    public java.util.List<User> getPartnershipsByWorkflowStatus(java.util.List<ApprovalWorkflowStatus> statuses) {
+        java.util.List<User> allPartners = userRepository.findByRole(User.Role.PARTNER);
+        java.util.List<User> filtered = new java.util.ArrayList<>();
+        for (User partner : allPartners) {
+            if (partner.getParentDonor() != null && statuses.contains(partner.getPartnershipWorkflowStatus())) {
+                filtered.add(partner);
+            }
+        }
+        return filtered;
+    }
+
+    public boolean updatePartnershipStatus(Long partnerId, ApprovalStatus appStatus, ApprovalWorkflowStatus workStatus) {
+        java.util.Optional<User> partnerOpt = userRepository.findById(partnerId);
+        if (partnerOpt.isPresent()) {
+            User partner = partnerOpt.get();
+            partner.setPartnershipApprovalStatus(appStatus);
+            partner.setPartnershipWorkflowStatus(workStatus);
+            userRepository.save(partner);
+            return true;
+        }
+        return false;
     }
 
 }

@@ -38,7 +38,7 @@
 	<script src="auth.js"></script>
 	<script src="session-manager.js"></script>
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700;800;900&display=swap"
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
 		rel="stylesheet" />
 	<link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
 	<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
@@ -786,6 +786,129 @@
 					<i class="fas fa-tags text-xs"></i>
 					<span>Thematic Areas</span>
 				</button>
+
+				<!-- Partnership Approvals Tab -->
+				<button x-show="userRole === 'SUPER_ADMIN' || userRole === 'SUPER_ADMIN_REVIEWER' || userRole === 'SUPER_ADMIN_APPROVER'"
+					@click="activeTab = 'partnerships'"
+					:class="activeTab === 'partnerships' ? 'bg-white shadow-md text-blue-900 font-bold scale-[1.02]' : 'text-slate-600 hover:text-slate-950 hover:bg-slate-200/55 font-medium'"
+					class="px-5 py-2.5 text-xs rounded-xl transition duration-150 flex items-center gap-2">
+					<i class="fas fa-handshake text-xs"></i>
+					<span>Partnership Approvals</span>
+					<span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold"
+						:class="activeTab === 'partnerships' ? 'bg-blue-100 text-blue-800' : 'bg-slate-200 text-slate-700'"
+						x-text="userRole === 'SUPER_ADMIN_REVIEWER' ? partnershipsForReview.length : (userRole === 'SUPER_ADMIN_APPROVER' ? partnershipsForApproval.length : partnershipsForReview.length + partnershipsForApproval.length)">0</span>
+				</button>
+			</div>
+
+			<!-- Partnership Approvals Workspace Section -->
+			<div x-show="activeTab === 'partnerships'" class="space-y-6" x-cloak>
+				<!-- Tier 1: Partnerships for Review -->
+				<div x-show="userRole === 'SUPER_ADMIN_REVIEWER' || userRole === 'SUPER_ADMIN'" class="bg-white rounded-2xl border border-slate-150 p-6 shadow-sm">
+					<div class="flex justify-between items-center mb-4">
+						<div>
+							<h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+								<i class="fas fa-file-signature text-amber-500"></i> Partnerships Awaiting Review
+							</h2>
+							<p class="text-xs text-slate-500 mt-1">Review partnership link requests submitted by Donors and recommend them to the Ministry of Health Approver.</p>
+						</div>
+						<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-50 border border-amber-200 text-amber-800" x-text="partnershipsForReview.length + ' pending'">0 pending</span>
+					</div>
+
+					<template x-if="partnershipsForReview.length === 0">
+						<div class="text-center py-8 text-slate-400 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+							<i class="fas fa-inbox text-3xl mb-2 text-slate-300"></i>
+							<p class="text-xs">No partnerships awaiting thematic review</p>
+						</div>
+					</template>
+
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<template x-for="partner in partnershipsForReview" :key="partner.id">
+							<div class="border border-slate-150 rounded-xl p-4 bg-slate-50/20 hover:shadow-md transition duration-150">
+								<div class="flex justify-between items-start">
+									<div class="space-y-3 flex-1">
+										<!-- Donor Section -->
+										<div class="p-2.5 bg-sky-50/50 rounded-lg border border-sky-100/60">
+											<span class="text-[10px] font-bold uppercase tracking-wider text-sky-800 flex items-center gap-1"><i class="fas fa-building-columns"></i> Funding Donor</span>
+											<h4 class="font-bold text-slate-800 text-sm mt-0.5" x-text="partner.parentDonor ? (partner.parentDonor.organizationName || partner.parentDonor.name) : 'N/A'"></h4>
+											<p class="text-[11px] text-slate-500" x-text="partner.parentDonor ? partner.parentDonor.email : 'N/A'"></p>
+										</div>
+
+										<!-- Partner Section -->
+										<div class="p-2.5 bg-teal-50/50 rounded-lg border border-teal-100/60">
+											<span class="text-[10px] font-bold uppercase tracking-wider text-teal-800 flex items-center gap-1"><i class="fas fa-handshake"></i> Implementing Partner</span>
+											<h4 class="font-bold text-slate-800 text-sm mt-0.5" x-text="partner.organization ? partner.organization.name : partner.name"></h4>
+											<p class="text-[11px] text-slate-500" x-text="partner.email"></p>
+											<p class="text-[10px] text-teal-600 font-semibold mt-1" x-show="partner.thematicArea"><i class="fas fa-tag"></i> <span x-text="partner.thematicArea"></span></p>
+										</div>
+									</div>
+								</div>
+
+								<div class="mt-4 pt-3 border-t border-slate-100 flex justify-end gap-2">
+									<button @click="rejectPartnership(partner.id)" class="px-3.5 py-1.5 text-xs font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition">
+										Reject Link
+									</button>
+									<button @click="recommendPartnership(partner.id)" class="px-4 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition shadow-sm">
+										Recommend Link
+									</button>
+								</div>
+							</div>
+						</template>
+					</div>
+				</div>
+
+				<!-- Tier 2: Partnerships for Approval -->
+				<div x-show="userRole === 'SUPER_ADMIN_APPROVER' || userRole === 'SUPER_ADMIN'" class="bg-white rounded-2xl border border-slate-150 p-6 shadow-sm">
+					<div class="flex justify-between items-center mb-4">
+						<div>
+							<h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+								<i class="fas fa-stamp text-emerald-600"></i> Partnerships Awaiting Final Approval
+							</h2>
+							<p class="text-xs text-slate-500 mt-1">Provide final approval to link partner organizations with donor funding streams.</p>
+						</div>
+						<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 border border-emerald-200 text-emerald-800" x-text="partnershipsForApproval.length + ' pending'">0 pending</span>
+					</div>
+
+					<template x-if="partnershipsForApproval.length === 0">
+						<div class="text-center py-8 text-slate-400 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+							<i class="fas fa-inbox text-3xl mb-2 text-slate-300"></i>
+							<p class="text-xs">No partnerships awaiting final approval</p>
+						</div>
+					</template>
+
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<template x-for="partner in partnershipsForApproval" :key="partner.id">
+							<div class="border border-slate-150 rounded-xl p-4 bg-slate-50/20 hover:shadow-md transition duration-150">
+								<div class="flex justify-between items-start">
+									<div class="space-y-3 flex-1">
+										<!-- Donor Section -->
+										<div class="p-2.5 bg-sky-50/50 rounded-lg border border-sky-100/60">
+											<span class="text-[10px] font-bold uppercase tracking-wider text-sky-800 flex items-center gap-1"><i class="fas fa-building-columns"></i> Funding Donor</span>
+											<h4 class="font-bold text-slate-800 text-sm mt-0.5" x-text="partner.parentDonor ? (partner.parentDonor.organizationName || partner.parentDonor.name) : 'N/A'"></h4>
+											<p class="text-[11px] text-slate-500" x-text="partner.parentDonor ? partner.parentDonor.email : 'N/A'"></p>
+										</div>
+
+										<!-- Partner Section -->
+										<div class="p-2.5 bg-teal-50/50 rounded-lg border border-teal-100/60">
+											<span class="text-[10px] font-bold uppercase tracking-wider text-teal-800 flex items-center gap-1"><i class="fas fa-handshake"></i> Implementing Partner</span>
+											<h4 class="font-bold text-slate-800 text-sm mt-0.5" x-text="partner.organization ? partner.organization.name : partner.name"></h4>
+											<p class="text-[11px] text-slate-500" x-text="partner.email"></p>
+											<p class="text-[10px] text-teal-600 font-semibold mt-1" x-show="partner.thematicArea"><i class="fas fa-tag"></i> <span x-text="partner.thematicArea"></span></p>
+										</div>
+									</div>
+								</div>
+
+								<div class="mt-4 pt-3 border-t border-slate-100 flex justify-end gap-2">
+									<button @click="rejectPartnership(partner.id)" class="px-3.5 py-1.5 text-xs font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition">
+										Reject Link
+									</button>
+									<button @click="approvePartnership(partner.id)" class="px-4 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition shadow-sm">
+										Approve Link
+									</button>
+								</div>
+							</div>
+						</template>
+					</div>
+				</div>
 			</div>
 
 			<!-- Projects for Review (Reviewer View) -->
@@ -2504,6 +2627,8 @@
 				projectsForReview: [],
 				projectsForApproval: [],
 				allPendingProjects: [], // Combined view for SUPER_ADMIN_APPROVER
+				partnershipsForReview: [],
+				partnershipsForApproval: [],
 
 				// Reviewers data
 				allReviewers: [],
@@ -2672,6 +2797,7 @@
 							this.loadAllPendingProjects(),
 							this.loadReviewers(),
 							this.loadThematicAreas(),
+							this.loadPartnerships(),
 						]);
 					} catch (error) {
 						console.error("Error loading initial data:", error);
@@ -2705,6 +2831,66 @@
 						}
 					} catch (error) {
 						console.error("Error loading thematic areas:", error);
+					}
+				},
+
+				async loadPartnerships() {
+					try {
+						if (this.userRole === "SUPER_ADMIN_REVIEWER" || this.userRole === "SUPER_ADMIN") {
+							const response = await this.apiCall("/api/auth/admin/partnerships-for-review");
+							this.partnershipsForReview = response.data || response || [];
+						}
+						if (this.userRole === "SUPER_ADMIN_APPROVER" || this.userRole === "SUPER_ADMIN") {
+							const response = await this.apiCall("/api/auth/admin/partnerships-awaiting-final-approval");
+							this.partnershipsForApproval = response.data || response || [];
+						}
+					} catch (error) {
+						console.error("Error loading partnerships:", error);
+					}
+				},
+
+				async recommendPartnership(partnerId) {
+					if (!confirm("Are you sure you want to recommend this partnership for final approval?")) return;
+					this.loading = true;
+					try {
+						await this.apiCall(`/api/auth/admin/partner/${partnerId}/recommend-partnership`, "POST");
+						this.showToast("Partnership successfully recommended for final approval");
+						await this.loadPartnerships();
+					} catch (error) {
+						console.error("Error recommending partnership:", error);
+						this.showToast("Failed to recommend partnership: " + error.message, "error");
+					} finally {
+						this.loading = false;
+					}
+				},
+
+				async approvePartnership(partnerId) {
+					if (!confirm("Are you sure you want to approve this partnership?")) return;
+					this.loading = true;
+					try {
+						await this.apiCall(`/api/auth/admin/partner/${partnerId}/approve-partnership`, "POST");
+						this.showToast("Partnership successfully approved");
+						await this.loadPartnerships();
+					} catch (error) {
+						console.error("Error approving partnership:", error);
+						this.showToast("Failed to approve partnership: " + error.message, "error");
+					} finally {
+						this.loading = false;
+					}
+				},
+
+				async rejectPartnership(partnerId) {
+					if (!confirm("Are you sure you want to reject this partnership link request?")) return;
+					this.loading = true;
+					try {
+						await this.apiCall(`/api/auth/admin/partner/${partnerId}/reject-partnership`, "POST");
+						this.showToast("Partnership successfully rejected and cleared");
+						await this.loadPartnerships();
+					} catch (error) {
+						console.error("Error rejecting partnership:", error);
+						this.showToast("Failed to reject partnership: " + error.message, "error");
+					} finally {
+						this.loading = false;
 					}
 				},
 

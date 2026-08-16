@@ -93,6 +93,14 @@ public class User {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_donor_id")
     private User parentDonor;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "partnership_approval_status")
+    private ApprovalStatus partnershipApprovalStatus;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "partnership_workflow_status")
+    private ApprovalWorkflowStatus partnershipWorkflowStatus;
     
     // Legacy single thematic area assignment for backward compatibility
     @Enumerated(EnumType.STRING)
@@ -340,5 +348,21 @@ public class User {
     
     public void setOrganization(Organization organization) {
         this.organization = organization;
+    }
+
+    public ApprovalStatus getPartnershipApprovalStatus() {
+        return partnershipApprovalStatus;
+    }
+
+    public void setPartnershipApprovalStatus(ApprovalStatus partnershipApprovalStatus) {
+        this.partnershipApprovalStatus = partnershipApprovalStatus;
+    }
+
+    public ApprovalWorkflowStatus getPartnershipWorkflowStatus() {
+        return partnershipWorkflowStatus;
+    }
+
+    public void setPartnershipWorkflowStatus(ApprovalWorkflowStatus partnershipWorkflowStatus) {
+        this.partnershipWorkflowStatus = partnershipWorkflowStatus;
     }
 }
