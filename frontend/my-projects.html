@@ -11,7 +11,7 @@
         integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&family=Montserrat:wght@200;300;400;500;600;700;800;900&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     
     <!-- Tailwind CSS with custom configuration -->
@@ -28,8 +28,8 @@
                         slatebg: '#F8FAFC'      // Slate-50
                     },
                     fontFamily: {
-                        sans: ['Lexend', 'Montserrat', 'sans-serif'],
-                        display: ['Lexend', 'sans-serif']
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Inter', 'sans-serif']
                     }
                 }
             }
@@ -367,6 +367,14 @@
                                                     title="View Details">
                                                 <i class="fas fa-eye"></i> Details
                                             </button>
+
+                                            <!-- Add Collaborator action (available once project is approved) -->
+                                            <button @click="addCollaborators(project)"
+                                                    x-show="(project.approvalWorkflowStatus || project.status) === 'APPROVED'"
+                                                    class="inline-flex items-center gap-1.5 text-teal-700 hover:text-white px-2.5 py-1.5 rounded-lg border border-teal-300 hover:bg-teal-600 transition active:scale-[0.96]"
+                                                    title="Add Collaborators">
+                                                <i class="fas fa-user-plus"></i> Add Collaborator
+                                            </button>
                                             
 
 
@@ -471,6 +479,13 @@
                                 <button @click="openProjectDetails(project.id)"
                                         class="inline-flex items-center gap-1.5 text-slate-700 hover:text-slate-900 px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-xs font-semibold transition active:scale-95">
                                     <i class="fas fa-eye"></i> Details
+                                </button>
+
+                                <!-- Add Collaborator action (available once project is approved) -->
+                                <button @click="addCollaborators(project)"
+                                        x-show="(project.approvalWorkflowStatus || project.status) === 'APPROVED'"
+                                        class="inline-flex items-center gap-1 text-teal-700 hover:text-white px-3 py-2 rounded-xl border border-teal-300 hover:bg-teal-600 text-xs font-semibold transition active:scale-95">
+                                    <i class="fas fa-user-plus"></i> Add Collaborator
                                 </button>
                                 
 
@@ -785,6 +800,11 @@
         };
 
         // Detail Modal Controller
+        window.addCollaborators = function (project) {
+            const projectNo = project.projectNo || project.id;
+            window.location.href = `project-details.html?project_number=${encodeURIComponent(projectNo)}`;
+        };
+
         window.openProjectDetails = async function (projectId, actionType = 'view') {
             const modal = document.getElementById('projectDetailsModal');
             const content = document.getElementById('projectDetailsContent');

@@ -33,7 +33,7 @@
 	<link rel="stylesheet" href="styles/main.css" />
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tw-elements/css/tw-elements.min.css" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700;800;900&display=swap"
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
 		rel="stylesheet" />
 	<link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
 	<!-- Alpine.js -->
@@ -269,13 +269,13 @@
                             <i class="fas fa-clipboard-list-check"></i>
                         </span>
                     </a> -->
-					<button type="button" onclick="openVideoModal()"
+					<a href="guide.html"
 						class="flex items-center w-1/2 lg:w-full justify-between px-4 py-2 rounded-full bg-button_two hover:opacity-90 transition-opacity text-left">
 						<span class="text-sm"> User Guide </span>
 						<span class="text-lg">
 							<i class="fas fa-book"></i>
 						</span>
-					</button>
+					</a>
 				</div>
 			</div>
 		</div>
@@ -3550,6 +3550,24 @@
 				loadPendingRequestsCount();
 			} else {
 				console.log("[DEBUG] User is NOT admin, role is:", user.role);
+			}
+
+			// Only super admin reviewers and approvers can filter by "Pending" status
+			const statusFilter = document.getElementById("statusFilter");
+			if (statusFilter) {
+				const pendingOption = statusFilter.querySelector(
+					'option[value="pending"]'
+				);
+				const canSeePending =
+					user.role === "SUPER_ADMIN_APPROVER" ||
+					user.role === "SUPER_ADMIN_REVIEWER";
+				if (pendingOption) {
+					pendingOption.style.display = canSeePending ? "" : "none";
+					if (!canSeePending && statusFilter.value === "pending") {
+						statusFilter.value = "all";
+						applyStatusFilter("all");
+					}
+				}
 			}
 			// Optionally, show/hide other navs for other roles as needed
 		}

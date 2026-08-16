@@ -795,7 +795,12 @@ public class ProjectService {
             replaceLocations(project, request.getLocations());
 
             logger.debug("About to call createProject");
-            return createProject(project);
+            Project createdProject = createProject(project);
+
+            // Send submission confirmation email explaining the post-submission review process
+            sendProjectSubmissionEmail(createdProject);
+
+            return createdProject;
         } catch (Exception e) {
             logger.error("Error in createProjectFromRequest: {}", e.getMessage(), e);
             throw e;
@@ -1318,6 +1323,65 @@ public class ProjectService {
     }
 
     /**
+     * Send a submission confirmation email explaining the post-submission review process
+     */
+    private void sendProjectSubmissionEmail(Project project) {
+        String subject;
+        String body;
+
+        if (project.getApprovalWorkflowStatus() == ApprovalWorkflowStatus.APPROVED &&
+            project.getApprovalStatus() == ApprovalStatus.APPROVED) {
+            // Priority projects created by super admins are immediately active
+            subject = "RMNCAH Hub - Project Confirmed: " + project.getTitle();
+            body = String.format(
+                "Hello %s,\n\n" +
+                "Congratulations! Your project, %s, has been registered and confirmed on the RMNCAH Coordination Hub and is now active.\n\n" +
+                "Project Number: %s\n" +
+                "Project Title: %s\n" +
+                "Partner Organisation: %s\n" +
+                "Status: Active\n\n" +
+                "You can proceed with your planned project activities and reporting.\n\n" +
+                "Tip: You can add collaborators to work with you on this project after it has been created, directly from the project page on your dashboard.\n\n" +
+                "Best regards,\n" +
+                "RMNCAH Coordination Hub Team",
+                project.getContactPersonName() != null ? project.getContactPersonName() : "Partner",
+                project.getTitle(),
+                project.getProjectNo() != null ? project.getProjectNo() : "N/A",
+                project.getTitle(),
+                project.getPartner()
+            );
+        } else {
+            // Regular project submitted for MoH review
+            subject = "RMNCAH Hub - Project Submitted for Review: " + project.getTitle();
+            body = String.format(
+                "Hello %s,\n\n" +
+                "Thank you for submitting your project, %s, to the RMNCAH Coordination Hub. We've received it successfully.\n\n" +
+                "Project Number: %s\n" +
+                "Project Title: %s\n" +
+                "Partner Organisation: %s\n" +
+                "Status: Pending Review\n\n" +
+                "What happens next?\n" +
+                "1. Verification - The Ministry of Health will verify the details of your submission.\n" +
+                "2. Review - Your project will be reviewed by the relevant subject matter experts.\n" +
+                "3. Decision - The Ministry of Health will make a final approval decision.\n" +
+                "4. Activation - Once approved, your project will become active on the Coordination Hub and ready for activities and reporting.\n\n" +
+                "You'll receive email updates at each stage. You can also track the progress of your project from your dashboard.\n\n" +
+                "Tip: You can add collaborators to work with you on this project after it has been created, directly from the project page on your dashboard.\n\n" +
+                "If you have any questions, please contact the Ministry of Health administrator or platform support team.\n\n" +
+                "Best regards,\n" +
+                "RMNCAH Coordination Hub Team",
+                project.getContactPersonName() != null ? project.getContactPersonName() : "Partner",
+                project.getTitle(),
+                project.getProjectNo() != null ? project.getProjectNo() : "N/A",
+                project.getTitle(),
+                project.getPartner()
+            );
+        }
+
+        sendProjectNotificationEmail(project, subject, body);
+    }
+
+    /**
      * Send email notifications to both the contact person and the partner
      */
     private void sendProjectNotificationEmail(Project project, String subject, String body) {
@@ -1333,7 +1397,7 @@ public class ProjectService {
             }
         }
         
-        if (partnerEmail != null && !partnerEmail.trim().isEmpty() && (contactEmail == null || !partnerEmail.equalsIgnoreCase(contactEmail))) {
+        if (partnerEmail != null && !partnerEmail.trim().isEmpty()) {
             try {
                 emailService.sendEmail(partnerEmail, subject, body);
                 logger.info("Notification email sent to partner: {}", partnerEmail);

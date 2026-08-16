@@ -1055,8 +1055,8 @@
 
   <!-- Link Partner Modal -->
   <div id="linkPartnerModal"
-    class="fixed inset-0 backdrop-blur-md my-auto bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    class="fixed inset-0 backdrop-blur-md my-auto bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
       <div class="mt-3">
         <h3 class="text-lg font-medium text-gray-900 mb-4">
           Link Partner Organization
@@ -1070,9 +1070,19 @@
               <!-- Available partners will be loaded here -->
             </select>
             <p class="text-xs text-gray-500 mt-1">
-              Only shows approved partner organizations that aren't already
-              linked to a donor
+              Only shows approved partner organizations that aren't already linked to a donor.
             </p>
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Partnership End Date</label>
+            <input type="date" id="partnershipEndDate" required
+              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Partnership Description / Scope</label>
+            <textarea id="partnershipDescription" required rows="3"
+              placeholder="Provide a summary of the joint activities, objectives, and coordination goals..."
+              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
           </div>
           <div class="flex justify-end space-x-3">
             <button type="button" onclick="hideLinkPartnerModal()"
@@ -2218,6 +2228,8 @@
         const partnerSelect = document.getElementById("partnerSelect");
         const partnerName =
           partnerSelect.options[partnerSelect.selectedIndex].text;
+        const endDate = document.getElementById("partnershipEndDate").value;
+        const description = document.getElementById("partnershipDescription").value;
 
         if (!partnerId) {
           await showAlert(
@@ -2241,7 +2253,14 @@
                 `${auth.baseUrl}/api/auth/partner/${partnerId}/link-donor/${currentUser.id}`,
                 {
                   method: "POST",
-                  headers: { Authorization: `Bearer ${token}` },
+                  headers: { 
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify({
+                    endDate: endDate,
+                    description: description
+                  })
                 }
               );
 

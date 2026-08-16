@@ -1169,7 +1169,8 @@ public class UserController {
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('SUPER_ADMIN_APPROVER') or hasRole('DONOR')")
     public ResponseEntity<ApiResponse<String>> linkPartnerToDonor(
             @PathVariable Long partnerId, 
-            @PathVariable Long donorId) {
+            @PathVariable Long donorId,
+            @RequestBody(required = false) java.util.Map<String, String> payload) {
         try {
             // Check if donor can link this partner
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -1187,7 +1188,17 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
             }
             
-            boolean success = userService.linkPartnerToDonor(partnerId, donorId);
+            java.time.LocalDate endDate = null;
+            String description = null;
+            if (payload != null) {
+                String endDateStr = payload.get("endDate");
+                if (endDateStr != null && !endDateStr.trim().isEmpty()) {
+                    endDate = java.time.LocalDate.parse(endDateStr);
+                }
+                description = payload.get("description");
+            }
+            
+            boolean success = userService.linkPartnerToDonor(partnerId, donorId, endDate, description);
             if (success) {
                 ApiResponse<String> response = new ApiResponse<>(
                     HttpStatus.OK.value(), 
@@ -1299,6 +1310,22 @@ public class UserController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Error retrieving partnerships awaiting final approval", e);
+            ApiResponse<List<User>> response = new ApiResponse<>(500, "Error: " + e.getMessage(), null);
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @GetMapping("/admin/partnerships-approved")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'SUPER_ADMIN_REVIEWER', 'SUPER_ADMIN_APPROVER')")
+    public ResponseEntity<ApiResponse<List<User>>> getApprovedPartnerships() {
+        try {
+            List<User> partners = userService.getPartnershipsByWorkflowStatus(
+                Arrays.asList(ApprovalWorkflowStatus.APPROVED)
+            );
+            ApiResponse<List<User>> response = new ApiResponse<>(HttpStatus.OK.value(), "Approved partnerships retrieved successfully", partners);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error retrieving approved partnerships", e);
             ApiResponse<List<User>> response = new ApiResponse<>(500, "Error: " + e.getMessage(), null);
             return ResponseEntity.status(500).body(response);
         }

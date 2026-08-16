@@ -100,6 +100,8 @@ public class DatabaseSeeder {
                 brainePartner.setThematicArea(ProjectTheme.MNH);
                 brainePartner.setPartnershipApprovalStatus(ApprovalStatus.PENDING);
                 brainePartner.setPartnershipWorkflowStatus(ApprovalWorkflowStatus.PENDING_REVIEW);
+                brainePartner.setPartnershipEndDate(LocalDate.now().plusYears(1));
+                brainePartner.setPartnershipDescription("Joint maternal healthcare initiative focused on county referral clinics and Dagoretti subcounty health centers.");
                 userRepository.save(brainePartner);
                 logger.info("Linked partner {} to donor: {} as PENDING_REVIEW", brainePartner.getEmail(), testDonor.getEmail());
             }
@@ -111,6 +113,8 @@ public class DatabaseSeeder {
                 pendingApprovalPartner.setThematicArea(ProjectTheme.AYPSRH);
                 pendingApprovalPartner.setPartnershipApprovalStatus(ApprovalStatus.PENDING);
                 pendingApprovalPartner.setPartnershipWorkflowStatus(ApprovalWorkflowStatus.PENDING_FINAL_APPROVAL);
+                pendingApprovalPartner.setPartnershipEndDate(LocalDate.now().plusMonths(6));
+                pendingApprovalPartner.setPartnershipDescription("Adolescent health outreach targeting high schools and community support services.");
                 userRepository.save(pendingApprovalPartner);
                 logger.info("Linked partner {} to donor: {} as PENDING_FINAL_APPROVAL", pendingApprovalPartner.getEmail(), testDonor.getEmail());
             }

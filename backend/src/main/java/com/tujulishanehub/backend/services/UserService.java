@@ -689,6 +689,10 @@ public class UserService {
      * Link a partner to a donor
      */
     public boolean linkPartnerToDonor(Long partnerId, Long donorId) {
+        return linkPartnerToDonor(partnerId, donorId, null, null);
+    }
+    
+    public boolean linkPartnerToDonor(Long partnerId, Long donorId, java.time.LocalDate endDate, String description) {
         Optional<User> partnerOptional = userRepository.findById(partnerId);
         Optional<User> donorOptional = userRepository.findById(donorId);
         
@@ -700,6 +704,8 @@ public class UserService {
                 partner.setParentDonor(donor);
                 partner.setPartnershipApprovalStatus(ApprovalStatus.PENDING);
                 partner.setPartnershipWorkflowStatus(ApprovalWorkflowStatus.PENDING_REVIEW);
+                partner.setPartnershipEndDate(endDate);
+                partner.setPartnershipDescription(description);
                 userRepository.save(partner);
                 
                 // Send email notifications

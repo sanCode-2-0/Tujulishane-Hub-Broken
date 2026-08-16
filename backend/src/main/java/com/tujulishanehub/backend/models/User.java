@@ -101,6 +101,12 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "partnership_workflow_status")
     private ApprovalWorkflowStatus partnershipWorkflowStatus;
+
+    @Column(name = "partnership_end_date")
+    private java.time.LocalDate partnershipEndDate;
+
+    @Column(name = "partnership_description", columnDefinition = "TEXT")
+    private String partnershipDescription;
     
     // Legacy single thematic area assignment for backward compatibility
     @Enumerated(EnumType.STRING)

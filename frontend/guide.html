@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Guide - RMNCAH Coordination Hub</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="styles/main.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css"
+      rel="stylesheet"
+    />
+    <script
+      defer
+      src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+
+    <!-- Config & Auth -->
+    <script>
+      if (
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1" ||
+        window.location.hostname === ""
+      ) {
+        document.write('<script src="./config.local.js"><\/script>');
+      }
+    </script>
+    <script src="./app-config.js?v=6"></script>
+    <script src="./set-base-url.js?v=6"></script>
+    <script src="./modal-utils.js"></script>
+    <script src="auth.js"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              button: "#0047BA",
+              button_two: "#28A745",
+              footer_color: "#1B2B48",
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+
+  <body class="bg-gray-50 text-gray-800 font-sans leading-relaxed">
+    <!-- Dynamic Header / Navbar -->
+    <div id="nav-placeholder"></div>
+
+    <!-- Hero Header -->
+    <header
+      style="
+        background: linear-gradient(
+          135deg,
+          #0f172a 0%,
+          #1e3a8a 50%,
+          #1e1b4b 100%
+        );
+        color: #ffffff;
+      "
+      class="py-16 px-6 lg:px-12 shadow-lg"
+    >
+      <div
+        class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8"
+      >
+        <div class="space-y-4 text-center md:text-left">
+          <span
+            style="background-color: rgba(255, 255, 255, 0.15); color: #bfdbfe"
+            class="text-xs font-semibold px-3.5 py-1.5 rounded-full uppercase tracking-wider inline-block"
+          >
+            Official Platform Manual
+          </span>
+          <h1
+            style="color: #ffffff"
+            class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight"
+          >
+            RMNCAH Coordination Hub User Guide
+          </h1>
+          <p style="color: #e0f2fe" class="text-base sm:text-lg max-w-2xl">
+            Step-by-step instructions for Implementing Partners, Donors,
+            Reviewers, and Ministry of Health Administrators.
+          </p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3">
+          <a
+            href="index-post-login.html"
+            style="background-color: #ffffff; color: #1e3a8a"
+            class="px-6 py-3 font-bold rounded-lg shadow hover:bg-gray-100 transition text-center text-sm"
+          >
+            <i class="fas fa-columns mr-2"></i>Go to Home Page
+          </a>
+          <a
+            href="faq.html"
+            style="
+              background-color: rgba(255, 255, 255, 0.1);
+              color: #ffffff;
+              border: 1px solid rgba(255, 255, 255, 0.3);
+            "
+            class="px-6 py-3 font-semibold rounded-lg shadow transition text-center text-sm"
+          >
+            <i class="fas fa-question-circle mr-2"></i>View FAQs
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Guide Layout -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <!-- Sticky Quick Navigation Sidebar -->
+        <aside class="lg:col-span-1">
+          <div
+            class="sticky top-24 bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4"
+          >
+            <h3
+              class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2"
+            >
+              Quick Table of Contents
+            </h3>
+            <nav class="space-y-2 text-sm">
+              <a
+                href="#overview"
+                class="block p-2 rounded hover:bg-blue-50 text-gray-700 font-medium hover:text-blue-900 transition flex items-center"
+              >
+                <i class="fas fa-info-circle text-blue-600 w-6"></i> 1. Platform
+                Overview
+              </a>
+              <a
+                href="#accounts"
+                class="block p-2 rounded hover:bg-blue-50 text-gray-700 font-medium hover:text-blue-900 transition flex items-center"
+              >
+                <i class="fas fa-user-check text-green-600 w-6"></i> 2. Accounts
+                & Registration
+              </a>
+              <a
+                href="#projects"
+                class="block p-2 rounded hover:bg-blue-50 text-gray-700 font-medium hover:text-blue-900 transition flex items-center"
+              >
+                <i class="fas fa-folder-plus text-purple-600 w-6"></i> 3.
+                Submitting Projects
+              </a>
+              <a
+                href="#approvals"
+                class="block p-2 rounded hover:bg-blue-50 text-gray-700 font-medium hover:text-blue-900 transition flex items-center"
+              >
+                <i class="fas fa-clipboard-check text-amber-600 w-6"></i> 4.
+                Two-Tier Approvals
+              </a>
+              <a
+                href="#collaborators"
+                class="block p-2 rounded hover:bg-blue-50 text-gray-700 font-medium hover:text-blue-900 transition flex items-center"
+              >
+                <i class="fas fa-user-friends text-indigo-600 w-6"></i> 5.
+                Inviting Collaborators
+              </a>
+              <a
+                href="#announcements"
+                class="block p-2 rounded hover:bg-blue-50 text-gray-700 font-medium hover:text-blue-900 transition flex items-center"
+              >
+                <i class="fas fa-bullhorn text-red-600 w-6"></i> 6. Priorities &
+                Calls
+              </a>
+              <a
+                href="#export"
+                class="block p-2 rounded hover:bg-blue-50 text-gray-700 font-medium hover:text-blue-900 transition flex items-center"
+              >
+                <i class="fas fa-file-csv text-teal-600 w-6"></i> 7. Filters &
+                CSV Export
+              </a>
+            </nav>
+          </div>
+        </aside>
+
+        <!-- Guide Content Body -->
+        <section class="lg:col-span-3 space-y-12">
+          <!-- Section 1: Overview -->
+          <article
+            id="overview"
+            class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 space-y-4"
+          >
+            <div class="flex items-center gap-3 border-b border-gray-100 pb-4">
+              <span
+                class="bg-blue-100 text-blue-900 p-3 rounded-lg text-xl font-bold"
+                >01</span
+              >
+              <h2 class="text-2xl font-bold text-gray-900">
+                Platform Overview
+              </h2>
+            </div>
+            <p class="text-gray-700 text-base leading-relaxed">
+              The <strong>RMNCAH Coordination Hub</strong> is the Ministry of
+              Health’s central digital repository designed to align, track, and
+              coordinate health initiatives across Kenya’s 47 counties.
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+              <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h4 class="font-semibold text-blue-900 mb-1">
+                  <i class="fas fa-handshake mr-2"></i>Implementing Partners
+                </h4>
+                <p class="text-xs text-gray-600">
+                  Register organizational profiles, submit health projects,
+                  attach proposals, and invite internal co-owners.
+                </p>
+              </div>
+              <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h4 class="font-semibold text-green-900 mb-1">
+                  <i class="fas fa-coins mr-2"></i>Donors & Supporters
+                </h4>
+                <p class="text-xs text-gray-600">
+                  Track funded initiatives across counties, explore thematic
+                  distributions, and review project outcomes.
+                </p>
+              </div>
+            </div>
+          </article>
+
+          <!-- Section 2: Registration & Login -->
+          <article
+            id="accounts"
+            class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 space-y-4"
+          >
+            <div class="flex items-center gap-3 border-b border-gray-100 pb-4">
+              <span
+                class="bg-green-100 text-green-900 p-3 rounded-lg text-xl font-bold"
+                >02</span
+              >
+              <h2 class="text-2xl font-bold text-gray-900">
+                Account Registration & Login
+              </h2>
+            </div>
+            <ol
+              class="space-y-4 text-gray-700 text-sm list-decimal list-inside"
+            >
+              <li class="pl-2">
+                <strong>Registration:</strong> Navigate to
+                <a
+                  href="access.html"
+                  class="text-blue-600 font-semibold underline"
+                  >Go to Page</a
+                >
+                and select your role (Partner or Donor). Fill out your
+                organization details, contact email, and password.
+              </li>
+              <li class="pl-2">
+                <strong>Email Verification:</strong> After submitting, check
+                your email inbox for a verification link to confirm your
+                registered email address.
+              </li>
+              <li class="pl-2">
+                <strong>One-Time Password (OTP) Login:</strong> Upon entering
+                valid credentials, a 6-digit OTP code will be dispatched to your
+                registered email. Enter the OTP within 10 minutes to authorize
+                access.
+              </li>
+              <li class="pl-2">
+                <strong>Account Approval:</strong> Partner accounts require
+                administrative review by the Ministry of Health before project
+                submission rights are granted.
+              </li>
+            </ol>
+          </article>
+
+          <!-- Section 3: Submitting Projects -->
+          <article
+            id="projects"
+            class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 space-y-4"
+          >
+            <div class="flex items-center gap-3 border-b border-gray-100 pb-4">
+              <span
+                class="bg-purple-100 text-purple-900 p-3 rounded-lg text-xl font-bold"
+                >03</span
+              >
+              <h2 class="text-2xl font-bold text-gray-900">
+                Submitting a New Project
+              </h2>
+            </div>
+            <p class="text-gray-700 text-sm">
+              Click <strong>"Add New Project"</strong> to access the 6-step
+              project entry wizard:
+            </p>
+            <ul class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+              <li class="p-3 bg-gray-50 rounded border border-gray-200">
+                <strong>Step 1: Location</strong> — Pin exact sub-county
+                locations and facilities on the interactive Mapbox map.
+              </li>
+              <li class="p-3 bg-gray-50 rounded border border-gray-200">
+                <strong>Step 2: Basic Info</strong> — Select Category
+                (Implementing, Research with Lacoste #, or Priority), Title, and
+                Time Period.
+              </li>
+              <li class="p-3 bg-gray-50 rounded border border-gray-200">
+                <strong>Step 3: Health Themes</strong> — Select applicable
+                health thematic areas (GBV, AYPSRH, MNH, FP, CH, AH, Advocacy &
+                SBC, M&E, Research).
+              </li>
+              <li class="p-3 bg-gray-50 rounded border border-gray-200">
+                <strong>Step 4: Contact Person</strong> — Provide designated
+                contact person name, role, and email address.
+              </li>
+              <li class="p-3 bg-gray-50 rounded border border-gray-200">
+                <strong>Step 5: Budget & Goals</strong> — Specify currency
+                (KES/USD/EUR), total budget amount, and key objectives.
+              </li>
+              <li class="p-3 bg-gray-50 rounded border border-gray-200">
+                <strong>Step 6: Documents</strong> — Upload supporting PDF,
+                DOCX, or XLSX proposals (up to 10MB per file).
+              </li>
+            </ul>
+          </article>
+
+          <!-- Section 4: Two-Tier Approval Workflow -->
+          <article
+            id="approvals"
+            class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 space-y-4"
+          >
+            <div class="flex items-center gap-3 border-b border-gray-100 pb-4">
+              <span
+                class="bg-amber-100 text-amber-900 p-3 rounded-lg text-xl font-bold"
+                >04</span
+              >
+              <h2 class="text-2xl font-bold text-gray-900">
+                Two-Tier Review & Approval Process
+              </h2>
+            </div>
+            <p class="text-gray-700 text-sm leading-relaxed">
+              To ensure quality control and thematic alignment, projects undergo
+              structured review before publishing:
+            </p>
+            <div class="space-y-3 text-xs">
+              <div
+                class="p-4 bg-amber-50 rounded-lg border border-amber-200 text-amber-900"
+              >
+                <strong>Tier 1 — Thematic Review:</strong> Assigned Subject
+                Matter Experts (Thematic Reviewers) evaluate technical
+                methodology, location coverage, and thematic alignment.
+              </div>
+              <div
+                class="p-4 bg-green-50 rounded-lg border border-green-200 text-green-900"
+              >
+                <strong>Tier 2 — Executive Approval:</strong> Ministry of Health
+                Approvers grant final approval to publish the project to the
+                live national database.
+              </div>
+            </div>
+          </article>
+
+          <!-- Section 5: Inviting Collaborators -->
+          <article
+            id="collaborators"
+            class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 space-y-4"
+          >
+            <div class="flex items-center gap-3 border-b border-gray-100 pb-4">
+              <span
+                class="bg-indigo-100 text-indigo-900 p-3 rounded-lg text-xl font-bold"
+                >05</span
+              >
+              <h2 class="text-2xl font-bold text-gray-900">
+                Managing Project Collaborators
+              </h2>
+            </div>
+            <p class="text-gray-700 text-sm">
+              Collaborators can be invited to participate in managing or viewing
+              project progress:
+            </p>
+            <div
+              class="p-4 bg-gray-50 rounded-lg border border-gray-200 space-y-2 text-xs text-gray-700"
+            >
+              <p>
+                <strong>Timing Rule:</strong> The collaborator invitation panel
+                appears on the
+                <a
+                  href="project-details.html"
+                  class="text-blue-600 font-semibold underline"
+                  >Project Details</a
+                >
+                page <em>after</em> the project has received official approval
+                (<code>APPROVED</code> status).
+              </p>
+              <p>
+                <strong>Roles Available:</strong> <code>Co-Owner</code> (full
+                editing & collaborator management rights),
+                <code>Editor</code> (project updates), and
+                <code>Viewer</code> (read-only monitoring).
+              </p>
+            </div>
+          </article>
+
+          <!-- Section 6: Announcements & Government Priorities -->
+          <article
+            id="announcements"
+            class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 space-y-4"
+          >
+            <div class="flex items-center gap-3 border-b border-gray-100 pb-4">
+              <span
+                class="bg-red-100 text-red-900 p-3 rounded-lg text-xl font-bold"
+                >06</span
+              >
+              <h2 class="text-2xl font-bold text-gray-900">
+                Government Priorities & Call for Proposals
+              </h2>
+            </div>
+            <p class="text-gray-700 text-sm leading-relaxed">
+              Ministry of Health Administrators issue official calls for
+              proposals and announcements under
+              <strong>"Government Priorities"</strong>. Partners can review
+              guidelines, submit collaboration requests, or ask questions via
+              integrated project messaging.
+            </p>
+          </article>
+
+          <!-- Section 7: Filters & CSV Export -->
+          <article
+            id="export"
+            class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 space-y-4"
+          >
+            <div class="flex items-center gap-3 border-b border-gray-100 pb-4">
+              <span
+                class="bg-teal-100 text-teal-900 p-3 rounded-lg text-xl font-bold"
+                >07</span
+              >
+              <h2 class="text-2xl font-bold text-gray-900">
+                Filtering & Exporting CSV Data
+              </h2>
+            </div>
+            <p class="text-gray-700 text-sm leading-relaxed">
+              Use the top search bar and filter controls on the
+              <a
+                href="index-post-login.html"
+                class="text-blue-600 font-semibold underline"
+                >Projects Dashboard</a
+              >
+              to narrow projects by
+              <strong
+                >County, Sub-County, Health Theme, Date Range, or Status</strong
+              >. Click <strong>"Export CSV"</strong> to download structured
+              datasets for offline reporting.
+            </p>
+          </article>
+        </section>
+      </div>
+    </main>
+
+    <!-- Standard Footer Placeholder -->
+    <div id="footer-placeholder"></div>
+    <script
+      type="module"
+      src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496"
+      integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ=="
+      data-cf-beacon='{"version":"2024.11.0","token":"8679eea07dfc4322bcb1b30bceaed4ff","r":1}'
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
