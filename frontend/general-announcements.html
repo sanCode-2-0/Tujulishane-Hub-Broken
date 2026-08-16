@@ -1,519 +1,604 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="scroll-smooth">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Announcements - RMNCAH</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: "#1e40af",
-            secondary: "#f59e0b",
-            accent: "#10b981",
-            dark: "#1f2937",
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Announcements - RMNCAH</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#1e40af",
+              secondary: "#f59e0b",
+              accent: "#10b981",
+              dark: "#1f2937",
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+            },
           },
-          fontFamily: {
-            sans: ["Inter", "sans-serif"],
-          },
-        },
-      },
-    };
-  </script>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700;800;900&display=swap"
-    rel="stylesheet" />
-  <link rel="stylesheet" href="styles/main.css" />
-  <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
-
-  <!-- Backend URL Configuration - MUST BE LOADED FIRST -->
-  <script src="./app-config.js?v=5"></script>
-  <script src="./set-base-url.js?v=3"></script>
-
-  <!-- Modal Utilities -->
-  <script src="./modal-utils.js"></script>
-
-  <script>
-    // Try to load a local config override (frontend/config.local.js) if present.
-    // This is optional and safe to 404 — it won't break page load.
-    (function () {
-      if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "") {
-        try {
-          var s = document.createElement("script");
-          s.src = "./config.local.js";
-          s.async = false;
-          document.head.appendChild(s);
-        } catch (e) {
-          /* ignore */
-        }
-      }
-    })();
-  </script>
-  <script type="module">
-    // Use window.BASE_URL which is already set by app-config.js loaded via script tag
-    const BASE_URL = window.BASE_URL;
-    console.log(
-      "[general-announcements.html] Using BASE_URL:",
-      BASE_URL,
-      "- Environment:",
-      window.USE_PROD ? "PRODUCTION" : "DEVELOPMENT"
-    );
-  </script>
-  <script src="auth.js"></script>
-  <!-- Load Alpine.js after function definitions -->
-  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-  <style>
-    .ql-toolbar {
-      border-top-left-radius: 0.5rem;
-      border-top-right-radius: 0.5rem;
-      border-bottom: none;
-    }
-
-    .ql-container {
-      border-bottom-left-radius: 0.5rem;
-      border-bottom-right-radius: 0.5rem;
-      min-height: 150px;
-    }
-
-    .ql-editor {
-      font-family: inherit;
-      font-size: 14px;
-    }
-  </style>
-</head>
-
-<body id="general-announcements-app" x-data="generalAnnouncementsApp()" x-init="init()" class="bg-gray-50">
-  <!-- Define generalAnnouncementsApp before Alpine initializes -->
-  <script>
-    window.generalAnnouncementsApp = function generalAnnouncementsApp() {
-      return {
-        announcements: [],
-        loading: true,
-        showCreateModal: false,
-        userRole: null,
-        currentUser: null,
-        newAnnouncement: {
-          title: "",
-          body: "",
-        },
-        isButtonDisabled() {
-          const title = this.newAnnouncement?.title || "";
-          const editorContent = this.editorContent || "";
-          const disabled = this.creating || !title.trim() || !editorContent.trim();
-          console.log('🔍 Button disabled check:', {
-            creating: this.creating,
-            title: `"${title}"`,
-            titleTrimmed: `"${title.trim()}"`,
-            editorContent: `"${editorContent}"`,
-            editorContentTrimmed: `"${editorContent.trim()}"`,
-            disabled: disabled
-          });
-          return disabled;
-        },
-        creating: false,
-
-        async init() {
-          // Wait for auth.js to load user data and get it directly
-          const user = await this.waitForAuth();
-
-          // Set user role and store user data from the returned user object
-          if (user && user.role) {
-            this.userRole = user.role;
-            this.currentUser = user;
-          } else {
-            // Fallback: try to read from localStorage
-            const userStr = localStorage.getItem("currentUser");
-            if (userStr) {
-              try {
-                const parsedUser = JSON.parse(userStr);
-                this.userRole = parsedUser.role;
-                this.currentUser = parsedUser;
-              } catch (e) {
-                console.error("Error parsing user data:", e);
-              }
-            }
-            // Final fallback to userRole if it exists
-            if (!this.userRole) {
-              this.userRole = localStorage.getItem("userRole");
-            }
-          }
-          console.log("🔍 User Role:", this.userRole);
-          console.log("🔍 Current User:", this.currentUser);
-
-          // Populate user dropdown in navigation
-          if (this.currentUser) {
-            console.log("👤 Populating user dropdown...");
-            this.populateUserDropdown(this.currentUser);
-          }
-
-          await this.loadAnnouncements();
-        },
-
-        // Populate user dropdown with current user data
-        populateUserDropdown(user) {
-          try {
-            const userDisplayName =
-              document.getElementById("userDisplayName");
-            const userNameDisplay =
-              document.getElementById("userNameDisplay");
-            const userEmailDisplay =
-              document.getElementById("userEmailDisplay");
-            const userRoleDisplay =
-              document.getElementById("userRoleDisplay");
-            const userStatusDisplay =
-              document.getElementById("userStatusDisplay");
-
-            if (userDisplayName)
-              userDisplayName.textContent = user.name || "User";
-            if (userNameDisplay)
-              userNameDisplay.textContent = user.name || "Loading...";
-            if (userEmailDisplay)
-              userEmailDisplay.textContent = user.email || "";
-            if (userRoleDisplay)
-              userRoleDisplay.textContent = user.role || "N/A";
-            if (userStatusDisplay) {
-              userStatusDisplay.textContent = user.status || "N/A";
-              // Update status color based on status
-              userStatusDisplay.className =
-                user.status === "ACTIVE"
-                  ? "font-medium text-green-600"
-                  : "font-medium text-gray-600";
-            }
-
-            // Show role-based navs
-            if (
-              user.role === "ADMIN" ||
-              user.role === "SUPER_ADMIN" ||
-              user.role === "SUPER_ADMIN_REVIEWER" ||
-              user.role === "SUPER_ADMIN_APPROVER" ||
-              user.role === "SUPER_ADMIN_REVIEWER" ||
-              user.role === "SUPER_ADMIN_APPROVER"
-            ) {
-              const adminNav = document.getElementById("adminNav");
-              if (adminNav) adminNav.classList.remove("hidden");
-            }
-            if (user.role === "DONOR") {
-              const donorNav = document.getElementById("donorNav");
-              if (donorNav) donorNav.classList.remove("hidden");
-            }
-
-            console.log("✅ User dropdown populated successfully!");
-          } catch (error) {
-            console.error("❌ Error populating user dropdown:", error);
-          }
-        },
-
-        async waitForAuth() {
-          // Wait for AuthManager to be available and initialized
-          let attempts = 0;
-          while (attempts < 50) {
-            // Max 5 seconds
-            if (
-              window.authManager &&
-              typeof window.authManager.getCurrentUser === "function"
-            ) {
-              // Try to get current user and return it directly
-              try {
-                const user = await window.authManager.getCurrentUser();
-                return user; // Return the user object
-              } catch (e) {
-                // User not logged in or error
-                return null;
-              }
-            }
-            await new Promise((resolve) => setTimeout(resolve, 100));
-            attempts++;
-          }
-          return null; // Timeout - no auth available
-        },
-
-        async loadAnnouncements() {
-          try {
-            const response = await fetch(
-              `${window.BASE_URL}/api/general-announcements`
-            );
-            const data = await response.json();
-            if (data.status === 200) {
-              this.announcements = data.data;
-            }
-          } catch (error) {
-            console.error("Error loading announcements:", error);
-            await showAlert("Failed to load announcements", "Error", "error");
-          } finally {
-            this.loading = false;
-          }
-        },
-
-        async createAnnouncement() {
-          this.creating = true;
-          try {
-            // Ensure Quill is initialized
-            if (!quill) {
-              initQuill();
-            }
-
-            // Get content from Quill
-            const bodyContent = quill ? quill.root.innerHTML : '';
-
-            const token = localStorage.getItem("accessToken");
-            const response = await fetch(
-              `${window.BASE_URL}/api/general-announcements`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                  title: this.newAnnouncement.title,
-                  body: bodyContent
-                }),
-              }
-            );
-
-            if (!response.ok) {
-              if (response.status === 403) {
-                await showAlert(
-                  "Permission denied. Only SUPER_ADMIN_APPROVER and SUPER_ADMIN_REVIEWER can create announcements.",
-                  "Permission Denied",
-                  "error"
-                );
-              } else if (response.status === 401) {
-                await showAlert(
-                  "You must be logged in to create announcements.",
-                  "Authentication Required",
-                  "warning"
-                );
-              } else {
-                await showAlert(
-                  `Error: Server returned status ${response.status}`,
-                  "Error",
-                  "error"
-                );
-              }
-              return;
-            }
-
-            const data = await response.json();
-
-            if (data.status === 201) {
-              await showAlert(
-                "Announcement created successfully!",
-                "Success",
-                "success"
-              );
-              this.showCreateModal = false;
-              this.newAnnouncement = {
-                title: "",
-                body: "",
-              };
-              this.editorContent = ""; // Reset editor content
-              // Clear Quill
-              if (quill) {
-                quill.setContents([]);
-              }
-              await this.loadAnnouncements();
-            } else {
-              await showAlert(
-                "Error: " + (data.message || "Unknown error occurred"),
-                "Error",
-                "error"
-              );
-            }
-          } catch (error) {
-            console.error("Error creating announcement:", error);
-            await showAlert(
-              "Failed to create announcement. Please try again.",
-              "Error",
-              "error"
-            );
-          } finally {
-            this.creating = false;
-          }
         },
       };
-    };
-  </script>
-  <div class="" id="nav-placeholder"></div>
-  <div>
-    <!-- Main Content -->
-    <section class="relative z-0 overflow-hidden" id="top">
-      <div class="w-full overflow-hidden">
-        <div class="relative w-full min-h-[50vh] md:h-[40vh] flex flex-col justify-end">
-          <!-- Background Image -->
-          <div class="absolute inset-0">
-            <img src="resources/images/main-1.jpg" alt="Background" class="w-full h-full object-cover object-center" />
-          </div>
+    </script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles/main.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css"
+      rel="stylesheet"
+    />
 
-          <!-- Overlay -->
-          <div class="absolute inset-0 bg-black bg-opacity-50 z-10"></div>
+    <!-- Backend URL Configuration - MUST BE LOADED FIRST -->
+    <script src="./app-config.js?v=5"></script>
+    <script src="./set-base-url.js?v=3"></script>
 
-          <!-- Bottom Content Section -->
-          <div class="relative z-20 w-full pt-16 sm:pt-0">
-            <div class="mx-4 md:mx-8 text-white px-4">
-              <a href="#" class="text-xs font-semibold uppercase tracking-wide mb-2 block">
-                Ministry of Health
-              </a>
-              <h1 class="text-xl sm:text-4xl font-semibold mb-4">
-                <span class="tracking-wide">RMNCAH</span> Announcements
-              </h1>
-              <p class="text-sm sm:text-base mb-6 max-w-4xl">
-                Stay updated with the latest announcements and messages from the Ministry of Health.
-              </p>
+    <!-- Modal Utilities -->
+    <script src="./modal-utils.js"></script>
+
+    <script>
+      // Try to load a local config override (frontend/config.local.js) if present.
+      // This is optional and safe to 404 — it won't break page load.
+      (function () {
+        if (
+          window.location.hostname === "localhost" ||
+          window.location.hostname === "127.0.0.1" ||
+          window.location.hostname === ""
+        ) {
+          try {
+            var s = document.createElement("script");
+            s.src = "./config.local.js";
+            s.async = false;
+            document.head.appendChild(s);
+          } catch (e) {
+            /* ignore */
+          }
+        }
+      })();
+    </script>
+    <script type="module">
+      // Use window.BASE_URL which is already set by app-config.js loaded via script tag
+      const BASE_URL = window.BASE_URL;
+      console.log(
+        "[general-announcements.html] Using BASE_URL:",
+        BASE_URL,
+        "- Environment:",
+        window.USE_PROD ? "PRODUCTION" : "DEVELOPMENT",
+      );
+    </script>
+    <script src="auth.js"></script>
+    <!-- Load Alpine.js after function definitions -->
+    <script
+      src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
+      defer
+    ></script>
+    <style>
+      [x-cloak] {
+        display: none !important;
+      }
+
+      .ql-toolbar {
+        border-top-left-radius: 0.5rem;
+        border-top-right-radius: 0.5rem;
+        border-bottom: none;
+      }
+
+      .ql-container {
+        border-bottom-left-radius: 0.5rem;
+        border-bottom-right-radius: 0.5rem;
+        min-height: 150px;
+      }
+
+      .ql-editor {
+        font-family: inherit;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+
+  <body
+    id="general-announcements-app"
+    x-data="generalAnnouncementsApp()"
+    x-init="init()"
+    class="bg-gray-50"
+  >
+    <!-- Define generalAnnouncementsApp before Alpine initializes -->
+    <script>
+      window.generalAnnouncementsApp = function generalAnnouncementsApp() {
+        return {
+          announcements: [],
+          loading: true,
+          showCreateModal: false,
+          userRole: null,
+          currentUser: null,
+          newAnnouncement: {
+            title: "",
+            body: "",
+          },
+          isButtonDisabled() {
+            const title = this.newAnnouncement?.title || "";
+            const editorContent = this.editorContent || "";
+            const disabled =
+              this.creating || !title.trim() || !editorContent.trim();
+            console.log("🔍 Button disabled check:", {
+              creating: this.creating,
+              title: `"${title}"`,
+              titleTrimmed: `"${title.trim()}"`,
+              editorContent: `"${editorContent}"`,
+              editorContentTrimmed: `"${editorContent.trim()}"`,
+              disabled: disabled,
+            });
+            return disabled;
+          },
+          creating: false,
+
+          async init() {
+            // Wait for auth.js to load user data and get it directly
+            const user = await this.waitForAuth();
+
+            // Set user role and store user data from the returned user object
+            if (user && user.role) {
+              this.userRole = user.role;
+              this.currentUser = user;
+            } else {
+              // Fallback: try to read from localStorage
+              const userStr = localStorage.getItem("currentUser");
+              if (userStr) {
+                try {
+                  const parsedUser = JSON.parse(userStr);
+                  this.userRole = parsedUser.role;
+                  this.currentUser = parsedUser;
+                } catch (e) {
+                  console.error("Error parsing user data:", e);
+                }
+              }
+              // Final fallback to userRole if it exists
+              if (!this.userRole) {
+                this.userRole = localStorage.getItem("userRole");
+              }
+            }
+            console.log("🔍 User Role:", this.userRole);
+            console.log("🔍 Current User:", this.currentUser);
+
+            // Populate user dropdown in navigation
+            if (this.currentUser) {
+              console.log("👤 Populating user dropdown...");
+              this.populateUserDropdown(this.currentUser);
+            }
+
+            await this.loadAnnouncements();
+          },
+
+          // Populate user dropdown with current user data
+          populateUserDropdown(user) {
+            try {
+              const userDisplayName =
+                document.getElementById("userDisplayName");
+              const userNameDisplay =
+                document.getElementById("userNameDisplay");
+              const userEmailDisplay =
+                document.getElementById("userEmailDisplay");
+              const userRoleDisplay =
+                document.getElementById("userRoleDisplay");
+              const userStatusDisplay =
+                document.getElementById("userStatusDisplay");
+
+              if (userDisplayName)
+                userDisplayName.textContent = user.name || "User";
+              if (userNameDisplay)
+                userNameDisplay.textContent = user.name || "Loading...";
+              if (userEmailDisplay)
+                userEmailDisplay.textContent = user.email || "";
+              if (userRoleDisplay)
+                userRoleDisplay.textContent = user.role || "N/A";
+              if (userStatusDisplay) {
+                userStatusDisplay.textContent = user.status || "N/A";
+                // Update status color based on status
+                userStatusDisplay.className =
+                  user.status === "ACTIVE"
+                    ? "font-medium text-green-600"
+                    : "font-medium text-gray-600";
+              }
+
+              // Show role-based navs
+              if (
+                user.role === "ADMIN" ||
+                user.role === "SUPER_ADMIN" ||
+                user.role === "SUPER_ADMIN_REVIEWER" ||
+                user.role === "SUPER_ADMIN_APPROVER" ||
+                user.role === "SUPER_ADMIN_REVIEWER" ||
+                user.role === "SUPER_ADMIN_APPROVER"
+              ) {
+                const adminNav = document.getElementById("adminNav");
+                if (adminNav) adminNav.classList.remove("hidden");
+              }
+              if (user.role === "DONOR") {
+                const donorNav = document.getElementById("donorNav");
+                if (donorNav) donorNav.classList.remove("hidden");
+              }
+
+              console.log("✅ User dropdown populated successfully!");
+            } catch (error) {
+              console.error("❌ Error populating user dropdown:", error);
+            }
+          },
+
+          async waitForAuth() {
+            // Wait for AuthManager to be available and initialized
+            let attempts = 0;
+            while (attempts < 50) {
+              // Max 5 seconds
+              if (
+                window.authManager &&
+                typeof window.authManager.getCurrentUser === "function"
+              ) {
+                // Try to get current user and return it directly
+                try {
+                  const user = await window.authManager.getCurrentUser();
+                  return user; // Return the user object
+                } catch (e) {
+                  // User not logged in or error
+                  return null;
+                }
+              }
+              await new Promise((resolve) => setTimeout(resolve, 100));
+              attempts++;
+            }
+            return null; // Timeout - no auth available
+          },
+
+          async loadAnnouncements() {
+            try {
+              const response = await fetch(
+                `${window.BASE_URL}/api/general-announcements`,
+              );
+              const data = await response.json();
+              if (data.status === 200) {
+                this.announcements = data.data;
+              }
+            } catch (error) {
+              console.error("Error loading announcements:", error);
+              await showAlert("Failed to load announcements", "Error", "error");
+            } finally {
+              this.loading = false;
+            }
+          },
+
+          async createAnnouncement() {
+            this.creating = true;
+            try {
+              // Ensure Quill is initialized
+              if (!quill) {
+                initQuill();
+              }
+
+              // Get content from Quill
+              const bodyContent = quill ? quill.root.innerHTML : "";
+
+              const token = localStorage.getItem("accessToken");
+              const response = await fetch(
+                `${window.BASE_URL}/api/general-announcements`,
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                  },
+                  body: JSON.stringify({
+                    title: this.newAnnouncement.title,
+                    body: bodyContent,
+                  }),
+                },
+              );
+
+              if (!response.ok) {
+                if (response.status === 403) {
+                  await showAlert(
+                    "Permission denied. Only SUPER_ADMIN_APPROVER and SUPER_ADMIN_REVIEWER can create announcements.",
+                    "Permission Denied",
+                    "error",
+                  );
+                } else if (response.status === 401) {
+                  await showAlert(
+                    "You must be logged in to create announcements.",
+                    "Authentication Required",
+                    "warning",
+                  );
+                } else {
+                  await showAlert(
+                    `Error: Server returned status ${response.status}`,
+                    "Error",
+                    "error",
+                  );
+                }
+                return;
+              }
+
+              const data = await response.json();
+
+              if (data.status === 201) {
+                await showAlert(
+                  "Announcement created successfully!",
+                  "Success",
+                  "success",
+                );
+                this.showCreateModal = false;
+                this.newAnnouncement = {
+                  title: "",
+                  body: "",
+                };
+                this.editorContent = ""; // Reset editor content
+                // Clear Quill
+                if (quill) {
+                  quill.setContents([]);
+                }
+                await this.loadAnnouncements();
+              } else {
+                await showAlert(
+                  "Error: " + (data.message || "Unknown error occurred"),
+                  "Error",
+                  "error",
+                );
+              }
+            } catch (error) {
+              console.error("Error creating announcement:", error);
+              await showAlert(
+                "Failed to create announcement. Please try again.",
+                "Error",
+                "error",
+              );
+            } finally {
+              this.creating = false;
+            }
+          },
+        };
+      };
+    </script>
+    <div class="" id="nav-placeholder"></div>
+    <div>
+      <!-- Main Content -->
+      <section class="relative z-0 overflow-hidden" id="top">
+        <div class="w-full overflow-hidden">
+          <div
+            class="relative w-full min-h-[50vh] md:h-[40vh] flex flex-col justify-end"
+          >
+            <!-- Background Image -->
+            <div class="absolute inset-0">
+              <img
+                src="resources/images/main-1.jpg"
+                alt="Background"
+                class="w-full h-full object-cover object-center"
+              />
             </div>
-          </div>
-        </div>
-      </div>
-    </section>
 
-    <div class="mx-auto px-4 py-8">
-      <div class="flex flex-col md:flex-row justify-between md:items-end mb-6 border-b pb-4">
-        <div>
-          <h2 class="text-2xl font-bold text-gray-900">Announcements</h2>
-          <p class="text-gray-600 mt-1">Latest updates and messages</p>
-        </div>
-        <div class="mt-4 md:mt-0">
-          <button x-show="userRole === 'SUPER_ADMIN_APPROVER' || userRole === 'SUPER_ADMIN_REVIEWER'"
-            @click="showCreateModal = true; console.log('📝 Opening create modal')"
-            class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition">
-            <i class="fas fa-plus mr-2"></i>Create Announcement
-          </button>
-        </div>
-      </div>
+            <!-- Overlay -->
+            <div class="absolute inset-0 bg-black bg-opacity-50 z-10"></div>
 
-      <div x-show="loading" class="text-center py-12">
-        <i class="fas fa-spinner fa-spin text-4xl text-blue-600"></i>
-        <p class="mt-4 text-gray-600">Loading announcements...</p>
-      </div>
-
-      <div x-show="!loading && announcements.length > 0" class="space-y-6">
-        <template x-for="announcement in announcements" :key="announcement.id">
-          <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
-            <div class="mb-4">
-              <h3 class="text-xl font-bold text-gray-900 mb-2" x-text="announcement.title"></h3>
-              <div class="flex items-center text-sm text-gray-500 mb-4">
-                <i class="fas fa-user mr-2"></i>
-                <span x-text="announcement.createdBy?.name || 'Unknown'"></span>
-                <span class="mx-2">•</span>
-                <i class="fas fa-calendar mr-2"></i>
-                <span x-text="new Date(announcement.createdAt).toLocaleDateString()"></span>
+            <!-- Bottom Content Section -->
+            <div class="relative z-20 w-full pt-16 sm:pt-0">
+              <div class="mx-4 md:mx-8 text-white px-4">
+                <a
+                  href="#"
+                  class="text-xs font-semibold uppercase tracking-wide mb-2 block"
+                >
+                  Ministry of Health
+                </a>
+                <h1 class="text-xl sm:text-4xl font-semibold mb-4">
+                  <span class="tracking-wide">RMNCAH</span> Announcements
+                </h1>
+                <p class="text-sm sm:text-base mb-6 max-w-4xl">
+                  This page is reserved strictly for official general bulletins, policy updates, and notices posted by MoH Admins. Only users with Super Admin, Reviewer, or Approver roles are authorized to post here.
+                </p>
               </div>
             </div>
-            <div class="prose prose-gray max-w-none">
-              <div x-html="announcement.body"></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="mx-auto px-4 py-8">
+        <div
+          class="flex flex-col md:flex-row justify-between md:items-end mb-6 border-b pb-4"
+        >
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900">Announcements</h2>
+            <p class="text-gray-600 mt-1">Latest updates and messages</p>
+          </div>
+          <div class="mt-4 md:mt-0">
+            <button
+              x-show="userRole === 'SUPER_ADMIN_APPROVER' || userRole === 'SUPER_ADMIN_REVIEWER'"
+              @click="showCreateModal = true; console.log('📝 Opening create modal')"
+              class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition"
+            >
+              <i class="fas fa-plus mr-2"></i>Create Announcement
+            </button>
+          </div>
+        </div>
+
+        <div x-show="loading" class="text-center py-12">
+          <i class="fas fa-spinner fa-spin text-4xl text-blue-600"></i>
+          <p class="mt-4 text-gray-600">Loading announcements...</p>
+        </div>
+
+        <div x-show="!loading && announcements.length > 0" class="space-y-6">
+          <template
+            x-for="announcement in announcements"
+            :key="announcement.id"
+          >
+            <div
+              class="bg-white rounded-xl shadow-lg border border-gray-100 p-6"
+            >
+              <div class="mb-4">
+                <h3
+                  class="text-xl font-bold text-gray-900 mb-2"
+                  x-text="announcement.title"
+                ></h3>
+                <div class="flex items-center text-sm text-gray-500 mb-4">
+                  <i class="fas fa-user mr-2"></i>
+                  <span
+                    x-text="announcement.createdBy?.name || 'Unknown'"
+                  ></span>
+                  <span class="mx-2">•</span>
+                  <i class="fas fa-calendar mr-2"></i>
+                  <span
+                    x-text="new Date(announcement.createdAt).toLocaleDateString()"
+                  ></span>
+                </div>
+              </div>
+              <div class="prose prose-gray max-w-none">
+                <div x-html="announcement.body"></div>
+              </div>
             </div>
-          </div>
-        </template>
+          </template>
+        </div>
+
+        <div
+          x-show="!loading && announcements.length === 0"
+          class="text-center py-16 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 mt-8"
+        >
+          <i class="fas fa-bullhorn text-6xl text-gray-400 mb-4"></i>
+          <h3 class="text-2xl font-semibold text-gray-700 mb-2">
+            No Announcements Yet
+          </h3>
+          <p class="text-gray-500">
+            Check back later for updates and announcements.
+          </p>
+        </div>
       </div>
 
-      <div x-show="!loading && announcements.length === 0"
-        class="text-center py-16 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 mt-8">
-        <i class="fas fa-bullhorn text-6xl text-gray-400 mb-4"></i>
-        <h3 class="text-2xl font-semibold text-gray-700 mb-2">No Announcements Yet</h3>
-        <p class="text-gray-500">Check back later for updates and announcements.</p>
+      <!-- Create Announcement Modal -->
+      <div
+        x-show="showCreateModal"
+        x-cloak
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        @click.self="showCreateModal = false"
+      >
+        <div class="bg-white rounded-lg p-8 max-w-2xl w-full mx-4">
+          <h3 class="text-2xl font-bold mb-6">Create Announcement</h3>
+
+          <form @submit.prevent="createAnnouncement()">
+            <!-- Title -->
+            <div class="mb-4">
+              <label class="block text-gray-700 font-semibold mb-2"
+                >Title *</label
+              >
+              <input
+                type="text"
+                x-model="newAnnouncement.title"
+                required
+                class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary"
+                placeholder="Enter announcement title"
+              />
+            </div>
+
+            <!-- Body -->
+            <div class="mb-6">
+              <label class="block text-gray-700 font-semibold mb-2"
+                >Message *</label
+              >
+              <div
+                id="announcement-body"
+                class="border border-gray-300 rounded-lg"
+                style="min-height: 200px"
+              ></div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex justify-end space-x-3">
+              <button
+                type="button"
+                @click="showCreateModal = false"
+                class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                :disabled="isButtonDisabled()"
+                class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span x-show="!creating">Create Announcement</span>
+                <span x-show="creating"
+                  ><i class="fas fa-spinner fa-spin mr-2"></i>Creating...</span
+                >
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
 
-    <!-- Create Announcement Modal -->
-    <div x-show="showCreateModal" x-cloak
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-      @click.self="showCreateModal = false">
-      <div class="bg-white rounded-lg p-8 max-w-2xl w-full mx-4">
-        <h3 class="text-2xl font-bold mb-6">Create Announcement</h3>
+    <!-- Quill.js CSS -->
+    <link
+      href="https://cdn.quilljs.com/1.3.6/quill.snow.css"
+      rel="stylesheet"
+    />
+    <!-- Quill.js JS -->
+    <script src="styles/loadNav.js"></script>
+    <script src="styles/authnav.js"></script>
+    <script src="auth.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+      // Global function to update editor content
+      window.updateEditorContent = function (text) {
+        // Find the Alpine component and update editorContent
+        const alpineEl = document.getElementById("general-announcements-app");
+        if (alpineEl && alpineEl._x_dataStack && alpineEl._x_dataStack[0]) {
+          alpineEl._x_dataStack[0].editorContent = text;
+          console.log("📝 Updated editorContent to:", text);
+        }
+      };
 
-        <form @submit.prevent="createAnnouncement()">
-          <!-- Title -->
-          <div class="mb-4">
-            <label class="block text-gray-700 font-semibold mb-2">Title *</label>
-            <input type="text" x-model="newAnnouncement.title" required
-              class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary"
-              placeholder="Enter announcement title" />
-          </div>
+      // Initialize Quill editor
+      let quill;
 
-          <!-- Body -->
-          <div class="mb-6">
-            <label class="block text-gray-700 font-semibold mb-2">Message *</label>
-            <div id="announcement-body" class="border border-gray-300 rounded-lg" style="min-height: 200px;"></div>
-          </div>
+      function initQuill() {
+        const element = document.getElementById("announcement-body");
+        if (element && !quill) {
+          quill = new Quill("#announcement-body", {
+            theme: "snow",
+            placeholder: "Enter the announcement message...",
+            modules: {
+              toolbar: [
+                ["bold", "italic", "underline"],
+                [{ list: "ordered" }, { list: "bullet" }],
+                ["link"],
+                ["clean"],
+              ],
+            },
+          });
 
-          <!-- Buttons -->
-          <div class="flex justify-end space-x-3">
-            <button type="button" @click="showCreateModal = false"
-              class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-              Cancel
-            </button>
-            <button type="submit" :disabled="isButtonDisabled()"
-              class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
-              <span x-show="!creating">Create Announcement</span>
-              <span x-show="creating"><i class="fas fa-spinner fa-spin mr-2"></i>Creating...</span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
+          // Listen for content changes to update Alpine data
+          quill.on("text-change", function (delta, oldDelta, source) {
+            const text = quill.getText().trim();
+            console.log("📝 Quill text-change:", {
+              text,
+              length: text.length,
+              source,
+            });
+            window.updateEditorContent(text);
+          });
 
-  <!-- Quill.js CSS -->
-  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-  <!-- Quill.js JS -->
-  <script src="styles/loadNav.js"></script>
-  <script src="styles/authnav.js"></script>
-  <script src="auth.js"></script>
-  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-  <script>
-    // Global function to update editor content
-    window.updateEditorContent = function (text) {
-      // Find the Alpine component and update editorContent
-      const alpineEl = document.getElementById('general-announcements-app');
-      if (alpineEl && alpineEl._x_dataStack && alpineEl._x_dataStack[0]) {
-        alpineEl._x_dataStack[0].editorContent = text;
-        console.log('📝 Updated editorContent to:', text);
+          // Initialize editorContent
+          const initialText = quill.getText().trim();
+          console.log("📝 Quill initialized with text:", initialText);
+          window.updateEditorContent(initialText);
+        }
       }
-    };
 
-    // Initialize Quill editor
-    let quill;
+      // Try to initialize immediately
+      initQuill();
 
-    function initQuill() {
-      const element = document.getElementById('announcement-body');
-      if (element && !quill) {
-        quill = new Quill('#announcement-body', {
-          theme: 'snow',
-          placeholder: 'Enter the announcement message...',
-          modules: {
-            toolbar: [
-              ['bold', 'italic', 'underline'],
-              [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-              ['link'],
-              ['clean']
-            ]
-          }
-        });
-
-        // Listen for content changes to update Alpine data
-        quill.on('text-change', function (delta, oldDelta, source) {
-          const text = quill.getText().trim();
-          console.log('📝 Quill text-change:', { text, length: text.length, source });
-          window.updateEditorContent(text);
-        });
-
-        // Initialize editorContent
-        const initialText = quill.getText().trim();
-        console.log('📝 Quill initialized with text:', initialText);
-        window.updateEditorContent(initialText);
-      }
-    }
-
-    // Try to initialize immediately
-    initQuill();
-
-    // Also initialize on DOMContentLoaded as fallback
-    document.addEventListener('DOMContentLoaded', initQuill);
-  </script>
-</body>
-
+      // Also initialize on DOMContentLoaded as fallback
+      document.addEventListener("DOMContentLoaded", initQuill);
+    </script>
+  </body>
 </html>
