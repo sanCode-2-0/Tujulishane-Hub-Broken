@@ -669,7 +669,8 @@
 				},
 
 				async deleteMessage(msg) {
-					if (confirm("Are you sure you want to delete this message?")) {
+					const confirmed = await showConfirm("Are you sure you want to delete this message?", "Delete Message", "Delete", "Cancel");
+					if (confirmed) {
 						try {
 							const token = localStorage.getItem("accessToken");
 							const response = await fetch(`${window.BASE_URL}/api/announcements/${this.selectedAnnouncement.id}/messages/${msg.id}`, {
@@ -2821,8 +2822,10 @@
 								].includes(this.userRole)
 							) {
 								console.warn("Access denied. User role:", this.userRole);
-								alert(
-									"Access denied. You do not have permission to access this page."
+								await showAlert(
+									"Access denied. You do not have permission to access this page.",
+									"Access Denied",
+									"error"
 								);
 								window.location.href = "dashboard.html";
 							}
@@ -2902,7 +2905,8 @@
 				},
 
 				async recommendPartnership(partnerId) {
-					if (!confirm("Are you sure you want to recommend this partnership for final approval?")) return;
+					const confirmed = await showConfirm("Are you sure you want to recommend this partnership for final approval?", "Recommend Partnership Link", "Recommend", "Cancel");
+					if (!confirmed) return;
 					this.loading = true;
 					try {
 						await this.apiCall(`/api/auth/admin/partner/${partnerId}/recommend-partnership`, "POST");
@@ -2917,7 +2921,8 @@
 				},
 
 				async approvePartnership(partnerId) {
-					if (!confirm("Are you sure you want to approve this partnership?")) return;
+					const confirmed = await showConfirm("Are you sure you want to approve this partnership?", "Approve Partnership Link", "Approve", "Cancel");
+					if (!confirmed) return;
 					this.loading = true;
 					try {
 						await this.apiCall(`/api/auth/admin/partner/${partnerId}/approve-partnership`, "POST");
@@ -2932,7 +2937,8 @@
 				},
 
 				async rejectPartnership(partnerId) {
-					if (!confirm("Are you sure you want to reject this partnership link request?")) return;
+					const confirmed = await showConfirm("Are you sure you want to reject this partnership link request?", "Reject Partnership Link", "Reject", "Cancel");
+					if (!confirmed) return;
 					this.loading = true;
 					try {
 						await this.apiCall(`/api/auth/admin/partner/${partnerId}/reject-partnership`, "POST");
@@ -3001,16 +3007,17 @@
 							await this.loadThematicAreas();
 						} else {
 							const errorData = await response.json();
-							alert("Error saving thematic area: " + (errorData.message || response.statusText));
+							await showAlert("Error saving thematic area: " + (errorData.message || response.statusText), "Error", "error");
 						}
 					} catch (error) {
 						console.error("Error saving thematic area:", error);
-						alert("Error saving thematic area: " + error.message);
+						await showAlert("Error saving thematic area: " + error.message, "Error", "error");
 					}
 				},
 
 				async deleteThematicArea(theme) {
-					if (!confirm(`Are you sure you want to delete the thematic area '${theme.title}'? This will not delete projects associated with this theme code.`)) {
+					const confirmed = await showConfirm(`Are you sure you want to delete the thematic area '${theme.title}'? This will not delete projects associated with this theme code.`, "Delete Thematic Area", "Delete", "Cancel");
+					if (!confirmed) {
 						return;
 					}
 					try {
@@ -3021,17 +3028,17 @@
 								Authorization: `Bearer ${token}`
 							}
 						});
-
+ 
 						if (response.ok) {
 							this.showToast("Thematic area deleted successfully", "success");
 							await this.loadThematicAreas();
 						} else {
 							const errorData = await response.json();
-							alert("Error deleting thematic area: " + (errorData.message || response.statusText));
+							await showAlert("Error deleting thematic area: " + (errorData.message || response.statusText), "Error", "error");
 						}
 					} catch (error) {
 						console.error("Error deleting thematic area:", error);
-						alert("Error deleting thematic area: " + error.message);
+						await showAlert("Error deleting thematic area: " + error.message, "Error", "error");
 					}
 				},
 
@@ -4147,7 +4154,7 @@
 				URL.revokeObjectURL(url);
 			} catch (error) {
 				console.error("[Download] Error downloading document:", error);
-				alert("Failed to download document. Please try again.");
+				await showAlert("Failed to download document. Please try again.", "Download Error", "error");
 			}
 		};
 	</script>
