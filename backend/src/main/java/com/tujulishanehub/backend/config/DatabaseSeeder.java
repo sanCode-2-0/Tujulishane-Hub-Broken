@@ -7,20 +7,13 @@ import com.tujulishanehub.backend.models.ApprovalStatus;
 import com.tujulishanehub.backend.models.User;
 import com.tujulishanehub.backend.models.Project;
 import com.tujulishanehub.backend.models.ProjectLocation;
-import com.tujulishanehub.backend.models.ProjectThemeAssignment;
-import com.tujulishanehub.backend.models.ProjectCategory;
 import com.tujulishanehub.backend.models.ProjectTheme;
-import com.tujulishanehub.backend.models.ApprovalWorkflowStatus;
 import com.tujulishanehub.backend.models.ReviewerThematicArea;
 import com.tujulishanehub.backend.repositories.UserRepository;
 import com.tujulishanehub.backend.repositories.ProjectRepository;
 import com.tujulishanehub.backend.repositories.ReviewerThematicAreaRepository;
 import com.tujulishanehub.backend.repositories.ThematicAreaDefinitionRepository;
 import com.tujulishanehub.backend.models.ThematicAreaDefinition;
-import com.tujulishanehub.backend.models.GeneralAnnouncement;
-import com.tujulishanehub.backend.repositories.GeneralAnnouncementRepository;
-import com.tujulishanehub.backend.models.ProjectReportDocument;
-import com.tujulishanehub.backend.repositories.ProjectReportDocumentRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -29,11 +22,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
-import java.time.LocalDate;
-import java.math.BigDecimal;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Configuration
 public class DatabaseSeeder {
@@ -55,12 +44,6 @@ public class DatabaseSeeder {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private GeneralAnnouncementRepository generalAnnouncementRepository;
-
-    @Autowired
-    private ProjectReportDocumentRepository projectReportDocumentRepository;
-
-    @Autowired
     private org.springframework.transaction.PlatformTransactionManager transactionManager;
 
     @Bean
@@ -73,241 +56,23 @@ public class DatabaseSeeder {
             
             String defaultPassword = passwordEncoder.encode("Password@123");
 
-            // 1. Braine Strathmore (PARTNER)
-            User brainePartner = seedUser("braine.kapolon@strathmore.edu", "Braine Strathmore", User.Role.PARTNER, defaultPassword);
-
-            // 2. Lomogan Reviewer (SUPER_ADMIN_REVIEWER)
+            // Lomogan Reviewer (SUPER_ADMIN_REVIEWER)
             User lomoganReviewer = seedUser("lomogantech@gmail.com", "Lomogan Reviewer", User.Role.SUPER_ADMIN_REVIEWER, defaultPassword);
 
-            // 3. Keegan Kariuki (SUPER_ADMIN_APPROVER)
+            // Keegan Kariuki (SUPER_ADMIN_APPROVER)
             User keeganApprover = seedUser("kariukikeegan@gmail.com", "Keegan Kariuki", User.Role.SUPER_ADMIN_APPROVER, defaultPassword);
 
-            // 4. Braine Kapolon (SUPER_ADMIN_APPROVER)
+            // Braine Kapolon (SUPER_ADMIN_APPROVER)
             User braineApprover = seedUser("kapolonbraine@gmail.com", "Braine Kapolon", User.Role.SUPER_ADMIN_APPROVER, defaultPassword);
 
-            // 5. Test Donor (DONOR)
-            User testDonor = seedUser("donor.test@gmail.com", "Test Donor", User.Role.DONOR, defaultPassword);
-
-            // 6. Partner linked to the test donor (for donor visibility testing)
-            User donorLinkedPartner = seedUser("partner.donorlinked@gmail.com", "Donor Linked Partner", User.Role.PARTNER, defaultPassword);
-            if (donorLinkedPartner != null && testDonor != null && donorLinkedPartner.getParentDonor() == null) {
-                donorLinkedPartner.setParentDonor(testDonor);
-                donorLinkedPartner.setPartnershipApprovalStatus(ApprovalStatus.APPROVED);
-                donorLinkedPartner.setPartnershipWorkflowStatus(ApprovalWorkflowStatus.APPROVED);
-                userRepository.save(donorLinkedPartner);
-                logger.info("Linked partner {} to donor: {} as APPROVED", donorLinkedPartner.getEmail(), testDonor.getEmail());
-            }
-
-            // Seed a pending partnership link request for review (awaiting MoH Reviewer)
-            if (brainePartner != null && testDonor != null && brainePartner.getParentDonor() == null) {
-                brainePartner.setParentDonor(testDonor);
-                brainePartner.setThematicArea(ProjectTheme.MNH);
-                brainePartner.setPartnershipApprovalStatus(ApprovalStatus.PENDING);
-                brainePartner.setPartnershipWorkflowStatus(ApprovalWorkflowStatus.PENDING_REVIEW);
-                brainePartner.setPartnershipEndDate(LocalDate.now().plusYears(1));
-                brainePartner.setPartnershipDescription("Joint maternal healthcare initiative focused on county referral clinics and Dagoretti subcounty health centers.");
-                userRepository.save(brainePartner);
-                logger.info("Linked partner {} to donor: {} as PENDING_REVIEW", brainePartner.getEmail(), testDonor.getEmail());
-            }
-
-            // Seed a pending partnership link request awaiting final approval (awaiting MoH Approver)
-            User pendingApprovalPartner = seedUser("partner.pendingapproval@gmail.com", "Adolescent Health Initiative", User.Role.PARTNER, defaultPassword);
-            if (pendingApprovalPartner != null && testDonor != null && pendingApprovalPartner.getParentDonor() == null) {
-                pendingApprovalPartner.setParentDonor(testDonor);
-                pendingApprovalPartner.setThematicArea(ProjectTheme.AYPSRH);
-                pendingApprovalPartner.setPartnershipApprovalStatus(ApprovalStatus.PENDING);
-                pendingApprovalPartner.setPartnershipWorkflowStatus(ApprovalWorkflowStatus.PENDING_FINAL_APPROVAL);
-                pendingApprovalPartner.setPartnershipEndDate(LocalDate.now().plusMonths(6));
-                pendingApprovalPartner.setPartnershipDescription("Adolescent health outreach targeting high schools and community support services.");
-                userRepository.save(pendingApprovalPartner);
-                logger.info("Linked partner {} to donor: {} as PENDING_FINAL_APPROVAL", pendingApprovalPartner.getEmail(), testDonor.getEmail());
-            }
+            // Hubert Manduku (SUPER_ADMIN_APPROVER)
+            User hubertApprover = seedUser("hubertmanduku@gmail.com", "Hubert Manduku", User.Role.SUPER_ADMIN_APPROVER, defaultPassword);
 
             // Seed reviewer thematic area assignments
             if (lomoganReviewer != null) {
                 seedReviewerTheme(lomoganReviewer, ProjectTheme.MNH);
                 seedReviewerTheme(lomoganReviewer, ProjectTheme.AYPSRH);
                 seedReviewerTheme(lomoganReviewer, ProjectTheme.FP);
-            }
-
-            // Seed projects by the Partner user
-            if (brainePartner != null) {
-                // Project 1: Approved & Active
-                seedProject(
-                    "braine.kapolon@strathmore.edu",
-                    "Maternal Health Outreach Initiative",
-                    "PRJ-001",
-                    ProjectCategory.IMPLEMENTING,
-                    LocalDate.of(2026, 1, 1),
-                    LocalDate.of(2026, 12, 31),
-                    "Community outreach, maternal care training",
-                    new BigDecimal("5000000.00"),
-                    "active",
-                    ApprovalStatus.APPROVED,
-                    ApprovalWorkflowStatus.APPROVED,
-                    ProjectTheme.MNH,
-                    new LocationData[] {
-                        new LocationData("Nairobi", "Dagoretti North", "Dagoretti Area, Nairobi", -1.2841, 36.7623),
-                        new LocationData("Nairobi", "Kibra", "Kibera Clinic, Nairobi", -1.3122, 36.7865)
-                    }
-                );
-
-                // Project 2: Pending Review
-                seedProject(
-                    "braine.kapolon@strathmore.edu",
-                    "Adolescent SRH Education Program",
-                    "PRJ-002",
-                    ProjectCategory.RESEARCH,
-                    LocalDate.of(2026, 6, 1),
-                    LocalDate.of(2027, 5, 31),
-                    "School workshops, clinical service links",
-                    new BigDecimal("3500000.00"),
-                    "pending",
-                    ApprovalStatus.PENDING,
-                    ApprovalWorkflowStatus.PENDING_REVIEW,
-                    ProjectTheme.AYPSRH,
-                    new LocationData[] {
-                        new LocationData("Mombasa", "Nyali", "Nyali Community Centre, Mombasa", -4.0435, 39.7042)
-                    }
-                );
-
-                // Project 3: Pending Final Approval
-                seedProject(
-                    "braine.kapolon@strathmore.edu",
-                    "Family Planning Expansion Project",
-                    "PRJ-003",
-                    ProjectCategory.IMPLEMENTING,
-                    LocalDate.of(2026, 3, 15),
-                    LocalDate.of(2026, 9, 15),
-                    "Contraceptive distribution, provider training",
-                    new BigDecimal("7200000.00"),
-                    "active",
-                    ApprovalStatus.PENDING,
-                    ApprovalWorkflowStatus.PENDING_FINAL_APPROVAL,
-                    ProjectTheme.FP,
-                    new LocationData[] {
-                        new LocationData("Kisumu", "Kisumu Central", "Kisumu Referral Hospital", -0.0917, 34.7680)
-                    }
-                );
-            }
-
-            // Seed projects owned by the donor-linked partner (visible to the donor in My Projects)
-            if (donorLinkedPartner != null) {
-                // Project 1: Approved & Active
-                seedProject(
-                    "partner.donorlinked@gmail.com",
-                    "Donor Funded Child Health Program",
-                    "PRJ-004",
-                    ProjectCategory.IMPLEMENTING,
-                    LocalDate.of(2026, 2, 1),
-                    LocalDate.of(2026, 11, 30),
-                    "Child vaccination drives, nutrition outreach",
-                    new BigDecimal("8500000.00"),
-                    "active",
-                    ApprovalStatus.APPROVED,
-                    ApprovalWorkflowStatus.APPROVED,
-                    ProjectTheme.CH,
-                    new LocationData[] {
-                        new LocationData("Nairobi", "Embakasi East", "Embakasi Health Centre", -1.3150, 36.8900)
-                    }
-                );
-
-                // Project 2: Pending
-                seedProject(
-                    "partner.donorlinked@gmail.com",
-                    "Donor Funded Maternal Nutrition Research",
-                    "PRJ-005",
-                    ProjectCategory.RESEARCH,
-                    LocalDate.of(2026, 5, 1),
-                    LocalDate.of(2026, 12, 31),
-                    "Maternal nutrition studies, evidence generation",
-                    new BigDecimal("4200000.00"),
-                    "pending",
-                    ApprovalStatus.PENDING,
-                    ApprovalWorkflowStatus.PENDING_REVIEW,
-                    ProjectTheme.MNH,
-                    new LocationData[] {
-                        new LocationData("Kilifi", "Kilifi North", "Kilifi County Hospital", -3.6300, 39.8500)
-                    }
-                );
-
-                // Project 3: Stalled
-                seedProject(
-                    "partner.donorlinked@gmail.com",
-                    "Donor Funded Adolescent Wellness Initiative",
-                    "PRJ-006",
-                    ProjectCategory.IMPLEMENTING,
-                    LocalDate.of(2026, 3, 1),
-                    LocalDate.of(2026, 9, 30),
-                    "Adolescent mental wellness workshops",
-                    new BigDecimal("1500000.00"),
-                    "stalled",
-                    ApprovalStatus.APPROVED,
-                    ApprovalWorkflowStatus.APPROVED,
-                    ProjectTheme.AYPSRH,
-                    new LocationData[] {
-                        new LocationData("Mombasa", "Mvita", "Mombasa Community Hall", -4.0500, 39.6700)
-                    }
-                );
-
-                // Project 4: Completed
-                seedProject(
-                    "partner.donorlinked@gmail.com",
-                    "Donor Funded Family Planning Campaign",
-                    "PRJ-008",
-                    ProjectCategory.IMPLEMENTING,
-                    LocalDate.of(2026, 1, 15),
-                    LocalDate.of(2026, 6, 15),
-                    "Contraception awareness and service provision",
-                    new BigDecimal("6000000.00"),
-                    "completed",
-                    ApprovalStatus.APPROVED,
-                    ApprovalWorkflowStatus.APPROVED,
-                    ProjectTheme.FP,
-                    new LocationData[] {
-                        new LocationData("Kisumu", "Kisumu Central", "Kisumu Health Clinic", -0.1000, 34.7500)
-                    }
-                );
-
-                // Seed report document for the completed project (PRJ-008)
-                java.util.Optional<Project> completedProjOpt = projectRepository.findByProjectNo("PRJ-008");
-                if (completedProjOpt.isPresent()) {
-                    Project completedProj = completedProjOpt.get();
-                    boolean reportExists = projectReportDocumentRepository.findByProjectId(completedProj.getId()).stream()
-                        .anyMatch(doc -> "Quarterly_Progress_Report_Q2.pdf".equals(doc.getFileName()));
-                    if (!reportExists) {
-                        ProjectReportDocument reportDoc = new ProjectReportDocument();
-                        reportDoc.setFileName("Quarterly_Progress_Report_Q2.pdf");
-                        reportDoc.setFileType("application/pdf");
-                        reportDoc.setFileSize(153600L); // 150 KB
-                        reportDoc.setData(new byte[100]); // dummy data
-                        reportDoc.setProject(completedProj);
-                        reportDoc.setUploadedBy("partner.donorlinked@gmail.com");
-                        reportDoc.setUploadedAt(LocalDateTime.now());
-                        projectReportDocumentRepository.save(reportDoc);
-                        
-                        completedProj.setHasReports(true);
-                        projectRepository.save(completedProj);
-                        logger.info("Seeded progress report document for project: {}", completedProj.getTitle());
-                    }
-                }
-            }
-
-            // Seed general announcements matching the design mockup
-            if (generalAnnouncementRepository.count() == 0 && braineApprover != null) {
-                GeneralAnnouncement a1 = new GeneralAnnouncement();
-                a1.setTitle("RMNCAH Multi-Sectoral Alignment Meeting");
-                a1.setBody("Stakeholder meeting scheduled to align on reproductive and maternal health interventions.");
-                a1.setCreatedBy(braineApprover);
-                generalAnnouncementRepository.save(a1);
-
-                GeneralAnnouncement a2 = new GeneralAnnouncement();
-                a2.setTitle("Updated Project Reporting Guidelines");
-                a2.setBody("Quarterly progress and financial reporting templates have been updated for 2026.");
-                a2.setCreatedBy(braineApprover);
-                generalAnnouncementRepository.save(a2);
-
-                logger.info("Seeded 2 general announcements");
             }
 
             // Backfill county for any existing projects where county is missing or 'Kenya'
@@ -389,80 +154,6 @@ public class DatabaseSeeder {
         }
     }
 
-    private void seedProject(
-        String partnerEmail,
-        String title,
-        String projectNo,
-        ProjectCategory category,
-        LocalDate startDate,
-        LocalDate endDate,
-        String activityType,
-        BigDecimal budget,
-        String status,
-        ApprovalStatus approvalStatus,
-        ApprovalWorkflowStatus workflowStatus,
-        ProjectTheme theme,
-        LocationData[] locationsData
-    ) {
-        if (projectRepository.findByProjectNo(projectNo).isEmpty()) {
-            Project project = new Project();
-            project.setPartner(partnerEmail);
-            project.setTitle(title);
-            project.setProjectNo(projectNo);
-            project.setProjectCategory(category);
-            project.setStartDate(startDate);
-            project.setEndDate(endDate);
-            project.setActivityType(activityType);
-            project.setBudget(budget);
-            project.setStatus(status);
-            project.setApprovalStatus(approvalStatus);
-            project.setApprovalWorkflowStatus(workflowStatus);
-            project.setObjectives("Objectives for " + title);
-            project.setContactPersonName("Contact Person");
-            project.setContactPersonRole("Manager");
-            project.setContactPersonEmail(partnerEmail);
-            project.setCreatedAt(LocalDateTime.now());
-            project.setUpdatedAt(LocalDateTime.now());
-
-            if (workflowStatus == ApprovalWorkflowStatus.APPROVED) {
-                project.setApprovedAt(LocalDateTime.now());
-                project.setApprovedBy(1L);
-            }
-
-            // Set themes
-            Set<ProjectThemeAssignment> themes = new HashSet<>();
-            ProjectThemeAssignment themeAss = new ProjectThemeAssignment();
-            themeAss.setProject(project);
-            themeAss.setProjectTheme(theme);
-            themeAss.setAssignedAt(LocalDateTime.now());
-            themes.add(themeAss);
-            project.setThemes(themes);
-
-            // Set locations
-            Set<ProjectLocation> locations = new HashSet<>();
-            for (LocationData locData : locationsData) {
-                ProjectLocation loc = new ProjectLocation();
-                loc.setProject(project);
-                loc.setCounty(locData.county);
-                loc.setSubCounty(locData.subCounty);
-                loc.setMapsAddress(locData.mapsAddress);
-                loc.setLatitude(locData.latitude);
-                loc.setLongitude(locData.longitude);
-                loc.setCreatedAt(LocalDateTime.now());
-                locations.add(loc);
-            }
-            project.setLocations(locations);
-            if (locationsData != null && locationsData.length > 0 && locationsData[0].county != null) {
-                project.setCounty(locationsData[0].county);
-            }
-
-            projectRepository.save(project);
-            logger.info("Seeded project: {} with number: {}", title, projectNo);
-        } else {
-            logger.info("Project already exists with number: {}", projectNo);
-        }
-    }
-
     private void seedThematicAreas() {
         if (thematicAreaDefinitionRepository.count() == 0) {
             logger.info("Seeding thematic area definitions...");
@@ -487,21 +178,5 @@ public class DatabaseSeeder {
         def.setColor(color);
         thematicAreaDefinitionRepository.save(def);
         logger.info("Seeded thematic area: {} ({})", title, code);
-    }
-
-    private static class LocationData {
-        String county;
-        String subCounty;
-        String mapsAddress;
-        double latitude;
-        double longitude;
-
-        LocationData(String county, String subCounty, String mapsAddress, double latitude, double longitude) {
-            this.county = county;
-            this.subCounty = subCounty;
-            this.mapsAddress = mapsAddress;
-            this.latitude = latitude;
-            this.longitude = longitude;
-        }
     }
 }
