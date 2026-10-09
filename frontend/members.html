@@ -908,8 +908,10 @@
 									<select name="role" required
 										class="block w-full py-2 mt-1 border-gray-600 rounded-sm shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
 										<option value="">Select Role...</option>
-										<option>Super Admin</option>
-										<option>Ei</option>
+										<option value="SUPER_ADMIN_APPROVER">Super Admin Approver</option>
+										<option value="SUPER_ADMIN_REVIEWER">Super Admin Reviewer</option>
+										<option value="PARTNER">Partner</option>
+										<option value="DONOR">Donor</option>
 									</select>
 								</div>
 
@@ -1194,7 +1196,6 @@
 									class="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
 									onchange="toggleThematicAreaField()">
 									<option value="">-- Select Role --</option>
-									<option value="SUPER_ADMIN">Super Admin</option>
 									<option value="SUPER_ADMIN_APPROVER">
 										Super Admin Approver
 									</option>
