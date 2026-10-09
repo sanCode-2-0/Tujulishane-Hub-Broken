@@ -97,55 +97,62 @@
 
 <body class="text-gray-800">
   <div class="" id="nav-placeholder"></div>
-  <section class="relative z-0 overflow-hidden" id="top">
-    <div class="w-full overflow-hidden">
-      <div x-data="{
-						activeSlide: 0,
-						media: [
-						{ type: 'image', src: 'resources/images/main-1.jpg' },
-						{ type: 'image', src: 'resources/images/main-2.jpg' },
-						{ type: 'image', src: 'resources/images/main-3.jpg' }
-						]
-					}" x-init="setInterval(() => { activeSlide = (activeSlide + 1) % media.length }, 7000)"
-        class="relative w-full min-h-[90vh] md:min-h-[60vh] flex flex-col justify-end">
-        <!-- Background Image Carousel with Zoom + Fade -->
-        <template x-for="(item, index) in media" :key="index">
-          <div class="absolute inset-0 transition-all duration-1000 ease-in-out overflow-hidden" :class="{
-							'opacity-100 z-0': activeSlide === index,
-							'opacity-0 z-0 pointer-events-none': activeSlide !== index
-						}">
-            <img :src="item.src" alt="Slide Image"
-              class="w-full h-full object-cover object-center transition-transform duration-[7000ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
-              :class="activeSlide === index ? 'scale-105' : 'scale-100'" />
-          </div>
-        </template>
-
-        <!-- Overlay -->
-        <div class="absolute inset-0 bg-black bg-opacity-50 z-10"></div>
-
-        <!-- Bottom Content Section -->
-        <div class="relative z-20 w-full pt-16 sm:pt-0">
-          <div class="mx-8 text-white px-4">
-            <a href="#" class="text-xs font-semibold uppercase tracking-wide mb-2 block">
-              Ministry of Health
-            </a>
-            <h1 class="text-3xl sm:text-4xl font-semibold mb-4">
-              <span class="tracking-wide">RMNCAH</span> Frequently Asked
-              Questions (<span class="font-normal px-2">F A Q's</span>)
-            </h1>
-            <p class="text-base sm:text-base mb-6 max-w-4xl">
-              Find answers to the most common questions related to RMNCAH
-              Coordination Hub.
-            </p>
-          </div>
-
-          <!-- Search and Stats Section -->
-          
-        </div>
-        <!-- end bottom section -->
+  <!-- Hero Header -->
+  <header
+    style="
+      background: linear-gradient(
+        135deg,
+        #0f172a 0%,
+        #1e3a8a 50%,
+        #1e1b4b 100%
+      );
+      color: #ffffff;
+    "
+    class="py-16 px-6 lg:px-12 shadow-lg"
+    id="top"
+  >
+    <div
+      class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8"
+    >
+      <div class="space-y-4 text-center md:text-left">
+        <span
+          style="background-color: rgba(255, 255, 255, 0.15); color: #bfdbfe"
+          class="text-xs font-semibold px-3.5 py-1.5 rounded-full uppercase tracking-wider inline-block"
+        >
+          Frequently Asked Questions
+        </span>
+        <h1
+          style="color: #ffffff"
+          class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight"
+        >
+          RMNCAH FAQs &amp; Help Center
+        </h1>
+        <p style="color: #e0f2fe" class="text-base sm:text-lg max-w-2xl">
+          Find answers to the most common questions related to RMNCAH Coordination Hub, platform access, and technical support.
+        </p>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <a
+          href="guide.html"
+          style="background-color: #ffffff; color: #1e3a8a"
+          class="px-6 py-3 font-bold rounded-lg shadow hover:bg-gray-100 transition text-center text-sm inline-flex items-center justify-center"
+        >
+          <i class="fas fa-book mr-2"></i>User Guide
+        </a>
+        <a
+          href="index-post-login.html"
+          style="
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+          "
+          class="px-6 py-3 font-semibold rounded-lg shadow transition text-center text-sm inline-flex items-center justify-center hover:bg-white/20"
+        >
+          <i class="fas fa-columns mr-2"></i>Go to Home Page
+        </a>
       </div>
     </div>
-  </section>
+  </header>
 
   <section class="px-4">
     <div class="py-4 bg-white">

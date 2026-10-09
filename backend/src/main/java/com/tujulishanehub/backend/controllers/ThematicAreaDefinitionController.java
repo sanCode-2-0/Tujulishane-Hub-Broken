@@ -40,7 +40,7 @@ public class ThematicAreaDefinitionController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('SUPER_ADMIN_APPROVER')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN_APPROVER', 'SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<ApiResponse<ThematicAreaDefinition>> createThematicArea(@RequestBody ThematicAreaDefinition area) {
         try {
             if (area.getCode() == null || area.getCode().trim().isEmpty()) {
@@ -85,7 +85,7 @@ public class ThematicAreaDefinitionController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('SUPER_ADMIN_APPROVER')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN_APPROVER', 'SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<ApiResponse<ThematicAreaDefinition>> updateThematicArea(
             @PathVariable Long id,
             @RequestBody ThematicAreaDefinition updatedArea
@@ -146,7 +146,7 @@ public class ThematicAreaDefinitionController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('SUPER_ADMIN_APPROVER')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN_APPROVER', 'SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteThematicArea(@PathVariable Long id) {
         try {
             if (!repository.existsById(id)) {

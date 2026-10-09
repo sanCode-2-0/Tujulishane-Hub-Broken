@@ -35,6 +35,382 @@ function formatBudget(value) {
     return 'KES ' + val.toLocaleString();
 }
 
+// =============================================================================
+// --- Standard Thematic Area Definitions & Normalizer ---
+// =============================================================================
+const THEME_DEFINITIONS = [
+    {
+        code: "MNH",
+        displayName: "Maternal & Newborn Health",
+        aliases: ["mnh", "maternity and newborn health", "maternal and newborn health", "maternal & newborn health", "maternal health", "newborn health", "maternal care"]
+    },
+    {
+        code: "FP",
+        displayName: "Family Planning",
+        aliases: ["fp", "family planning", "contraception", "contraceptive", "reproductive choices"]
+    },
+    {
+        code: "AYPSRH",
+        displayName: "Adolescent & Youth SRH",
+        aliases: ["aypsrh", "ayp-srh", "adolescent & youth srh", "adolescent and young people sexual and reproductive health", "adolescent and youth sexual and reproductive health", "adolescent srh", "youth srh", "srh", "adolescent & youth"]
+    },
+    {
+        code: "GBV",
+        displayName: "Gender-Based Violence",
+        aliases: ["gbv", "gender-based violence", "gender based violence", "gender violence", "gbv prevention"]
+    },
+    {
+        code: "CH",
+        displayName: "Child Health",
+        aliases: ["ch", "child health", "child healthcare", "pediatric health", "pediatrics", "vaccination", "nutrition"]
+    },
+    {
+        code: "AH",
+        displayName: "Adolescent Health",
+        aliases: ["ah", "adolescent health", "adolescent wellness", "adolescent mental wellness"]
+    },
+    {
+        code: "ADV_SBC",
+        displayName: "Advocacy & SBC",
+        aliases: ["adv_sbc", "adv-sbc", "advsbc", "advocacy and sbc", "advocacy and sbc (social & behavior change)", "advocacy & sbc", "advocacy & sbc (social & behavior change)", "advocacy", "sbc", "social and behavior change"]
+    },
+    {
+        code: "MONITORING_EVALUATION",
+        displayName: "Monitoring & Evaluation",
+        aliases: ["monitoring_evaluation", "monitoring evaluation", "monitoring and evaluation", "monitoring & evaluation", "m&e", "m & e", "me"]
+    },
+    {
+        code: "RESEARCH_LEARNING",
+        displayName: "Research & Learning",
+        aliases: ["research_learning", "research learning", "research and learning", "research & learning", "r&l", "r & l", "research"]
+    }
+];
+
+// Map raw thematic area codes/names to concise user-friendly display names
+function getThemeDisplayName(theme) {
+    if (!theme) return 'Other';
+    
+    // If an object was passed, extract code or name
+    if (typeof theme === 'object') {
+        theme = theme.code || theme.name || theme.title || theme.displayName || theme.projectTheme || '';
+    }
+    if (typeof theme !== 'string') return 'Other';
+    
+    const cleanTheme = theme.trim().toLowerCase();
+    if (!cleanTheme) return 'Other';
+
+    for (const def of THEME_DEFINITIONS) {
+        if (def.code.toLowerCase() === cleanTheme) return def.displayName;
+        if (def.displayName.toLowerCase() === cleanTheme) return def.displayName;
+        if (def.aliases.some(a => a === cleanTheme || cleanTheme.includes(a))) {
+            return def.displayName;
+        }
+    }
+
+    // Capitalize words if unknown
+    return theme.trim()
+        .replace(/_/g, ' ')
+        .split(' ')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(' ');
+}
+
+// Extract all valid, normalized thematic areas from a project object
+function getProjectThemes(p) {
+    if (!p) return ['Other'];
+    const themes = [];
+
+    // Helper to safely inspect and push
+    const addTheme = (val) => {
+        if (!val) return;
+        if (typeof val === 'string') {
+            // Check if it's a JSON array string
+            if (val.startsWith('[') && val.endsWith(']')) {
+                try {
+                    const parsed = JSON.parse(val);
+                    if (Array.isArray(parsed)) {
+                        parsed.forEach(item => addTheme(item));
+                        return;
+                    }
+                } catch (e) {}
+            }
+            // Split comma-separated values if any
+            if (val.includes(',')) {
+                val.split(',').forEach(item => addTheme(item.trim()));
+                return;
+            }
+            themes.push(getThemeDisplayName(val));
+        } else if (typeof val === 'object') {
+            const codeOrName = val.code || val.name || val.title || val.displayName || val.projectTheme;
+            if (codeOrName) {
+                themes.push(getThemeDisplayName(codeOrName));
+            }
+        }
+    };
+
+    if (Array.isArray(p.themes) && p.themes.length > 0) {
+        p.themes.forEach(t => addTheme(t));
+    }
+    if (Array.isArray(p.thematicAreas) && p.thematicAreas.length > 0) {
+        p.thematicAreas.forEach(t => addTheme(t));
+    }
+    if (p.thematicArea) addTheme(p.thematicArea);
+    if (p.projectTheme) addTheme(p.projectTheme);
+    if (p.thematic_area) addTheme(p.thematic_area);
+
+    // Fallback: title analysis if still no themes resolved
+    if (themes.length === 0 && (p.title || p.projectName)) {
+        const titleText = (p.title || p.projectName).toLowerCase();
+        for (const def of THEME_DEFINITIONS) {
+            if (def.aliases.some(a => a.length > 3 && titleText.includes(a))) {
+                themes.push(def.displayName);
+                break;
+            }
+        }
+    }
+
+    const unique = [...new Set(themes.filter(t => t && t !== 'Other'))];
+    return unique.length > 0 ? unique : ['Other'];
+}
+
+// =============================================================================
+// --- Standard Kenya 47-County Definitions & Normalizer ---
+// =============================================================================
+const KENYA_COUNTIES = [
+    "Baringo", "Bomet", "Bungoma", "Busia", "Elgeyo-Marakwet", "Embu", "Garissa", "Homa Bay",
+    "Isiolo", "Kajiado", "Kakamega", "Kericho", "Kiambu", "Kilifi", "Kirinyaga", "Kisii",
+    "Kisumu", "Kitui", "Kwale", "Laikipia", "Lamu", "Machakos", "Makueni", "Mandera",
+    "Marsabit", "Meru", "Migori", "Mombasa", "Murang'a", "Nairobi", "Nakuru", "Nandi",
+    "Narok", "Nyamira", "Nyandarua", "Nyeri", "Samburu", "Siaya", "Taita-Taveta",
+    "Tana River", "Tharaka-Nithi", "Trans Nzoia", "Turkana", "Uasin Gishu", "Vihiga", "Wajir", "West Pokot"
+];
+
+// Alias and normalization map
+const COUNTY_ALIASES = {
+    "taita taveta": "Taita-Taveta",
+    "taita-taveta": "Taita-Taveta",
+    "taita/taveta": "Taita-Taveta",
+    "tharaka nithi": "Tharaka-Nithi",
+    "tharaka-nithi": "Tharaka-Nithi",
+    "tharaka/nithi": "Tharaka-Nithi",
+    "elgeyo marakwet": "Elgeyo-Marakwet",
+    "elgeyo-marakwet": "Elgeyo-Marakwet",
+    "elgeyo/marakwet": "Elgeyo-Marakwet",
+    "keiyo marakwet": "Elgeyo-Marakwet",
+    "muranga": "Murang'a",
+    "murang'a": "Murang'a",
+    "homa bay": "Homa Bay",
+    "homabay": "Homa Bay",
+    "homa-bay": "Homa Bay",
+    "trans nzoia": "Trans Nzoia",
+    "trans-nzoia": "Trans Nzoia",
+    "transnzoia": "Trans Nzoia",
+    "uasin gishu": "Uasin Gishu",
+    "uasingishu": "Uasin Gishu",
+    "uasin-gishu": "Uasin Gishu",
+    "west pokot": "West Pokot",
+    "westpokot": "West Pokot",
+    "west-pokot": "West Pokot",
+    "tana river": "Tana River",
+    "tanariver": "Tana River",
+    "tana-river": "Tana River",
+    "nairobi city": "Nairobi",
+    "nairobi": "Nairobi"
+};
+
+// Known Kenyan sub-county reverse mapping to county
+const SUBCOUNTY_TO_COUNTY = {
+    "nyali": "Mombasa", "changamwe": "Mombasa", "jomvu": "Mombasa", "kisauni": "Mombasa", "likoni": "Mombasa", "mvita": "Mombasa",
+    "kinango": "Kwale", "lunga lunga": "Kwale", "msambweni": "Kwale", "matuga": "Kwale",
+    "ganze": "Kilifi", "kaloleni": "Kilifi", "kilifi north": "Kilifi", "kilifi south": "Kilifi", "magarini": "Kilifi", "malindi": "Kilifi", "rabai": "Kilifi",
+    "mwatate": "Taita-Taveta", "taveta": "Taita-Taveta", "voi": "Taita-Taveta", "wundanyi": "Taita-Taveta",
+    "daab": "Garissa", "fafi": "Garissa", "garissa township": "Garissa", "hulugho": "Garissa", "ijara": "Garissa", "lagdera": "Garissa", "balambala": "Garissa",
+    "eldas": "Wajir", "tarbaj": "Wajir", "wajir east": "Wajir", "wajir north": "Wajir", "wajir south": "Wajir", "wajir west": "Wajir",
+    "mandera east": "Mandera", "mandera north": "Mandera", "mandera south": "Mandera", "mandera west": "Mandera", "lafey": "Mandera", "banissa": "Mandera",
+    "moyale": "Marsabit", "north horr": "Marsabit", "saku": "Marsabit", "laisamis": "Marsabit",
+    "isiolo": "Isiolo", "merti": "Isiolo", "garbatulla": "Isiolo",
+    "buuri": "Meru", "igembe central": "Meru", "igembe north": "Meru", "igembe south": "Meru", "imenti central": "Meru", "imenti north": "Meru", "imenti south": "Meru", "tigania east": "Meru", "tigania west": "Meru",
+    "chuka": "Tharaka-Nithi", "igambang'ombe": "Tharaka-Nithi", "maara": "Tharaka-Nithi", "tharaka north": "Tharaka-Nithi", "tharaka south": "Tharaka-Nithi",
+    "manyatta": "Embu", "runyenjes": "Embu", "mbeere north": "Embu", "mbeere south": "Embu",
+    "kitui central": "Kitui", "kitui east": "Kitui", "kitui rural": "Kitui", "kitui south": "Kitui", "kitui west": "Kitui", "mwingi central": "Kitui", "mwingi north": "Kitui", "mwingi west": "Kitui",
+    "machakos town": "Machakos", "mavoko": "Machakos", "mwala": "Machakos", "yatta": "Machakos", "kangundo": "Machakos", "matungulu": "Machakos", "kathiani": "Machakos", "masinga": "Machakos",
+    "kaiti": "Makueni", "kibwezi east": "Makueni", "kibwezi west": "Makueni", "kilome": "Makueni", "makueni": "Makueni", "mbooni": "Makueni",
+    "kinangop": "Nyandarua", "kipipiri": "Nyandarua", "ol kalou": "Nyandarua", "ol jorok": "Nyandarua", "ndaragwa": "Nyandarua",
+    "tetu": "Nyeri", "kieni": "Nyeri", "mathira": "Nyeri", "othaya": "Nyeri", "mukurweini": "Nyeri", "nyeri town": "Nyeri",
+    "mwea": "Kirinyaga", "gichugu": "Kirinyaga", "ndia": "Kirinyaga", "kirinyaga central": "Kirinyaga",
+    "gatanga": "Murang'a", "kandara": "Murang'a", "kangema": "Murang'a", "kigumo": "Murang'a", "kiharu": "Murang'a", "maragua": "Murang'a", "mathioya": "Murang'a",
+    "gatundu north": "Kiambu", "gatundu south": "Kiambu", "githunguri": "Kiambu", "juja": "Kiambu", "kabete": "Kiambu", "kiambaa": "Kiambu", "kiambu": "Kiambu", "kikuyu": "Kiambu", "limuru": "Kiambu", "ruiru": "Kiambu", "thika town": "Kiambu", "lari": "Kiambu",
+    "turkana central": "Turkana", "turkana east": "Turkana", "turkana north": "Turkana", "turkana south": "Turkana", "turkana west": "Turkana", "loima": "Turkana",
+    "kapenguria": "West Pokot", "sigor": "West Pokot", "kachaliba": "West Pokot", "pokot south": "West Pokot",
+    "samburu east": "Samburu", "samburu north": "Samburu", "samburu west": "Samburu",
+    "cherangany": "Trans Nzoia", "endebess": "Trans Nzoia", "kiminini": "Trans Nzoia", "kwanza": "Trans Nzoia", "saboti": "Trans Nzoia",
+    "ainabkoi": "Uasin Gishu", "kapseret": "Uasin Gishu", "kesses": "Uasin Gishu", "moiben": "Uasin Gishu", "soy": "Uasin Gishu", "turbo": "Uasin Gishu",
+    "keiyo north": "Elgeyo-Marakwet", "keiyo south": "Elgeyo-Marakwet", "marakwet east": "Elgeyo-Marakwet", "marakwet west": "Elgeyo-Marakwet",
+    "aldai": "Nandi", "chesumei": "Nandi", "emgwen": "Nandi", "mosop": "Nandi", "nandi hills": "Nandi", "tinderet": "Nandi",
+    "baringo central": "Baringo", "baringo north": "Baringo", "baringo south": "Baringo", "mogotio": "Baringo", "elama": "Baringo", "tiaty": "Baringo",
+    "laikipia east": "Laikipia", "laikipia north": "Laikipia", "laikipia west": "Laikipia",
+    "gilgil": "Nakuru", "kuresoi north": "Nakuru", "kuresoi south": "Nakuru", "molo": "Nakuru", "naivasha": "Nakuru", "nakuru town east": "Nakuru", "nakuru town west": "Nakuru", "njoro": "Nakuru", "rongai": "Nakuru", "subukia": "Nakuru", "bahati": "Nakuru",
+    "kilgoris": "Narok", "emurua dikirr": "Narok", "narok east": "Narok", "narok north": "Narok", "narok south": "Narok", "narok west": "Narok",
+    "kajiado central": "Kajiado", "kajiado east": "Kajiado", "kajiado north": "Kajiado", "kajiado south": "Kajiado", "kajiado west": "Kajiado",
+    "ainamoi": "Kericho", "belgut": "Kericho", "bureti": "Kericho", "kipkelion east": "Kericho", "kipkelion west": "Kericho", "soin sigowet": "Kericho",
+    "bomet central": "Bomet", "bomet east": "Bomet", "chepalungu": "Bomet", "konoin": "Bomet", "sotik": "Bomet",
+    "butere": "Kakamega", "kakamega central": "Kakamega", "khwisero": "Kakamega", "lugari": "Kakamega", "lukuyani": "Kakamega", "lurambi": "Kakamega", "malava": "Kakamega", "matungu": "Kakamega", "mumias east": "Kakamega", "mumias west": "Kakamega", "navakholo": "Kakamega", "shinyalu": "Kakamega",
+    "emuhaya": "Vihiga", "hamisi": "Vihiga", "luanda": "Vihiga", "sabatia": "Vihiga", "vihiga": "Vihiga",
+    "bumula": "Bungoma", "kanduyi": "Bungoma", "kimilili": "Bungoma", "sirisia": "Bungoma", "tongaren": "Bungoma", "webuye east": "Bungoma", "webuye west": "Bungoma", "mt elgon": "Bungoma",
+    "budalangi": "Busia", "butula": "Busia", "funyula": "Busia", "nambale": "Busia", "teso north": "Busia", "teso south": "Busia", "matayos": "Busia",
+    "alego usonga": "Siaya", "bondo": "Siaya", "gem": "Siaya", "rarieda": "Siaya", "ugunja": "Siaya", "ugenya": "Siaya",
+    "kisumu central": "Kisumu", "kisumu east": "Kisumu", "kisumu west": "Kisumu", "muhoroni": "Kisumu", "nyakach": "Kisumu", "nyando": "Kisumu", "seme": "Kisumu",
+    "homa bay town": "Homa Bay", "kabondo kasipul": "Homa Bay", "karachuonyo": "Homa Bay", "kasipul": "Homa Bay", "mbita": "Homa Bay", "ndhiwa": "Homa Bay", "rangwe": "Homa Bay", "suba": "Homa Bay",
+    "awendo": "Migori", "kuria east": "Migori", "kuria west": "Migori", "nyatike": "Migori", "ronta": "Migori", "suna east": "Migori", "suna west": "Migori", "uriri": "Migori",
+    "bobasi": "Kisii", "bomachoge borabu": "Kisii", "bomachoge chache": "Kisii", "bonchari": "Kisii", "kitutu chache north": "Kisii", "kitutu chache south": "Kisii", "nyaribari chache": "Kisii", "nyaribari masaba": "Kisii", "south mugirango": "Kisii",
+    "borabu": "Nyamira", "kitutu masaba": "Nyamira", "north mugirango": "Nyamira", "west mugirango": "Nyamira",
+    "dagoretti north": "Nairobi", "dagoretti south": "Nairobi", "embakasi central": "Nairobi", "embakasi east": "Nairobi", "embakasi north": "Nairobi", "embakasi south": "Nairobi", "embakasi west": "Nairobi", "kamukunji": "Nairobi", "kasarani": "Nairobi", "kibra": "Nairobi", "langata": "Nairobi", "makadara": "Nairobi", "mathare": "Nairobi", "roysambu": "Nairobi", "ruiraka": "Nairobi", "starehe": "Nairobi", "westlands": "Nairobi", "kibera": "Nairobi"
+};
+
+// Normalize a single county string to canonical Kenya county name
+function normalizeCountyName(raw) {
+    if (!raw || typeof raw !== 'string') return null;
+    let clean = raw.trim();
+    if (!clean || clean.toLowerCase() === 'kenya') return null;
+    
+    // Remove "County" suffix
+    clean = clean.replace(/\s+County$/i, '').trim();
+    const lower = clean.toLowerCase();
+    
+    if (COUNTY_ALIASES[lower]) return COUNTY_ALIASES[lower];
+    
+    const exact = KENYA_COUNTIES.find(c => c.toLowerCase() === lower);
+    if (exact) return exact;
+    
+    // Check if it matches a known subcounty
+    if (SUBCOUNTY_TO_COUNTY[lower]) return SUBCOUNTY_TO_COUNTY[lower];
+    
+    return null;
+}
+
+// Infer county from text (such as address or title)
+function extractCountyFromText(text) {
+    if (!text || typeof text !== 'string') return [];
+    const found = [];
+    const lower = text.toLowerCase();
+
+    // Check all 47 counties
+    KENYA_COUNTIES.forEach(c => {
+        const cLower = c.toLowerCase();
+        const regex = new RegExp(`\\b${cLower.replace(/-/g, '[-\\s]')}\\b`, 'i');
+        if (regex.test(lower)) {
+            found.push(c);
+        }
+    });
+
+    // Check subcounties
+    for (const [sub, county] of Object.entries(SUBCOUNTY_TO_COUNTY)) {
+        const regex = new RegExp(`\\b${sub}\\b`, 'i');
+        if (regex.test(lower)) {
+            found.push(county);
+        }
+    }
+
+    return [...new Set(found)];
+}
+
+// Approximate coordinate to Kenyan county matching
+function getCountyFromCoordinates(lat, lng) {
+    if (typeof lat !== 'number' || typeof lng !== 'number') return null;
+    if (isNaN(lat) || isNaN(lng)) return null;
+
+    // Approximate regional coordinate boxes for Kenya
+    if (lat >= -1.45 && lat <= -1.15 && lng >= 36.65 && lng <= 37.10) return "Nairobi";
+    if (lat >= -4.20 && lat <= -3.90 && lng >= 39.55 && lng <= 39.80) return "Mombasa";
+    if (lat >= -0.25 && lat <= 0.05 && lng >= 34.60 && lng <= 34.90) return "Kisumu";
+    if (lat >= -3.85 && lat <= -3.40 && lng >= 39.70 && lng <= 40.05) return "Kilifi";
+    if (lat >= -0.45 && lat <= -0.15 && lng >= 36.00 && lng <= 36.25) return "Nakuru";
+    if (lat >= -0.10 && lat <= 0.30 && lng >= 37.50 && lng <= 37.80) return "Meru";
+    if (lat >= -3.60 && lat <= -3.20 && lng >= 38.30 && lng <= 38.70) return "Taita-Taveta";
+    if (lat >= 0.35 && lat <= 0.70 && lng >= 35.15 && lng <= 35.45) return "Uasin Gishu";
+    if (lat >= 0.15 && lat <= 0.45 && lng >= 34.60 && lng <= 34.90) return "Kakamega";
+    if (lat >= -1.30 && lat <= -0.95 && lng >= 36.65 && lng <= 37.15) return "Kiambu";
+    return null;
+}
+
+// Master resolver: returns an array of unique Kenya county names for a project
+function getProjectCounties(p) {
+    if (!p) return ['National Scope'];
+    const counties = [];
+
+    // 1. Inspect locations array
+    let locations = p.locations;
+    if (typeof locations === 'string') {
+        try { locations = JSON.parse(locations); } catch (e) { locations = []; }
+    }
+
+    if (Array.isArray(locations) && locations.length > 0) {
+        locations.forEach(loc => {
+            if (!loc) return;
+            // Direct county field
+            const direct = normalizeCountyName(loc.county);
+            if (direct) {
+                counties.push(direct);
+                return;
+            }
+
+            // Subcounty field
+            if (loc.subCounty) {
+                const sc = normalizeCountyName(loc.subCounty);
+                if (sc) {
+                    counties.push(sc);
+                    return;
+                }
+            }
+
+            // Maps address / place name
+            const addr = loc.mapsAddress || loc.name;
+            if (addr) {
+                const found = extractCountyFromText(addr);
+                found.forEach(c => counties.push(c));
+                if (found.length > 0) return;
+            }
+
+            // Coordinates fallback
+            if (loc.latitude && loc.longitude) {
+                const coordCounty = getCountyFromCoordinates(Number(loc.latitude), Number(loc.longitude));
+                if (coordCounty) counties.push(coordCounty);
+            }
+        });
+    }
+
+    // 2. Project-level county field
+    if (p.county) {
+        // Can be comma-separated like "Kilifi, Kakamega"
+        const parts = p.county.split(/[,&/]+/);
+        parts.forEach(part => {
+            const norm = normalizeCountyName(part.trim());
+            if (norm) counties.push(norm);
+            else {
+                const extracted = extractCountyFromText(part);
+                extracted.forEach(c => counties.push(c));
+            }
+        });
+    }
+
+    // 3. Project title inference (e.g. "PHC Kilifi, kakamega", "Maternal Health Outreach Initiative - Nairobi")
+    const title = p.title || p.projectName;
+    if (counties.length === 0 && title) {
+        const titleCounties = extractCountyFromText(title);
+        titleCounties.forEach(c => counties.push(c));
+    }
+
+    // 4. Project coordinates (if stored on root project object)
+    if (counties.length === 0 && p.latitude && p.longitude) {
+        const coordCounty = getCountyFromCoordinates(Number(p.latitude), Number(p.longitude));
+        if (coordCounty) counties.push(coordCounty);
+    }
+
+    // 5. Deduplicate and filter out 'Kenya'
+    const unique = [...new Set(counties.filter(c => c && c.toLowerCase() !== 'kenya'))];
+    return unique.length > 0 ? unique : ['National Scope'];
+}
+
 function formatRoleDisplayName(role) {
     if (!role) return 'User';
     switch (role.toUpperCase()) {
@@ -459,10 +835,8 @@ function renderRecentProjectsTable(projectsList) {
         }
 
         // Location formatting
-        let locString = p.county || 'Kenya';
-        if (Array.isArray(p.locations) && p.locations.length > 0) {
-            locString = p.locations.map(l => l.county).filter(Boolean).join(', ') || locString;
-        }
+        const counties = getProjectCounties(p);
+        const locString = counties.join(', ');
 
         return `
             <tr class="hover:bg-slate-50/50 dark:hover:bg-gray-700/50 transition">
@@ -493,8 +867,13 @@ window.filterRecentProjects = function() {
     const filtered = allProjects.filter(p => {
         const title = (p.title || p.projectName || '').toLowerCase();
         const projectNo = (p.projectNo || '').toLowerCase();
-        const county = (p.county || '').toLowerCase();
-        return title.includes(query) || projectNo.includes(query) || county.includes(query);
+        const countiesStr = getProjectCounties(p).join(' ').toLowerCase();
+        const themesStr = getProjectThemes(p).join(' ').toLowerCase();
+        
+        return title.includes(query) || 
+               projectNo.includes(query) || 
+               countiesStr.includes(query) || 
+               themesStr.includes(query);
     });
     renderRecentProjectsTable(filtered);
 };
@@ -511,14 +890,7 @@ function populateBreakdownTables(projects) {
     if (countyTbody) {
         const countyMap = {};
         projects.forEach(p => {
-            const counties = [];
-            if (Array.isArray(p.locations)) {
-                p.locations.forEach(l => { if (l.county) counties.push(l.county); });
-            } else if (p.county) {
-                counties.push(p.county);
-            }
-
-            const uniqueCounties = [...new Set(counties)];
+            const uniqueCounties = getProjectCounties(p);
             uniqueCounties.forEach(c => {
                 if (!countyMap[c]) countyMap[c] = { count: 0, budget: 0 };
                 countyMap[c].count++;
@@ -550,27 +922,20 @@ function populateBreakdownTables(projects) {
     if (themeTbody) {
         const themeMap = {};
         projects.forEach(p => {
-            const theme = p.thematicArea || p.projectTheme || 'Other';
-            if (!themeMap[theme]) themeMap[theme] = { count: 0, budget: 0 };
-            themeMap[theme].count++;
-            themeMap[theme].budget += Number(p.budget) || 0;
+            const uniqueThemes = getProjectThemes(p);
+            uniqueThemes.forEach(t => {
+                if (!themeMap[t]) themeMap[t] = { count: 0, budget: 0 };
+                themeMap[t].count++;
+                themeMap[t].budget += (Number(p.budget) || 0) / (uniqueThemes.length || 1);
+            });
         });
 
-        const themeList = Object.keys(themeMap).map(name => {
-            let displayName = name;
-            // Map codes to user-friendly PDF titles
-            if (name === 'MNH' || name === 'Maternity and Newborn Health') displayName = 'Maternity and Newborn Health';
-            else if (name === 'FP') displayName = 'Family Planning';
-            else if (name === 'AYPSRH') displayName = 'Adolescent & Youth SRH';
-            else if (name === 'GBV') displayName = 'Gender-Based Violence';
-
-            return {
-                name: displayName,
-                count: themeMap[name].count,
-                budget: themeMap[name].budget,
-                percentage: ((themeMap[name].budget / totalBudget) * 100).toFixed(1)
-            };
-        }).sort((a, b) => b.budget - a.budget);
+        const themeList = Object.keys(themeMap).map(name => ({
+            name: name,
+            count: themeMap[name].count,
+            budget: themeMap[name].budget,
+            percentage: ((themeMap[name].budget / totalBudget) * 100).toFixed(1)
+        })).sort((a, b) => b.budget - a.budget);
 
         const countEl = document.getElementById('theme-table-count');
         if (countEl) countEl.textContent = `${themeList.length} Active Themes`;
@@ -627,17 +992,20 @@ function renderDashboardCharts(projects) {
     // 2. Projects by County (County Chart)
     const countyMap = {};
     projects.forEach(p => {
-        const c = p.county || 'Kenya';
-        countyMap[c] = (countyMap[c] || 0) + 1;
+        const uniqueCounties = getProjectCounties(p);
+        uniqueCounties.forEach(c => {
+            countyMap[c] = (countyMap[c] || 0) + 1;
+        });
     });
 
     const countyChartEl = document.querySelector("#countyChart");
     if (countyChartEl) {
         countyChartEl.innerHTML = '';
+        const sortedCounties = Object.keys(countyMap).sort((a, b) => countyMap[b] - countyMap[a]);
         const options = {
             chart: { type: "donut", height: 330 },
-            series: Object.values(countyMap),
-            labels: Object.keys(countyMap),
+            series: sortedCounties.map(c => countyMap[c]),
+            labels: sortedCounties,
             legend: { position: "bottom", fontSize: '11px' },
             dataLabels: { enabled: true, formatter: (val) => val.toFixed(0) + "%" }
         };
@@ -647,30 +1015,35 @@ function renderDashboardCharts(projects) {
     // 3. Investment by Thematic Area (Theme Chart)
     const themeBudgets = {};
     projects.forEach(p => {
-        let theme = p.thematicArea || p.projectTheme || 'Other';
-        if (theme === 'MNH') theme = 'Maternity and Newborn Health';
-        else if (theme === 'FP') theme = 'Family Planning';
-        else if (theme === 'AYPSRH') theme = 'Adolescent & Youth SRH';
-        else if (theme === 'GBV') theme = 'Gender-Based Violence';
-
-        themeBudgets[theme] = (themeBudgets[theme] || 0) + (Number(p.budget) || 0);
+        const uniqueThemes = getProjectThemes(p);
+        uniqueThemes.forEach(t => {
+            themeBudgets[t] = (themeBudgets[t] || 0) + ((Number(p.budget) || 0) / (uniqueThemes.length || 1));
+        });
     });
 
     const themeChartEl = document.querySelector("#themeChart");
     if (themeChartEl) {
         themeChartEl.innerHTML = '';
+        const sortedThemes = Object.keys(themeBudgets).sort((a, b) => themeBudgets[b] - themeBudgets[a]);
         const options = {
             chart: { type: "bar", height: 350, toolbar: { show: false } },
             plotOptions: { bar: { horizontal: true, barHeight: "55%", borderRadius: 4 } },
             series: [{
                 name: "Budget",
-                data: Object.values(themeBudgets).map(v => (v / 1000000).toFixed(2)) // Display in Millions
+                data: sortedThemes.map(t => Number(((themeBudgets[t] || 0) / 1000000).toFixed(2))) // Display in Millions
             }],
             xaxis: {
-                categories: Object.keys(themeBudgets),
+                categories: sortedThemes,
                 title: { text: "Budget (Millions KES)" }
             },
-            colors: ['#0047BA']
+            colors: ['#0047BA'],
+            tooltip: {
+                y: {
+                    formatter: function(val) {
+                        return val + " Million KES";
+                    }
+                }
+            }
         };
         new ApexCharts(themeChartEl, options).render();
     }
@@ -678,25 +1051,35 @@ function renderDashboardCharts(projects) {
     // 4. Funding per County (County Funding Chart)
     const countyFunding = {};
     projects.forEach(p => {
-        const c = p.county || 'Kenya';
-        countyFunding[c] = (countyFunding[c] || 0) + (Number(p.budget) || 0);
+        const uniqueCounties = getProjectCounties(p);
+        uniqueCounties.forEach(c => {
+            countyFunding[c] = (countyFunding[c] || 0) + ((Number(p.budget) || 0) / (uniqueCounties.length || 1));
+        });
     });
 
     const countyFundingChartEl = document.querySelector("#countyFundingChart");
     if (countyFundingChartEl) {
         countyFundingChartEl.innerHTML = '';
+        const sortedCountyFunding = Object.keys(countyFunding).sort((a, b) => countyFunding[b] - countyFunding[a]);
         const options = {
             chart: { type: "bar", height: 350, toolbar: { show: false } },
             plotOptions: { bar: { horizontal: true, barHeight: "55%", borderRadius: 4 } },
             series: [{
                 name: "Budget",
-                data: Object.values(countyFunding).map(v => (v / 1000000).toFixed(2)) // Display in Millions
+                data: sortedCountyFunding.map(c => Number(((countyFunding[c] || 0) / 1000000).toFixed(2))) // Display in Millions
             }],
             xaxis: {
-                categories: Object.keys(countyFunding),
+                categories: sortedCountyFunding,
                 title: { text: "Budget (Millions KES)" }
             },
-            colors: ['#0D9488'] // Teal matching PDF color coding
+            colors: ['#0D9488'], // Teal matching PDF color coding
+            tooltip: {
+                y: {
+                    formatter: function(val) {
+                        return val + " Million KES";
+                    }
+                }
+            }
         };
         new ApexCharts(countyFundingChartEl, options).render();
     }
@@ -800,13 +1183,15 @@ function renderMapMarkers(projects) {
 
             // Popup content
             const pillColor = proj.status?.toLowerCase() === "active" ? "bg-green-50 border-green-200 text-green-700" : "bg-blue-50 border-blue-200 text-blue-700";
+            const projectCounties = getProjectCounties(proj);
+            const countyLabel = loc.county || (projectCounties.length ? projectCounties.join(', ') : "National Scope");
             const popupHtml = `
                 <div class="p-3 max-w-[240px] font-sans">
                     <h4 class="text-xs font-bold text-gray-900">${proj.projectName || proj.title || "Project"}</h4>
                     ${proj.projectNo ? `<span class="text-[10px] text-gray-500 block mt-0.5">${proj.projectNo}</span>` : ""}
                     <div class="mt-2 flex items-center justify-between">
                         <span class="text-[10px] font-bold px-1.5 py-0.5 rounded border ${pillColor}">${proj.status || "ACTIVE"}</span>
-                        <span class="text-[10px] font-semibold text-gray-600">${loc.county || proj.county || "Kenya"}</span>
+                        <span class="text-[10px] font-semibold text-gray-600">${countyLabel}</span>
                     </div>
                 </div>
             `;
@@ -846,9 +1231,8 @@ window.filterDashboardMap = function() {
         
         let matchesCounty = !countyVal;
         if (countyVal) {
-            const locs = Array.isArray(proj.locations) ? proj.locations : [];
-            const hasCounty = locs.some(l => l.county && l.county.toLowerCase() === countyVal.toLowerCase());
-            matchesCounty = hasCounty || (proj.county && proj.county.toLowerCase() === countyVal.toLowerCase());
+            const counties = getProjectCounties(proj);
+            matchesCounty = counties.some(c => c.toLowerCase() === countyVal.toLowerCase());
         }
 
         return matchesSearch && matchesCounty;
@@ -888,7 +1272,7 @@ window.exportDashboardCSV = function() {
             p.projectCategory || '',
             p.status || '',
             p.budget || 0,
-            p.county || ''
+            getProjectCounties(p).join('; ')
         ].map(val => '"' + String(val).replace(/"/g, '""') + '"');
         csv += row.join(',') + '\n';
     });

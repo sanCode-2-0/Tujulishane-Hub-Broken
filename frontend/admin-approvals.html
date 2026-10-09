@@ -1383,7 +1383,6 @@
 							</div>
 						</div>
 					</div>
-					</div>
 				</div>
 			</div>
 
@@ -1822,6 +1821,7 @@
 					</form>
 				</div>
 			</div>
+		</div>
 
 		<!-- Review Modal -->
 		<div x-show="showReviewModal" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
@@ -3084,20 +3084,24 @@
 
 				async saveThematicArea() {
 					try {
-						const token = localStorage.getItem("accessToken");
+						const token = (window.authManager && window.authManager.getToken()) || localStorage.getItem("accessToken") || localStorage.getItem("token");
 						const url = this.thematicAreaModalEditMode 
 							? `${window.BASE_URL}/api/thematic-areas/${this.thematicAreaForm.id}`
 							: `${window.BASE_URL}/api/thematic-areas`;
 						
 						const method = this.thematicAreaModalEditMode ? "PUT" : "POST";
+						const payload = { ...this.thematicAreaForm };
+						if (!this.thematicAreaModalEditMode) {
+							delete payload.id;
+						}
 
 						const response = await fetch(url, {
 							method: method,
 							headers: {
 								"Content-Type": "application/json",
-								Authorization: `Bearer ${token}`
+								...(token ? { Authorization: `Bearer ${token}` } : {})
 							},
-							body: JSON.stringify(this.thematicAreaForm)
+							body: JSON.stringify(payload)
 						});
 
 						if (response.ok) {
@@ -3110,7 +3114,7 @@
 							);
 							await this.loadThematicAreas();
 						} else {
-							const errorData = await response.json();
+							const errorData = await response.json().catch(() => ({}));
 							await showAlert("Error saving thematic area: " + (errorData.message || response.statusText), "Error", "error");
 						}
 					} catch (error) {
@@ -3125,11 +3129,11 @@
 						return;
 					}
 					try {
-						const token = localStorage.getItem("accessToken");
+						const token = (window.authManager && window.authManager.getToken()) || localStorage.getItem("accessToken") || localStorage.getItem("token");
 						const response = await fetch(`${window.BASE_URL}/api/thematic-areas/${theme.id}`, {
 							method: "DELETE",
 							headers: {
-								Authorization: `Bearer ${token}`
+								...(token ? { Authorization: `Bearer ${token}` } : {})
 							}
 						});
  
@@ -3137,7 +3141,7 @@
 							this.showToast("Thematic area deleted successfully", "success");
 							await this.loadThematicAreas();
 						} else {
-							const errorData = await response.json();
+							const errorData = await response.json().catch(() => ({}));
 							await showAlert("Error deleting thematic area: " + (errorData.message || response.statusText), "Error", "error");
 						}
 					} catch (error) {

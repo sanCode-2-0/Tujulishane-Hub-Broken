@@ -32,6 +32,7 @@ import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.math.BigDecimal;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Configuration
@@ -58,6 +59,9 @@ public class DatabaseSeeder {
 
     @Autowired
     private ProjectReportDocumentRepository projectReportDocumentRepository;
+
+    @Autowired
+    private org.springframework.transaction.PlatformTransactionManager transactionManager;
 
     @Bean
     public CommandLineRunner seedDatabase() {
@@ -306,8 +310,43 @@ public class DatabaseSeeder {
                 logger.info("Seeded 2 general announcements");
             }
 
+            // Backfill county for any existing projects where county is missing or 'Kenya'
+            backfillProjectCounties();
+
             logger.info("Database seeding completed successfully!");
         };
+    }
+
+    private void backfillProjectCounties() {
+        try {
+            org.springframework.transaction.support.TransactionTemplate tx =
+                new org.springframework.transaction.support.TransactionTemplate(transactionManager);
+            tx.executeWithoutResult(status -> {
+                List<Project> allProjects = projectRepository.findAllWithLocations();
+                for (Project p : allProjects) {
+                    if (p.getCounty() == null || p.getCounty().trim().isEmpty() || "Kenya".equalsIgnoreCase(p.getCounty().trim())) {
+                        try {
+                            if (p.getLocations() != null && !p.getLocations().isEmpty()) {
+                                String c = p.getLocations().stream()
+                                    .map(ProjectLocation::getCounty)
+                                    .filter(locCounty -> locCounty != null && !locCounty.trim().isEmpty() && !"Kenya".equalsIgnoreCase(locCounty.trim()))
+                                    .findFirst()
+                                    .orElse(null);
+                                if (c != null) {
+                                    p.setCounty(c);
+                                    projectRepository.save(p);
+                                    logger.info("Backfilled county for existing project {}: {}", p.getProjectNo(), c);
+                                }
+                            }
+                        } catch (Exception pe) {
+                            logger.warn("Could not backfill county for project {}: {}", p.getProjectNo(), pe.getMessage());
+                        }
+                    }
+                }
+            });
+        } catch (Exception e) {
+            logger.warn("Could not backfill project counties on startup: {}", e.getMessage());
+        }
     }
 
     private User seedUser(String email, String name, User.Role role, String encodedPassword) {
@@ -413,6 +452,9 @@ public class DatabaseSeeder {
                 locations.add(loc);
             }
             project.setLocations(locations);
+            if (locationsData != null && locationsData.length > 0 && locationsData[0].county != null) {
+                project.setCounty(locationsData[0].county);
+            }
 
             projectRepository.save(project);
             logger.info("Seeded project: {} with number: {}", title, projectNo);

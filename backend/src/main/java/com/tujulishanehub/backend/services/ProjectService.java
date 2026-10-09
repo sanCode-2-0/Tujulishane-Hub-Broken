@@ -85,6 +85,21 @@ public class ProjectService {
                 logger.debug("Set default status to 'pending'");
             }
 
+            // Ensure county is populated from locations if not yet set
+            if (project.getCounty() == null || project.getCounty().trim().isEmpty() || "Kenya".equalsIgnoreCase(project.getCounty().trim())) {
+                if (project.getLocations() != null && !project.getLocations().isEmpty()) {
+                    String c = project.getLocations().stream()
+                        .map(ProjectLocation::getCounty)
+                        .filter(locCounty -> locCounty != null && !locCounty.trim().isEmpty() && !"Kenya".equalsIgnoreCase(locCounty.trim()))
+                        .findFirst()
+                        .orElse(null);
+                    if (c != null) {
+                        project.setCounty(c);
+                        logger.debug("Set project county from primary location: {}", c);
+                    }
+                }
+            }
+
             logger.debug("About to save project to repository");
             Project savedProject = projectRepository.save(project);
             logger.info("Project created successfully with ID: {}", savedProject.getId());
@@ -120,6 +135,20 @@ public class ProjectService {
         replaceThemes(existingProject, request.getThemes());
         replaceLocations(existingProject, request.getLocations());
         
+        // Ensure county is populated from locations if not yet set
+        if (existingProject.getCounty() == null || existingProject.getCounty().trim().isEmpty() || "Kenya".equalsIgnoreCase(existingProject.getCounty().trim())) {
+            if (existingProject.getLocations() != null && !existingProject.getLocations().isEmpty()) {
+                String c = existingProject.getLocations().stream()
+                    .map(ProjectLocation::getCounty)
+                    .filter(locCounty -> locCounty != null && !locCounty.trim().isEmpty() && !"Kenya".equalsIgnoreCase(locCounty.trim()))
+                    .findFirst()
+                    .orElse(null);
+                if (c != null) {
+                    existingProject.setCounty(c);
+                }
+            }
+        }
+
         Project savedProject = projectRepository.save(existingProject);
         logger.info("Project updated successfully: {} by {}", savedProject.getId(), modifiedByEmail);
         return savedProject;
@@ -600,20 +629,31 @@ public class ProjectService {
             return;
         }
 
-        List<ProjectCreateRequest.LocationRequest> sanitized = locationRequests.stream()
-            .filter(Objects::nonNull)
-            .filter(request -> request.getCounty() != null && !request.getCounty().trim().isEmpty())
-            .collect(Collectors.toList());
+        logger.debug("Processing {} location requests", locationRequests.size());
 
-        logger.debug("Processing {} sanitized location requests", sanitized.size());
-
-        for (ProjectCreateRequest.LocationRequest request : sanitized) {
+        for (ProjectCreateRequest.LocationRequest request : locationRequests) {
+            if (request == null) continue;
             try {
+                String county = request.getCounty();
+                if (county == null || county.trim().isEmpty() || "Kenya".equalsIgnoreCase(county.trim())) {
+                    if (project.getCounty() != null && !project.getCounty().trim().isEmpty() && !"Kenya".equalsIgnoreCase(project.getCounty().trim())) {
+                        county = project.getCounty();
+                    }
+                }
+
+                if (county == null || county.trim().isEmpty() || "Kenya".equalsIgnoreCase(county.trim())) {
+                    logger.warn("Skipping location request without valid county: lat={}, lng={}, address={}",
+                        request.getLatitude(), request.getLongitude(), request.getMapsAddress());
+                    continue;
+                }
+
+                county = county.trim();
                 logger.debug("Processing location: county={}, subCounty={}, lat={}, lng={}",
-                    request.getCounty(), request.getSubCounty(), request.getLatitude(), request.getLongitude());
+                    county, request.getSubCounty(), request.getLatitude(), request.getLongitude());
+
                 ProjectLocation location = new ProjectLocation();
                 location.setProject(project);
-                location.setCounty(request.getCounty());
+                location.setCounty(county);
                 location.setSubCounty(request.getSubCounty());
                 location.setMapsAddress(request.getMapsAddress());
                 location.setLatitude(request.getLatitude());
@@ -626,7 +666,13 @@ public class ProjectService {
                 }
 
                 currentLocations.add(location);
-                logger.debug("Added location for county: {}", request.getCounty());
+
+                // Ensure project entity has primary county set
+                if (project.getCounty() == null || project.getCounty().trim().isEmpty() || "Kenya".equalsIgnoreCase(project.getCounty().trim())) {
+                    project.setCounty(county);
+                }
+
+                logger.debug("Added location for county: {}", county);
             } catch (Exception e) {
                 logger.error("Error processing location request: {}", e.getMessage(), e);
             }
@@ -671,7 +717,19 @@ public class ProjectService {
             response.setStartDate(project.getStartDate());
             response.setEndDate(project.getEndDate());
             response.setActivityType(project.getActivityType());
-            response.setCounty(project.getCounty());
+
+            // County resolution: if project.county is null or 'Kenya', derive from first valid location
+            String resolvedCounty = project.getCounty();
+            if (resolvedCounty == null || resolvedCounty.trim().isEmpty() || "Kenya".equalsIgnoreCase(resolvedCounty.trim())) {
+                if (project.getLocations() != null && !project.getLocations().isEmpty()) {
+                    resolvedCounty = project.getLocations().stream()
+                        .map(ProjectLocation::getCounty)
+                        .filter(c -> c != null && !c.trim().isEmpty() && !"Kenya".equalsIgnoreCase(c.trim()))
+                        .findFirst()
+                        .orElse(null);
+                }
+            }
+            response.setCounty(resolvedCounty);
             response.setContactPersonName(project.getContactPersonName());
             response.setContactPersonRole(project.getContactPersonRole());
             response.setContactPersonEmail(project.getContactPersonEmail());

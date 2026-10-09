@@ -37,7 +37,7 @@ test.describe('Tujulishane Hub Collaboration Lifecycle', () => {
     );
 
     // Submit the opportunity form
-    await page.locator('button[type="submit"]:has-text("Create Announcement")').click();
+    await page.locator('button:has-text("Create Announcement")').click();
     await createResponsePromise;
     console.log('[E2E] Collaboration Opportunity posted successfully!');
 
@@ -47,7 +47,7 @@ test.describe('Tujulishane Hub Collaboration Lifecycle', () => {
     await okBtn.click();
 
     // Verify it is listed in the opportunities feed
-    const opportunityCard = page.locator('h3', { hasText: opportunityTitle });
+    const opportunityCard = page.locator('span, h4', { hasText: opportunityTitle }).first();
     await expect(opportunityCard).toBeVisible();
 
     // Logout Partner 1
@@ -65,7 +65,7 @@ test.describe('Tujulishane Hub Collaboration Lifecycle', () => {
 
     // Find the opportunity card and click "Request" button directly on it
     console.log(`[E2E] Locating opportunity card for: "${opportunityTitle}"...`);
-    const oppCardForRequest = page.locator('div.bg-white', { has: page.locator('h3', { hasText: opportunityTitle }) }).first();
+    const oppCardForRequest = page.locator('div.bg-white', { has: page.locator('span, h4', { hasText: opportunityTitle }) }).first();
     await expect(oppCardForRequest).toBeVisible();
     await oppCardForRequest.locator('button:has-text("Request")').click();
 

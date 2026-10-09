@@ -576,6 +576,8 @@ function resolveKenyaLocation(lat, lng, options = {}) {
 
 window.resolveKenyaLocation = resolveKenyaLocation;
 window.formatKenyaCoordinatePair = formatCoordinatePair;
+window.kenyaLocations = kenyaLocations;
+window.getAllCounties = getAllCounties;
 
 // Function to initialize county dropdown
 function initializeCountyDropdown(countySelectId, subCountySelectId) {

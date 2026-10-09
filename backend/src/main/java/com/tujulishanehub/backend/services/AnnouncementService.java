@@ -43,7 +43,9 @@ public class AnnouncementService {
             .orElseThrow(() -> new RuntimeException("Project not found"));
         
         // Verify user owns the project or is admin
-        if (!project.getContactPersonEmail().equals(userEmail) && !user.isSuperAdmin()) {
+        boolean isOwner = (project.getPartner() != null && project.getPartner().equals(userEmail)) 
+            || (project.getContactPersonEmail() != null && project.getContactPersonEmail().equals(userEmail));
+        if (!isOwner && !user.isSuperAdmin()) {
             throw new RuntimeException("You don't have permission to create announcements for this project");
         }
         
@@ -74,7 +76,9 @@ public class AnnouncementService {
             .orElseThrow(() -> new RuntimeException("Project not found"));
         
         // Verify user owns the project or is admin
-        if (!project.getContactPersonEmail().equals(userEmail) && !user.isSuperAdmin()) {
+        boolean isOwner = (project.getPartner() != null && project.getPartner().equals(userEmail)) 
+            || (project.getContactPersonEmail() != null && project.getContactPersonEmail().equals(userEmail));
+        if (!isOwner && !user.isSuperAdmin()) {
             throw new RuntimeException("You don't have permission to create announcements for this project");
         }
         

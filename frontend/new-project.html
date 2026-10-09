@@ -1363,6 +1363,59 @@
 			}
 		}
 
+		function extractCountyAndSubCountyFromGeocode(data, lat, lng) {
+			let county = null;
+			let subCounty = null;
+
+			if (data && Array.isArray(data.features) && data.features.length > 0) {
+				// 1. Direct place_type check
+				const region = data.features.find((f) => f.place_type && f.place_type.includes("region"));
+				const district = data.features.find((f) => f.place_type && f.place_type.includes("district"));
+				const place = data.features.find((f) => f.place_type && f.place_type.includes("place"));
+
+				if (region && region.text) county = region.text;
+				if (district && district.text) subCounty = district.text;
+				else if (place && place.text && !subCounty) subCounty = place.text;
+
+				// 2. Context hierarchy check across features
+				if (!county) {
+					for (const f of data.features) {
+						if (Array.isArray(f.context)) {
+							const ctxRegion = f.context.find((c) => c.id && c.id.startsWith("region"));
+							if (ctxRegion && ctxRegion.text) {
+								county = ctxRegion.text;
+								break;
+							}
+							const ctxDistrict = f.context.find((c) => c.id && c.id.startsWith("district"));
+							if (ctxDistrict && ctxDistrict.text && !subCounty) {
+								subCounty = ctxDistrict.text;
+							}
+						}
+					}
+				}
+			}
+
+			// Clean up "County" suffix if present
+			if (county) {
+				county = county.replace(/\s+county$/i, "").trim();
+			}
+
+			// 3. Coordinate fallback via resolveKenyaLocation
+			if (!county && typeof window.resolveKenyaLocation === "function" && lat && lng) {
+				try {
+					const resolved = window.resolveKenyaLocation(lat, lng);
+					if (resolved && resolved.county) {
+						county = resolved.county;
+						if (!subCounty && resolved.subCounty) subCounty = resolved.subCounty;
+					}
+				} catch (e) {
+					console.warn("Coordinate fallback resolution failed:", e);
+				}
+			}
+
+			return { county, subCounty };
+		}
+
 		function updateLocationsDisplay() {
 			const container = document.getElementById("selectedLocationsList");
 
@@ -1400,32 +1453,17 @@
 					)
 						.then((response) => response.json())
 						.then((data) => {
-							if (data.features && data.features.length > 0) {
-								// Extract county and subcounty from the response
-								const region = data.features.find((f) =>
-									f.place_type.includes("region")
-								);
-								const district = data.features.find((f) =>
-									f.place_type.includes("district")
-								);
-								const place = data.features.find((f) =>
-									f.place_type.includes("place")
-								);
-
-								// Store the extracted data
-								if (region) {
-									location.county = region.text;
-								}
-								if (district || place) {
-									location.subCounty = (district || place).text;
-								}
-
-								// Update form data with new info
-								updateFormData();
-							}
+							const extracted = extractCountyAndSubCountyFromGeocode(data, location.lat, location.lng);
+							if (extracted.county) location.county = extracted.county;
+							if (extracted.subCounty) location.subCounty = extracted.subCounty;
+							updateFormData();
 						})
 						.catch((error) => {
 							console.error("Geocoding error for county/subcounty:", error);
+							const extracted = extractCountyAndSubCountyFromGeocode(null, location.lat, location.lng);
+							if (extracted.county) location.county = extracted.county;
+							if (extracted.subCounty) location.subCounty = extracted.subCounty;
+							updateFormData();
 						});
 				} else {
 					// No pre-defined name, need to reverse geocode
@@ -1446,42 +1484,29 @@
 					)
 						.then((response) => response.json())
 						.then((data) => {
-							let placeName = `${location.lat.toFixed(
-								4
-							)}, ${location.lng.toFixed(4)}`; // fallback
+							let placeName = `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`;
+
+							const extracted = extractCountyAndSubCountyFromGeocode(data, location.lat, location.lng);
+							if (extracted.county) location.county = extracted.county;
+							if (extracted.subCounty) location.subCounty = extracted.subCounty;
 
 							if (data.features && data.features.length > 0) {
-								// Extract county and subcounty
-								const region = data.features.find((f) =>
-									f.place_type.includes("region")
-								);
-								const district = data.features.find((f) =>
-									f.place_type.includes("district")
-								);
-								const place = data.features.find((f) =>
-									f.place_type.includes("place")
-								);
-								const country = data.features.find((f) =>
-									f.place_type.includes("country")
-								);
+								const place = data.features.find((f) => f.place_type.includes("place"));
+								const region = data.features.find((f) => f.place_type.includes("region"));
+								const country = data.features.find((f) => f.place_type.includes("country"));
 
-								// Store administrative data
-								if (region) {
-									location.county = region.text;
-								}
-								if (district || place) {
-									location.subCounty = (district || place).text;
-								}
-
-								// Build place name
 								if (place) {
-									placeName = `${place.text}, ${country ? country.text : "Kenya"}`;
+									placeName = `${place.text}, ${location.county || (country ? country.text : "Kenya")}`;
+								} else if (location.county) {
+									placeName = `${location.county}, Kenya`;
 								} else if (region) {
 									placeName = `${region.text}, Kenya`;
 								} else if (country) {
 									placeName = `${country.text}`;
 								}
-
+								location.name = placeName;
+							} else if (location.county) {
+								placeName = `${location.county}, Kenya`;
 								location.name = placeName;
 							}
 
@@ -1495,14 +1520,18 @@
 								</button>
 							`;
 
-							// Update form data with new info
 							updateFormData();
 						})
 						.catch((error) => {
 							console.error("Geocoding error:", error);
+							const extracted = extractCountyAndSubCountyFromGeocode(null, location.lat, location.lng);
+							if (extracted.county) location.county = extracted.county;
+							if (extracted.subCounty) location.subCounty = extracted.subCounty;
+							updateFormData();
+
 							locationDiv.innerHTML = `
 								<span class="text-sm text-blue-600">
-									<i class="fas fa-map-marker-alt mr-2"></i>${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}
+									<i class="fas fa-map-marker-alt mr-2"></i>${location.county ? location.county + ', Kenya' : location.lat.toFixed(4) + ', ' + location.lng.toFixed(4)}
 								</span>
 								<button type="button" onclick="removeLocation(${location.id})"
 										class="text-red-500 hover:text-red-700 ml-2">

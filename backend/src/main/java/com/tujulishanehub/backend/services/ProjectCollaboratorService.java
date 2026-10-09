@@ -113,7 +113,9 @@ public class ProjectCollaboratorService {
             if (project == null) return false;
             
             // Check if user is the project owner
-            if (project.getContactPersonEmail().equals(userEmail)) {
+            boolean isOwner = (project.getPartner() != null && project.getPartner().equals(userEmail)) 
+                || (project.getContactPersonEmail() != null && project.getContactPersonEmail().equals(userEmail));
+            if (isOwner) {
                 return true;
             }
             
@@ -147,8 +149,9 @@ public class ProjectCollaboratorService {
             
             // Only project owner or MOH can remove collaborators
             User requestingUser = userService.getUserByEmail(requestingUserEmail);
-            if (!project.getContactPersonEmail().equals(requestingUserEmail) && 
-                !requestingUser.isSuperAdmin()) {
+            boolean isOwner = (project.getPartner() != null && project.getPartner().equals(requestingUserEmail)) 
+                || (project.getContactPersonEmail() != null && project.getContactPersonEmail().equals(requestingUserEmail));
+            if (!isOwner && !requestingUser.isSuperAdmin()) {
                 throw new RuntimeException("Only project owner or MOH can remove collaborators");
             }
             
@@ -177,8 +180,9 @@ public class ProjectCollaboratorService {
         
         // Only project owner or MOH can update roles
         User requestingUser = userService.getUserByEmail(requestingUserEmail);
-        if (!project.getContactPersonEmail().equals(requestingUserEmail) && 
-            !requestingUser.isSuperAdmin()) {
+        boolean isOwner = (project.getPartner() != null && project.getPartner().equals(requestingUserEmail)) 
+            || (project.getContactPersonEmail() != null && project.getContactPersonEmail().equals(requestingUserEmail));
+        if (!isOwner && !requestingUser.isSuperAdmin()) {
             throw new RuntimeException("Only project owner or MOH can update collaborator roles");
         }
         

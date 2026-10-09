@@ -385,7 +385,7 @@ class AuthManager {
   checkPageRestrictions() {
     const user = this.getCachedUser();
     if (user && user.role === "DONOR") {
-      const restrictedPages = ["new-project.html", "my-projects.html", "past-projects.html", "projects.html"];
+      const restrictedPages = ["new-project.html"];
       const pathname = window.location.pathname;
       const currentPage = pathname.substring(pathname.lastIndexOf("/") + 1);
       if (restrictedPages.includes(currentPage)) {
